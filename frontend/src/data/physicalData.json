@@ -1,0 +1,217 @@
+{
+  "Primary": {
+    "Sun": {
+      "Type": "Star",
+      "Physical": {
+        "Mass": 1988400e24,
+        "Radius": 696340e3,
+        "Density": 1408,
+        "Gravity": 274.0,
+        "EscapeVelocity": 617.6,
+        "RotationPeriod": 609.12,
+        "ObliquityToOrbit": 7.25,
+        "Luminosity": 382.8e24,
+        "SurfaceEmission": 62.94e6
+      },
+      "Textures": {
+        "Map": "./src/assets/maps/sun/8k_sun.jpg"
+      }
+    }
+  },
+  "Secondary": {
+    "Mercury": {
+      "Type": "Planet",
+      "Physical": {
+        "Mass": 0.33e24,
+        "Radius": 2439.7e3,
+        "Density": 5429,
+        "Gravity": 3.7,
+        "EscapeVelocity": 4.3e3,
+        "RotationPeriod": 1407.6,
+        "LengthOfDay": 4222.6,
+        "ObliquityToOrbit": 0.034,
+        "MeanTemperature": 167,
+        "SurfacePressure": 0,
+        "NumberOfMoons": 0,
+        "RingSystem": false,
+        "GlobalMagneticField": true
+      },
+      "Textures": {
+        "Map": "./src/assets/maps/mercury/8k_mercury.jpg"
+      }
+    },
+    "Venus": {
+      "Type": "Planet",
+      "Physical": {
+        "Mass": 4.87e24,
+        "Radius": 6051.8e3,
+        "Density": 5243,
+        "Gravity": 8.9,
+        "EscapeVelocity": 10.4e3,
+        "RotationPeriod": -5832.5,
+        "LengthOfDay": 2802.0,
+        "ObliquityToOrbit": 177.4,
+        "MeanTemperature": 464,
+        "SurfacePressure": 92,
+        "NumberOfMoons": 0,
+        "RingSystem": false,
+        "GlobalMagneticField": false
+      },
+      "Textures": {
+        "Map": "./src/assets/maps/venus/8k_venus_surface.jpg"
+      }
+    },
+    "Earth": {
+      "Type": "Planet",
+      "Physical": {
+        "Mass": 5.972e24,
+        "Radius": 6378e3,
+        "Density": 5514,
+        "Gravity": 9.8,
+        "EscapeVelocity": 11.2e3,
+        "RotationPeriod": 23.93,
+        "LengthOfDay": 24.0,
+        "ObliquityToOrbit": 23.4,
+        "MeanTemperature": 15,
+        "SurfacePressure": 1,
+        "NumberOfMoons": 1,
+        "RingSystem": false,
+        "GlobalMagneticField": true
+      },
+      "Textures": {
+        "Map": "./src/assets/maps/earth/10k_earth_map.jpg",
+        "Specular": "./src/assets/maps/earth/10k_earth_spec.jpg",
+        "Bump": "./src/assets/maps/earth/10k_earth_bump.jpg",
+        "Light": "./src/assets/maps/earth/10k_earth_lights.jpg",
+        "Cloud": "./src/assets/maps/earth/8k_earth_clouds.jpg"
+      }
+    },
+    "Mars": {
+      "Type": "Planet",
+      "Physical": {
+        "Mass": 0.642e24,
+        "Radius": 3389.5e3,
+        "Density": 3934,
+        "Gravity": 3.7,
+        "EscapeVelocity": 5.0e3,
+        "RotationPeriod": 24.6,
+        "LengthOfDay": 24.62,
+        "ObliquityToOrbit": 25.2,
+        "MeanTemperature": -65,
+        "SurfacePressure": 0.01,
+        "NumberOfMoons": 2,
+        "RingSystem": false,
+        "GlobalMagneticField": false
+      },
+      "Textures": {
+        "Map": "./src/assets/maps/mars/8k_mars.jpg"
+      }
+    },
+    "Jupiter": {
+      "Type": "Planet",
+      "Physical": {
+        "Mass": 1898e24,
+        "Radius": 69911e3,
+        "Density": 1326,
+        "Gravity": 23.1,
+        "EscapeVelocity": 59.5e3,
+        "RotationPeriod": 9.9,
+        "LengthOfDay": 9.9,
+        "ObliquityToOrbit": 3.1,
+        "MeanTemperature": -110,
+        "SurfacePressure": null,
+        "NumberOfMoons": 95,
+        "RingSystem": true,
+        "GlobalMagneticField": true
+      },
+      "Textures": {
+        "Map": "./src/assets/maps/jupiter/8k_jupiter.jpg"
+      }
+    },
+    "Saturn": {
+      "Type": "Planet",
+      "Physical": {
+        "Mass": 568e24,
+        "Radius": 58232e3,
+        "Density": 687,
+        "Gravity": 9.0,
+        "EscapeVelocity": 35.5e3,
+        "RotationPeriod": 10.7,
+        "LengthOfDay": 10.7,
+        "ObliquityToOrbit": 26.7,
+        "MeanTemperature": -140,
+        "SurfacePressure": null,
+        "NumberOfMoons": 146,
+        "RingSystem": true,
+        "GlobalMagneticField": true
+      },
+      "Textures": {
+        "Map": "./src/assets/maps/saturn/8k_saturn.jpg"
+      }
+    },
+    "Uranus": {
+      "Type": "Planet",
+      "Physical": {
+        "Mass": 86.8e24,
+        "Radius": 25362e3,
+        "Density": 1270,
+        "Gravity": 8.7,
+        "EscapeVelocity": 21.3e3,
+        "RotationPeriod": -17.2,
+        "LengthOfDay": 17.2,
+        "OrbitalEccentricity": 0.047,
+        "ObliquityToOrbit": 97.8,
+        "MeanTemperature": -195,
+        "SurfacePressure": null,
+        "NumberOfMoons": 28,
+        "RingSystem": true,
+        "GlobalMagneticField": true
+      },
+      "Textures": {
+        "Map": "./src/assets/maps/uranus/2k_uranus.jpg"
+      }
+    },
+    "Neptune": {
+      "Type": "Planet",
+      "Physical": {
+        "Mass": 102e24,
+        "Radius": 24622e3,
+        "Density": 1638,
+        "Gravity": 11.0,
+        "EscapeVelocity": 23.5e3,
+        "RotationPeriod": 16.1,
+        "LengthOfDay": 16.1,
+        "ObliquityToOrbit": 28.3,
+        "MeanTemperature": -200,
+        "SurfacePressure": null,
+        "NumberOfMoons": 16,
+        "RingSystem": true,
+        "GlobalMagneticField": true
+      },
+      "Textures": {
+        "Map": "./src/assets/maps/neptune/2k_neptune.jpg"
+      }
+    }
+  },
+  "Pluto": {
+    "Type": "Planet",
+    "Physical": {
+      "Mass": 0.013e24,
+      "Radius": 1188e3,
+      "Density": 1850,
+      "Gravity": 0.7,
+      "EscapeVelocity": 1.3e3,
+      "RotationPeriod": -153.3,
+      "LengthOfDay": 153.3,
+      "ObliquityToOrbit": 119.5,
+      "MeanTemperature": -225,
+      "SurfacePressure": 0.00001,
+      "NumberOfMoons": 5,
+      "RingSystem": false,
+      "GlobalMagneticField": null
+    },
+    "Textures": {
+      "Map": null
+    }
+  }
+}

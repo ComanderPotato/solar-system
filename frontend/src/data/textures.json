@@ -1,0 +1,47 @@
+{
+  "Sun": {
+    "Map": "./static/src/assets/maps/sun/8k_sun.jpg"
+  },
+  "Mercury": {
+    "Map": "./static/src/assets/maps/mercury/8k_mercury.jpg"
+  },
+  "Venus": {
+    "Map": "./static/src/assets/maps/venus/8k_venus_surface.jpg"
+  },
+  "Earth": {
+    "Map": "./static/src/assets/maps/earth/10k_earth_map.jpg",
+    "Specular": "./static/src/assets/maps/earth/10k_earth_spec.jpg",
+    "Bump": "./static/src/assets/maps/earth/10k_earth_bump.jpg",
+    "Light": "./static/src/assets/maps/earth/10k_earth_lights.jpg",
+    "Cloud": "./static/src/assets/maps/earth/8k_earth_clouds.jpg"
+  },
+  "Mars": {
+    "Map": "./static/src/assets/maps/mars/8k_mars.jpg"
+  },
+  "Jupiter": {
+    "Map": "./static/src/assets/maps/jupiter/8k_jupiter.jpg"
+  },
+  "Saturn": {
+    "Map": "./static/src/assets/maps/saturn/8k_saturn.jpg",
+    "Ring": "./static/src/assets/maps/saturn/8k_saturn_ring_alpha.png",
+    "RingAlpha": "./static/src/assets/maps/saturn/saturnringpattern.gif"
+  },
+  "Uranus": {
+    "Map": "./static/src/assets/maps/uranus/2k_uranus.jpg",
+    "Ring": "./static/src/assets/maps/uranus/uranusringcolour.jpg",
+    "RingAlpha": "./static/src/assets/maps/uranus/uranusringtrans.gif"
+  },
+  "Neptune": {
+    "Map": "./static/src/assets/maps/neptune/2k_neptune.jpg"
+  },
+  "Pluto": {
+    "Map": "./static/src/assets/maps/neptune/2k_neptune.jpg"
+  },
+  "Moons": {
+    "Moon": { "Map": "./static/src/assets/maps/moons/8k_moon.jpg" },
+    "Ceres": { "Map": "./static/src/assets/maps/moons/4k_ceres_fictional.jpg" },
+    "Eris": { "Map": "./static/src/assets/maps/moons/4k_eris_fictional.jpg" },
+    "Hauema": { "Map": "./static/src/assets/maps/moons/4k_haumea_fictional.jpg" },
+    "MakeMake": { "Map": "./static/src/assets/maps/moons/4k_makemake_fictional.jpg" }
+  }
+}

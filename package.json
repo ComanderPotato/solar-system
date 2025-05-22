@@ -1,0 +1,13 @@
+{
+  "name": "solar-system",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd frontend && npm run build",
+    "start": "npm run build && cd backend && flask run --host=0.0.0.0 --port=80",
+    "dev": "concurrently \"cd frontend && npm run build\" \"cd backend && flask run\"",
+    "server": "cd backend && flask run"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}

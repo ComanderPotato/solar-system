@@ -1,0 +1,26 @@
+{
+  "name": "frontent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf dist",
+    "compile": "tsc",
+    "build": "rm -rf dist && tsc && webpack && cp -r dist/* ../backend/static/src"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/three": "^0.175.0",
+    "copy-webpack-plugin": "^13.0.0",
+    "file-loader": "^6.2.0",
+    "terser-webpack-plugin": "^5.3.14",
+    "three": "^0.175.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  }
+}

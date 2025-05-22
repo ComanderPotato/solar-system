@@ -1,0 +1,87 @@
+{
+  "Sun": {
+    "Luminosity": 3.828e26,
+    "SurfaceEmission": 62940000
+  },
+  "Mercury": {
+    "LengthOfDay": 4222.6,
+    "MeanTemperature": 167,
+    "SurfacePressure": 0,
+    "RingSystem": false,
+    "InnerRingRadius": 0,
+    "OuterRingRadius": 0,
+    "GlobalMagneticField": true
+  },
+  "Venus": {
+    "LengthOfDay": 2802.0,
+    "MeanTemperature": 464,
+    "SurfacePressure": 92,
+    "RingSystem": false,
+    "InnerRingRadius": 0,
+    "OuterRingRadius": 0,
+    "GlobalMagneticField": false
+  },
+  "Earth": {
+    "LengthOfDay": 24.0,
+    "MeanTemperature": 15,
+    "SurfacePressure": 1,
+    "RingSystem": false,
+    "InnerRingRadius": 0,
+    "OuterRingRadius": 0,
+    "GlobalMagneticField": true
+  },
+  "Mars": {
+    "LengthOfDay": 24.62,
+    "MeanTemperature": -65,
+    "SurfacePressure": 0.01,
+    "RingSystem": false,
+    "InnerRingRadius": 0,
+    "OuterRingRadius": 0,
+    "GlobalMagneticField": false
+  },
+  "Jupiter": {
+    "LengthOfDay": 9.9,
+    "MeanTemperature": -110,
+    "SurfacePressure": null,
+    "RingSystem": false,
+    "InnerRingRadius": 0,
+    "OuterRingRadius": 0,
+    "GlobalMagneticField": true
+  },
+  "Saturn": {
+    "LengthOfDay": 10.7,
+    "MeanTemperature": -140,
+    "SurfacePressure": null,
+    "RingSystem": true,
+    "InnerRingRadius": 66900,
+    "OuterRingRadius": 140200,
+    "GlobalMagneticField": true
+  },
+  "Uranus": {
+    "LengthOfDay": 17.2,
+    "MeanTemperature": -195,
+    "SurfacePressure": null,
+    "RingSystem": true,
+    "InnerRingRadius": 38000,
+    "OuterRingRadius": 51000,
+    "GlobalMagneticField": true
+  },
+  "Neptune": {
+    "LengthOfDay": 16.1,
+    "MeanTemperature": -200,
+    "SurfacePressure": null,
+    "RingSystem": false,
+    "InnerRingRadius": 0,
+    "OuterRingRadius": 0,
+    "GlobalMagneticField": true
+  },
+  "Pluto": {
+    "LengthOfDay": 153.3,
+    "MeanTemperature": -225,
+    "SurfacePressure": 0.00001,
+    "RingSystem": false,
+    "InnerRingRadius": 0,
+    "OuterRingRadius": 0,
+    "GlobalMagneticField": true
+  }
+}
