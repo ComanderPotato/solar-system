@@ -99,7 +99,7 @@ def get_moon_parameters():
 if __name__ == '__main__':
     # with app.app_context():
     #     setup_time()
-    app.run(debug=True, host='0.0.0.0', port=80, use_reloader=False)
+    app.run(debug=True, host='0.0.0.0', port=80, use_reloader=True)
 
 
 
