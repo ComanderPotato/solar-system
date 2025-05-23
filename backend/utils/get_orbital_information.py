@@ -22,21 +22,6 @@ def get_orbital_parameters(planet_at):
     # position = rotX90 @ planet_at.position.m
     position, velocity = get_ecliptic_position_and_velocity(planet_at=planet_at)
     orbital_parameters = elementslib.osculating_elements_of(position=planet_at, reference_frame=inertial_frames['ECLIPJ2000'])
-    # print(planet_at)
-    # print(np.array(position.tolist()) * 250 /149.6e9)
-    # print(np.array(orbital_parameters._pos_vec.tolist()) * 250 /149.6e9)
-    # print(np.array(velocity.tolist()) * 250 /149.6e9)
-    # print(np.array(orbital_parameters._vel_vec.tolist()) * 250 /149.6e9)
-    # print("______")
-    # print(np.linalg.norm(position)* 250/149.6e9)
-    # print(np.array(position)  * 250/149.6e9)
-    # position = np.array(rotX90 @ orbital_parameters._pos_vec)
-    # print(np.linalg.norm(position))
-    # print(position)
-    # print(np.array(velocity)  * 250/149.6e9)
-    # velocity = np.array(rotX90 @ orbital_parameters._vel_vec)
-    # print(velocity)
-    # print("______")
     orbital_parameters_dict = {
         "Position": position.tolist(),
         "DistanceFromPrimary": np.linalg.norm(position),

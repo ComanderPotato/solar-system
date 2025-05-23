@@ -5,6 +5,8 @@ from .time import CURRENT_TIME, CURRENT_TIME_SCALE
 from .get_orbital_information import get_orbital_parameters
 from .constants import LOAD, PLANETS_LIST
 
+# IF I USE PRIMARY POSITION TO GET SECONDARY ORBITAL PARAMETERS AS WELL I CAN PROCESS THE POSITIONS IN HERE
+# I.E., SECONDARYPOSITION.ADD(PRIMARYPOSITION) MAYBE IDK
 
 def get_planet_parameters():
     planets_dict = {}
@@ -19,7 +21,7 @@ def get_planet_parameters():
                     planets_ephermeris[planet]
                 )
             )
-        except:
+        except: 
             # Later integrate not the barycenter
             # for ephemeris in os.listdir(os.path.join(LOAD.directory, planet.lower())):
             planets_dict[planet] = get_orbital_parameters(

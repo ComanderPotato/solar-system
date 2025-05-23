@@ -197,26 +197,25 @@ export default class App {
   }
   private moveCameraWithFocused = (dt: number) => {
     if (!this._focusedCelestialBody) return;
-    if (true) {
-    // if (true) {
+    if (!this._lerpDestination) {
       if (this._focusedCelestialBody instanceof OrbitingBody) {
         this._camera.position.add(this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt));
       }
     }
-    // else {
-    //   this.controls.disconnect();
-    //   if (this._focusedCelestialBody instanceof OrbitingBody) {
-    //     // this.calculateLerpDestination();
-    //     // this._lerpDestination.add(this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt));
-    //     // this._camera.position.add(this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt));
-    //   }
-    //   this._camera.position.lerp(this._lerpDestination, 0.1);
-    //   // if (this.camera.position.distanceTo(this._lerpDestination) <= this._focusedCelestialBody.physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE) {
-    //   if (this.camera.position.distanceTo(this._lerpDestination) <= this._focusedCelestialBody.physicalParameters.MeanRadius * 0.1) {
-    //     this._lerpDestination = undefined;
-    //     this.controls.connect(this._renderer.domElement);
-    //   }
-    // }
+    else {
+      this.controls.disconnect();
+      if (this._focusedCelestialBody instanceof OrbitingBody) {
+        // this.calculateLerpDestination();
+        this._lerpDestination.add(this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt));
+        this._camera.position.add(this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt));
+      }
+      this._camera.position.lerp(this._lerpDestination, 0.1);
+      // if (this.camera.position.distanceTo(this._lerpDestination) <= this._focusedCelestialBody.physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE) {
+      if (this.camera.position.distanceTo(this._lerpDestination) <= this._focusedCelestialBody.physicalParameters.MeanRadius * 0.01) {
+        this._lerpDestination = undefined;
+        this.controls.connect(this._renderer.domElement);
+      }
+    }
   };
   private calculateLerpDestination = () => {
     let lerpDestination;
