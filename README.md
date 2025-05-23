@@ -13,3 +13,4 @@
 - Fix glow for bodies (need atmosphere for glow, i.e., moons dont have one)
 - Fix planet axial tilt?
 - Refactor
+- Update closest orbit zoom to be focused bodys target + radius
