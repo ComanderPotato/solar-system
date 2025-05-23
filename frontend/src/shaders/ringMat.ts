@@ -1,14 +1,14 @@
 import { DoubleSide, ShaderMaterial, Texture } from "three";
-export const getRingMat = ( ringTexture: Texture | null, alphaTexture: Texture | null, innerRadius: number, outerRadius: number ): ShaderMaterial => {
+export const getRingMat = (ringTexture: Texture | null, alphaTexture: Texture | null, innerRadius: number, outerRadius: number): ShaderMaterial => {
   const useAlphaTexture = !!alphaTexture;
-    const uniforms =  {
-        ringTexture: { value: ringTexture },
-        alphaTexture: { value: alphaTexture }, // Add alpha texture uniform
-        useAlphaTexture: { value: useAlphaTexture },
-        innerRadius: { value: innerRadius },
-        outerRadius: { value: outerRadius },
-      }
-    const vertexShader: string =  `
+  const uniforms = {
+    ringTexture: { value: ringTexture },
+    alphaTexture: { value: alphaTexture },
+    useAlphaTexture: { value: useAlphaTexture },
+    innerRadius: { value: innerRadius },
+    outerRadius: { value: outerRadius },
+  };
+  const vertexShader: string = `
         varying vec3 vPos;
         
         void main() {
@@ -16,10 +16,10 @@ export const getRingMat = ( ringTexture: Texture | null, alphaTexture: Texture |
         vec3 viewPosition = (modelViewMatrix * vec4(position, 1.)).xyz;
         gl_Position = projectionMatrix * vec4(viewPosition, 1.);
         }
-    `
-    const fragmentShader: string = `
+    `;
+  const fragmentShader: string = `
     uniform sampler2D ringTexture;
-    uniform sampler2D alphaTexture;  // Declare alpha texture uniform
+    uniform sampler2D alphaTexture;
     uniform float innerRadius;
     uniform float outerRadius;
 
@@ -33,20 +33,20 @@ export const getRingMat = ( ringTexture: Texture | null, alphaTexture: Texture |
       }
       
       vec4 colorPixel = texture2D(ringTexture, uv);
-      float alpha = texture2D(alphaTexture, uv).r; // sample alpha from alphaTexture (usually red channel)
+      float alpha = texture2D(alphaTexture, uv).r;
       return vec4(colorPixel.rgb, colorPixel.a * alpha);
     }
 
     void main() {
       gl_FragColor = color();
     }
-  `
+  `;
   const ringMat = new ShaderMaterial({
-      uniforms: uniforms,
-      vertexShader: vertexShader,
-      fragmentShader: fragmentShader,
-      transparent: true,
-      side: DoubleSide
-    });
-    return ringMat;
-}
+    uniforms: uniforms,
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
+    transparent: true,
+    side: DoubleSide,
+  });
+  return ringMat;
+};

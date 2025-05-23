@@ -1,38 +1,23 @@
-import {
-  BufferGeometry,
-  Camera,
-  IcosahedronGeometry,
-  Mesh,
-  MeshPhongMaterial,
-  TextureLoader,
-  Vector3,
-} from "three";
+import { BufferGeometry, Camera, IcosahedronGeometry, Mesh, MeshPhongMaterial, TextureLoader, Vector3 } from "three";
 import IMeshProvider from "../interfaces/IMeshProvider";
-import {
-  MoonParameters,
-  MoonPhysicalParameters,
-  TextureParameters,
-} from "../types";
+import { MoonParameters, MoonPhysicalParameters, TextureParameters } from "../types";
 import { CelestialBody, OrbitingBody } from ".";
 import { CelestialBodyDetail, CelestialBodyDistance } from "../utils/constants";
 import { getFresnelMat } from "../shaders";
 import { app, assetManager } from "../core";
-export default class Moon
-  extends OrbitingBody<MoonParameters>
-  implements IMeshProvider
-{
+export default class Moon extends OrbitingBody<MoonParameters> implements IMeshProvider {
   private _loader: TextureLoader = new TextureLoader();
   private _celestialBodyGeometry!: BufferGeometry;
   private _celestialBodyMaterial!: MeshPhongMaterial;
   private _celestialBodyMesh!: Mesh;
   private _meshDetail: CelestialBodyDetail = CelestialBodyDetail.LOW;
-  private _glowMesh!: Mesh;
+  // private _glowMesh!: Mesh;
   private _textures: TextureParameters;
   constructor(moonParameters: MoonParameters, primaryBody: CelestialBody) {
     super(moonParameters, primaryBody, moonParameters.SecondaryBodyParameters);
     this._textures = moonParameters.Texture;
     this.initialiseBaseMesh();
-    this.addGlowMesh();
+    // this.addGlowMesh();
     this.initialiseOrbitalPlane();
     // this.initialiseOrbit();
     this.addToScene();
@@ -56,9 +41,9 @@ export default class Moon
   get celestialBodyMesh(): Mesh {
     return this._celestialBodyMesh;
   }
-  get glowMesh(): Mesh {
-    return this._glowMesh;
-  }
+  // get glowMesh(): Mesh {
+  //   return this._glowMesh;
+  // }
   get textures(): TextureParameters {
     return this._textures;
   }
@@ -79,14 +64,13 @@ export default class Moon
   // }
   public rotateOnAxis = (dt: number): void => {
     if (!this._celestialBodyMesh) return;
-    const rotationSpeed =
-      (2 * Math.PI) / this._physicalParameters.SideralRotation;
+    const rotationSpeed = (2 * Math.PI) / this._physicalParameters.SideralRotation;
     // const rotationSpeed = (2 * Math.PI) / (this.celestialBodyParameters.RotationPeriod * TIME_SCALE);
     const deltaRotation = rotationSpeed * dt;
     const y = new Vector3(0, 1, 0);
     // this._celestialBodyGroup.rotateOnAxis(y, deltaRotation);
     this._celestialBodyMesh?.rotateOnAxis(y, deltaRotation);
-    this._glowMesh?.rotateOnAxis(y, deltaRotation);
+    // this._glowMesh?.rotateOnAxis(y, deltaRotation);
     // this._lightMesh?.rotateOnAxis(y, deltaRotation);
     // this._cloudMesh?.rotateOnAxis(y, deltaRotation * 1.001);
     // this._cloudMesh?.rotateOnAxis(y, deltaRotation * 1.001);
@@ -101,10 +85,7 @@ export default class Moon
     // }
   };
   initialiseOrbitalPlane(): void {
-    this._celestialBodyGroup.rotateOnAxis(
-      new Vector3(1, 0, 0),
-      this._physicalParameters.AxialTilt,
-    );
+    this._celestialBodyGroup.rotateOnAxis(new Vector3(1, 0, 0), this._physicalParameters.AxialTilt);
   }
   // initialiseOrbit(): void {
   //   const { x, y, z } = this._orbitingBodyParameters.Position;
@@ -129,45 +110,31 @@ export default class Moon
     this._celestialBodyGroup.position.add(newVelocity);
     this._position = this._celestialBodyGroup.position;
     if (this._secondaryBodies) {
-      this._secondaryBodies.forEach((secondaryBody) =>
-        secondaryBody.updatePosition(dt),
-      );
+      this._secondaryBodies.forEach((secondaryBody) => secondaryBody.updatePosition(dt));
     }
     this.updateDetail();
   };
   public async initialiseBaseMesh(): Promise<void> {
-    if (this._physicalParameters.MeanRadius == 0) {
-      console.log(this._metadata.EnglishName);
-    }
-    this._celestialBodyGeometry = new IcosahedronGeometry(
-      this._physicalParameters.MeanRadius,
-      this._meshDetail,
-    );
+    // if (this._physicalParameters.MeanRadius == 0) {
+    //   console.log(this._metadata.EnglishName);
+    // }
+    this._celestialBodyGeometry = new IcosahedronGeometry(this._physicalParameters.MeanRadius, this._meshDetail);
     this._celestialBodyMaterial = new MeshPhongMaterial({
       map: await assetManager().loadTexure(this._textures.Map),
     });
-    this.celestialBodyMaterial.specularMap = await assetManager().loadTexure(
-      this._textures.Specular,
-    );
-    this._celestialBodyMesh = new Mesh(
-      this._celestialBodyGeometry,
-      this._celestialBodyMaterial,
-    );
+    this.celestialBodyMaterial.specularMap = await assetManager().loadTexure(this._textures.Specular);
+    this._celestialBodyMesh = new Mesh(this._celestialBodyGeometry, this._celestialBodyMaterial);
     this._celestialBodyGroup.add(this._celestialBodyMesh);
   }
-  addGlowMesh(): void {
-    this._glowMesh = new Mesh(this._celestialBodyGeometry, getFresnelMat());
-    this._glowMesh.scale.setScalar(1.03);
-    this._celestialBodyGroup.add(this._glowMesh);
-  }
-  private _geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>> =
-    {};
+  // addGlowMesh(): void {
+  //   this._glowMesh = new Mesh(this._celestialBodyGeometry, getFresnelMat());
+  //   this._glowMesh.scale.setScalar(1.03);
+  //   this._celestialBodyGroup.add(this._glowMesh);
+  // }
+  private _geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>> = {};
   private getGeometryForDetail(detail: CelestialBodyDetail) {
     if (!this._geometryCache[detail]) {
-      this._geometryCache[detail] = new IcosahedronGeometry(
-        this._physicalParameters.MeanRadius,
-        detail,
-      );
+      this._geometryCache[detail] = new IcosahedronGeometry(this._physicalParameters.MeanRadius, detail);
     }
     return this._geometryCache[detail];
   }
@@ -192,8 +159,8 @@ export default class Moon
       const baseGeometry = this.getGeometryForDetail(this._meshDetail);
       this._celestialBodyMesh.geometry.dispose();
       this._celestialBodyMesh.geometry = baseGeometry.clone();
-      this._glowMesh.geometry.dispose();
-      this._glowMesh.geometry = baseGeometry.clone();
+      // this._glowMesh.geometry.dispose();
+      // this._glowMesh.geometry = baseGeometry.clone();
     }
   };
 }

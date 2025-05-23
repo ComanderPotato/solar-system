@@ -3,7 +3,7 @@ from skyfield.api import Loader
 
 LOAD = Loader("./static/src/data/ephemeris")
 # ts = LOAD.timescale()
-
+INITIAL_EPHEMERIS = "de432s.bsp"
 
 PLANETS_LIST = [
     "Mercury",

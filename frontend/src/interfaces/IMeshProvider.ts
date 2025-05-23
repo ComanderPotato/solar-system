@@ -9,7 +9,7 @@ export default interface IMeshProvider {
   readonly celestialBodyGeometry: BufferGeometry;
   readonly celestialBodyMaterial: MeshPhongMaterial;
   readonly celestialBodyMesh: Mesh;
-  readonly glowMesh: Mesh;
+  readonly glowMesh?: Mesh;
   readonly lightMesh?: Mesh;
   readonly cloudMesh?: Mesh;
   // readonly geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>>;
@@ -19,7 +19,7 @@ export default interface IMeshProvider {
   // initialiseOrbit?(): void;
 
   initialiseBaseMesh(): void;
-  addGlowMesh(): void;
+  addGlowMesh?(): void;
 
   addLightingMesh?(): void;
 

@@ -4,7 +4,6 @@ import { HDRILoader, TextureLoader } from "../loaders";
 type ProgressCallback = (url: string, progressRatio: number) => void;
 type LoadCompleteCallback = () => void;
 
-
 export default class AssetLoadingManager {
   private _manager: LoadingManager;
   //   private _modelLoader: ModelLoader;
@@ -13,6 +12,7 @@ export default class AssetLoadingManager {
   private _isLoaded: boolean = false;
   //   private onProgress: ProgressCallback;
   //   private onLoadComplete: LoadCompleteCallback;
+
   private _progress: number = 0;
   constructor(private _onProgress: ProgressCallback, private _onLoadComplete: LoadCompleteCallback) {
     this._onProgress = _onProgress;

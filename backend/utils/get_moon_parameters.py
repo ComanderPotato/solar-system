@@ -53,6 +53,7 @@ def get_moon_parameters(planet_name: str, moon_list: list[str]):
 
         for ephemeris_file in os.listdir(ephemeris_path):
             ephemeris = LOAD(os.path.join(planet_name, ephemeris_file))
+            # print(ephemeris.names())
             try:
                 PLANET_BARYCENTER = ephemeris[planet_name]
             except:

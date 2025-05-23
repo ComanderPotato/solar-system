@@ -159,7 +159,7 @@ export default abstract class OrbitingBody<
     );
     for (let i = 0; i < points.length; i++) {
       const point = points[i];
-      positions.push(point.x, 0, point.y); // Convert XY to XZ
+      positions.push(point.x, 0, point.y);
       const t = i / (points.length - 1);
       const color = startColor.clone().lerp(endColour, t);
       colours.push(color.r, color.g, color.b);

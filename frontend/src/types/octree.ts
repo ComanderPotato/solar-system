@@ -6,14 +6,7 @@ export class BoundingCube {
   public w: number;
   public h: number;
   public l: number;
-  constructor(
-    x: number,
-    y: number,
-    z: number,
-    w: number,
-    h: number,
-    l: number
-  ) {
+  constructor(x: number, y: number, z: number, w: number, h: number, l: number) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -68,71 +61,15 @@ export class Octree {
     const halfH: number = this.boundingCube.h / 2;
     const halfL: number = this.boundingCube.l / 2;
     console.log("Hello");
-    const bottomFrontLeft: BoundingCube = new BoundingCube(
-      x - halfW,
-      y + halfH,
-      z - halfL,
-      halfW,
-      halfH,
-      halfL
-    );
-    const bottomFrontRight: BoundingCube = new BoundingCube(
-      x + halfW,
-      y + halfH,
-      z - halfL,
-      halfW,
-      halfH,
-      halfL
-    );
-    const bottomBackLeft: BoundingCube = new BoundingCube(
-      x - halfW,
-      y + halfH,
-      z + halfL,
-      halfW,
-      halfH,
-      halfL
-    );
-    const bottomBackRight: BoundingCube = new BoundingCube(
-      x + halfW,
-      y + halfH,
-      z + halfL,
-      halfW,
-      halfH,
-      halfL
-    );
+    const bottomFrontLeft: BoundingCube = new BoundingCube(x - halfW, y + halfH, z - halfL, halfW, halfH, halfL);
+    const bottomFrontRight: BoundingCube = new BoundingCube(x + halfW, y + halfH, z - halfL, halfW, halfH, halfL);
+    const bottomBackLeft: BoundingCube = new BoundingCube(x - halfW, y + halfH, z + halfL, halfW, halfH, halfL);
+    const bottomBackRight: BoundingCube = new BoundingCube(x + halfW, y + halfH, z + halfL, halfW, halfH, halfL);
 
-    const topFrontLeft: BoundingCube = new BoundingCube(
-      x - halfW,
-      y - halfH,
-      z - halfL,
-      halfW,
-      halfH,
-      halfL
-    );
-    const topFrontRight: BoundingCube = new BoundingCube(
-      x + halfW,
-      y - halfH,
-      z - halfL,
-      halfW,
-      halfH,
-      halfL
-    );
-    const topBackLeft: BoundingCube = new BoundingCube(
-      x - halfW,
-      y - halfH,
-      z + halfL,
-      halfW,
-      halfH,
-      halfL
-    );
-    const topBackRight: BoundingCube = new BoundingCube(
-      x + halfW,
-      y - halfH,
-      z + halfL,
-      halfW,
-      halfH,
-      halfL
-    );
+    const topFrontLeft: BoundingCube = new BoundingCube(x - halfW, y - halfH, z - halfL, halfW, halfH, halfL);
+    const topFrontRight: BoundingCube = new BoundingCube(x + halfW, y - halfH, z - halfL, halfW, halfH, halfL);
+    const topBackLeft: BoundingCube = new BoundingCube(x - halfW, y - halfH, z + halfL, halfW, halfH, halfL);
+    const topBackRight: BoundingCube = new BoundingCube(x + halfW, y - halfH, z + halfL, halfW, halfH, halfL);
 
     this.bottomFrontLeft = new Octree(bottomFrontLeft, this.capacity);
     this.bottomFrontRight = new Octree(bottomFrontRight, this.capacity);
@@ -215,25 +152,14 @@ export class Octree {
     return false;
   };
   public drawOctree = (scene: THREE.Scene): void => {
-    const geometry = new THREE.BoxGeometry(
-      this.boundingCube.w * 2,
-      this.boundingCube.h * 2,
-      this.boundingCube.l * 2
-    );
+    const geometry = new THREE.BoxGeometry(this.boundingCube.w * 2, this.boundingCube.h * 2, this.boundingCube.l * 2);
     const edges = new THREE.EdgesGeometry(geometry);
 
-    // Material for the wireframe
     const material = new THREE.LineBasicMaterial({ color: "white" });
 
-    // Create the wireframe mesh using LineSegments (lines instead of a full mesh)
     const wireframe = new THREE.LineSegments(edges, material);
 
-    // Add the wireframe to the scene
-    wireframe.position.set(
-      this.boundingCube.x,
-      this.boundingCube.y,
-      this.boundingCube.z
-    );
+    wireframe.position.set(this.boundingCube.x, this.boundingCube.y, this.boundingCube.z);
     scene.add(wireframe);
 
     if (this.bottomBackLeft == null) return;

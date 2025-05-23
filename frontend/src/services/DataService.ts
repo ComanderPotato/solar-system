@@ -65,24 +65,13 @@ export default class DataService {
       headers: { "Content-Type": "application/json" },
     });
     const data = await response.json();
-    return (await this.processPlanetaryOrbitalParameters(
-      data,
-    )) as PlanetaryOrbitalElements;
+    return (await this.processPlanetaryOrbitalParameters(data)) as PlanetaryOrbitalElements;
   };
-  public fetchFocusedPlanetsMoonData = async (
-    planetName: string,
-    moons: string[],
-  ) => {
+  public fetchFocusedPlanetsMoonData = async (planetName: string, moons: string[]) => {
     // Maybe do all processing inside here
-    this._focusedPlanetsMoons = await this.getMoonOrbitalParameters(
-      planetName,
-      moons,
-    );
+    this._focusedPlanetsMoons = await this.getMoonOrbitalParameters(planetName, moons);
   };
-  private getMoonOrbitalParameters = async (
-    planetName: string,
-    moons: string[],
-  ): Promise<SecondaryOrbitalElements> => {
+  private getMoonOrbitalParameters = async (planetName: string, moons: string[]): Promise<SecondaryOrbitalElements> => {
     const response = await fetch(`/get_moon_parameters`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -93,116 +82,69 @@ export default class DataService {
     });
 
     const data = await response.json();
-    return (await this.processPlanetaryOrbitalParameters(
-      data,
-    )) as SecondaryOrbitalElements;
+    return (await this.processPlanetaryOrbitalParameters(data)) as SecondaryOrbitalElements;
   };
-  private processPlanetaryOrbitalParameters = async (
-    planetaryOrbitalParameters: PlanetaryOrbitalElementsResponse,
-  ): Promise<PlanetaryOrbitalElements> => {
+  private processPlanetaryOrbitalParameters = async (planetaryOrbitalParameters: PlanetaryOrbitalElementsResponse): Promise<PlanetaryOrbitalElements> => {
     return Object.fromEntries(
-      Object.entries(planetaryOrbitalParameters).map(
-        ([planet, orbitalParameters]) => [
-          planet,
-          this.processOrbitalParameters(orbitalParameters),
-        ],
-      ),
+      Object.entries(planetaryOrbitalParameters).map(([planet, orbitalParameters]) => [planet, this.processOrbitalParameters(orbitalParameters)])
     ) as PlanetaryOrbitalElements;
   };
-  private processOrbitalParameters = (
-    orbitalParameters: OrbitalElementsResponse,
-  ): OrbitalParameters => {
-    distanceKeys.map(
-      (distanceKey) =>
-        (orbitalParameters[distanceKey] =
-          orbitalParameters[distanceKey] * SCALE),
-    );
+  private processOrbitalParameters = (orbitalParameters: OrbitalElementsResponse): OrbitalParameters => {
+    distanceKeys.map((distanceKey) => (orbitalParameters[distanceKey] = orbitalParameters[distanceKey] * SCALE));
     return {
       ...orbitalParameters,
-      Position: new Vector3(...orbitalParameters.Position).multiplyScalar(
-        SCALE,
-      ),
-      Velocity: new Vector3(...orbitalParameters.Velocity).multiplyScalar(
-        SCALE,
-      ),
+      Position: new Vector3(...orbitalParameters.Position).multiplyScalar(SCALE),
+      Velocity: new Vector3(...orbitalParameters.Velocity).multiplyScalar(SCALE),
       ParentBody: String(),
     };
   };
   private handleOrbitalData = async () => {
     if (this._orbitalParameters) {
-      this._starPlanetaryParameters = (
-        (await this.getPlanetaryPhysicalData(
-          this.STAR_FILTER,
-        )) as StarParameters[]
-      )[0];
-      this._primaryPlanetaryParameters = (await this.getPlanetaryPhysicalData(
-        this.PRIMARY_PLANETS_FILTER,
-      )) as OrbitingBodyParameters[];
-      this._dumbDwarfParameters = (await this.getPlanetaryPhysicalData(
-        this.DUMB_DWARF_FILTER,
-      )) as OrbitingBodyParameters[];
+      this._starPlanetaryParameters = ((await this.getPlanetaryPhysicalData(this.STAR_FILTER)) as StarParameters[])[0];
+      this._primaryPlanetaryParameters = (await this.getPlanetaryPhysicalData(this.PRIMARY_PLANETS_FILTER)) as OrbitingBodyParameters[];
+      this._dumbDwarfParameters = (await this.getPlanetaryPhysicalData(this.DUMB_DWARF_FILTER)) as OrbitingBodyParameters[];
       this.handleSolarSystemData();
     }
   };
   public a?: WikiSummary;
-  public getCelestialBodyExtract = async (
-    englishName: string,
-    bodyType: string,
-  ): Promise<WikiSummary> => {
+  public getCelestialBodyExtract = async (englishName: string, bodyType: string): Promise<WikiSummary> => {
     try {
       const data = await this.fetchCelestialBodyExtract(englishName, bodyType);
       // this.a = data;
-      return data
-    } catch(e) {console.log(e)}
-    return {extract: ""}
+      return data;
+    } catch (e) {
+      console.log(e);
+    }
+    return { extract: "" };
   };
-  public fetchCelestialBodyExtract = async (
-    planetName: string,
-    bodyType: string,
-  ): Promise<WikiSummary> => {
+  public fetchCelestialBodyExtract = async (planetName: string, bodyType: string): Promise<WikiSummary> => {
     planetName = planetName.toLocaleLowerCase();
-    console.log(`/api/rest/summary?planetName=${encodeURIComponent(planetName)}&bodyType=${encodeURIComponent(bodyType)}`)
-    const response = await fetch(
-      `/api/rest/summary?planetName=${encodeURIComponent(planetName)}&bodyType=${encodeURIComponent(bodyType)}`,
-    );
+    // console.log(`/api/rest/summary?planetName=${encodeURIComponent(planetName)}&bodyType=${encodeURIComponent(bodyType)}`)
+    const response = await fetch(`/api/rest/summary?planetName=${encodeURIComponent(planetName)}&bodyType=${encodeURIComponent(bodyType)}`);
     const data = await response.json();
     return data;
   };
 
-  getPlanetaryPhysicalData = async (
-    filter: string,
-  ): Promise<CelestialBodyParameters[]> => {
+  getPlanetaryPhysicalData = async (filter: string): Promise<CelestialBodyParameters[]> => {
     // console.log(`https://api.le-systeme-solaire.net/rest/bodies?data=${API_INCLUDE_DATA.join(",")}&filter[]=${filter}`);
-    const response = await fetch(
-      `https://api.le-systeme-solaire.net/rest/bodies?data=${API_INCLUDE_DATA.join(",")}&filter[]=${filter}`,
-    );
+    const response = await fetch(`https://api.le-systeme-solaire.net/rest/bodies?data=${API_INCLUDE_DATA.join(",")}&filter[]=${filter}`);
     // const response = await fetch(`/api/rest/physical?data=${encodeURIComponent(API_INCLUDE_DATA.join(","))}&filter[]=${encodeURIComponent(filter)}`);
     const data = await response.json();
-    return this.processPlanetaryPhysicalData(
-      data.bodies as SolarSystemOpenDataResponse[],
-    );
+    return this.processPlanetaryPhysicalData(data.bodies as SolarSystemOpenDataResponse[]);
   };
-  private processPlanetaryPhysicalData = async (
-    physicalParameters: SolarSystemOpenDataResponse[],
-  ): Promise<CelestialBodyParameters[]> => {
+  private processPlanetaryPhysicalData = async (physicalParameters: SolarSystemOpenDataResponse[]): Promise<CelestialBodyParameters[]> => {
     return await Promise.all(
       physicalParameters.map(async (parameters) => {
-        const orbitalParameters: OrbitalParameters | null =
-          this._orbitalParameters![parameters.englishName];
+        const orbitalParameters: OrbitalParameters | null = this._orbitalParameters![parameters.englishName];
         const bodyType = parameters.bodyType as BodyTypes;
-        const parentBody = parameters.aroundPlanet
-          ? parameters.aroundPlanet.planet
-          : "soleil";
+        const parentBody = parameters.aroundPlanet ? parameters.aroundPlanet.planet : "soleil";
 
-        // Fetch secondary bodies if moons exist
         const secondaryBodies = parameters.moons
           ? await Promise.all(
               parameters.moons.map(async (m) => {
-                const data = await this.getPlanetaryPhysicalData(
-                  `name,eq,${m.moon}`,
-                );
-                return data[0]; // Assuming 1 moon = 1 match
-              }),
+                const data = await this.getPlanetaryPhysicalData(`name,eq,${m.moon}`);
+                return data[0];
+              })
             )
           : null;
 
@@ -221,53 +163,33 @@ export default class DataService {
           SecondaryBodyParameters: secondaryBodies,
           Texture: this._textureData[parameters.englishName],
         } as CelestialBodyParameters;
-      }),
+      })
     );
   };
 
-  private processPhysicalData = (
-    physicalParameters: SolarSystemOpenDataResponse,
-    bodyType: BodyTypes,
-  ): PhysicalParameters => {
+  private processPhysicalData = (physicalParameters: SolarSystemOpenDataResponse, bodyType: BodyTypes): PhysicalParameters => {
     switch (bodyType) {
       case "Star":
         return {
           ...this.processBasePhysicalData(physicalParameters),
-          ...(this._optionalPhysicalData[
-            physicalParameters.englishName
-          ] as RequiredStarPhysicalParameters),
+          ...(this._optionalPhysicalData[physicalParameters.englishName] as RequiredStarPhysicalParameters),
         } as StarPhysicalParameters;
       case "Planet":
       case "Dwarf Planet":
         return {
           ...this.processBasePhysicalData(physicalParameters),
-          ...(this._optionalPhysicalData[
-            physicalParameters.englishName
-          ] as RequiredPlanetPhysicalParameters),
+          ...(this._optionalPhysicalData[physicalParameters.englishName] as RequiredPlanetPhysicalParameters),
         } as PlanetPhysicalParameters;
       case "Moon":
         return {
           ...this.processBasePhysicalData(physicalParameters),
-          ...(this._optionalPhysicalData[
-            physicalParameters.englishName
-          ] as RequiredMoonPhysicalParameters),
+          ...(this._optionalPhysicalData[physicalParameters.englishName] as RequiredMoonPhysicalParameters),
         } as MoonPhysicalParameters;
     }
   };
-  private processBasePhysicalData = (
-    basePhysicalParameters: SolarSystemOpenDataResponse,
-  ): BasePhysicalParameters => {
-    const mass = basePhysicalParameters.mass
-      ? basePhysicalParameters.mass.massValue *
-        10 ** basePhysicalParameters.mass.massExponent *
-        SCALE
-      : 0;
-    const vol = basePhysicalParameters.vol
-      ? basePhysicalParameters.vol.volValue *
-        10 ** basePhysicalParameters.vol.volExponent *
-        SCALE *
-        KM_TO_M
-      : 0;
+  private processBasePhysicalData = (basePhysicalParameters: SolarSystemOpenDataResponse): BasePhysicalParameters => {
+    const mass = basePhysicalParameters.mass ? basePhysicalParameters.mass.massValue * 10 ** basePhysicalParameters.mass.massExponent * SCALE : 0;
+    const vol = basePhysicalParameters.vol ? basePhysicalParameters.vol.volValue * 10 ** basePhysicalParameters.vol.volExponent * SCALE * KM_TO_M : 0;
     return {
       Mass: mass,
       Volume: vol,
@@ -276,12 +198,9 @@ export default class DataService {
       Density: basePhysicalParameters.density * 1000 /* Fix */,
       Gravity: basePhysicalParameters.gravity,
       Escape: basePhysicalParameters.escape,
-      MeanRadius:
-        basePhysicalParameters.meanRadius * KM_TO_M * SCALE,
-      EquaRadius:
-        basePhysicalParameters.equaRadius * KM_TO_M * SCALE,
-      PolarRadius:
-        basePhysicalParameters.polarRadius * KM_TO_M * SCALE,
+      MeanRadius: basePhysicalParameters.meanRadius * KM_TO_M * SCALE,
+      EquaRadius: basePhysicalParameters.equaRadius * KM_TO_M * SCALE,
+      PolarRadius: basePhysicalParameters.polarRadius * KM_TO_M * SCALE,
       Flattening: basePhysicalParameters.flattening,
       AxialTilt: basePhysicalParameters.axialTilt * DEG_TO_RAD,
       SideralRotation: basePhysicalParameters.sideralRotation * HOUR_TO_SECOND,
@@ -289,23 +208,12 @@ export default class DataService {
     };
   };
   private handleSolarSystemData = () => {
-    if (
-      this._starPlanetaryParameters &&
-      this._primaryPlanetaryParameters &&
-      this._dumbDwarfParameters
-    ) {
-      const starSecondaryBodies = [
-        ...this._primaryPlanetaryParameters,
-        ...this._dumbDwarfParameters,
-      ];
-      this._starPlanetaryParameters["SecondaryBodyParameters"] =
-        starSecondaryBodies;
+    if (this._starPlanetaryParameters && this._primaryPlanetaryParameters && this._dumbDwarfParameters) {
+      const starSecondaryBodies = [...this._primaryPlanetaryParameters, ...this._dumbDwarfParameters];
+      this._starPlanetaryParameters["SecondaryBodyParameters"] = starSecondaryBodies;
       this._solarSystemParameters = {
         Primary: this._starPlanetaryParameters,
-        Secondary: [
-          ...this._primaryPlanetaryParameters,
-          ...this._dumbDwarfParameters,
-        ],
+        Secondary: [...this._primaryPlanetaryParameters, ...this._dumbDwarfParameters],
       };
     }
   };
@@ -313,12 +221,7 @@ export default class DataService {
     return this._solarSystemParameters;
   }
   public hasFinishedLoading = (): boolean => {
-    return !!(
-      this._orbitalParameters &&
-      this._starPlanetaryParameters &&
-      this._primaryPlanetaryParameters &&
-      this._dumbDwarfParameters
-    );
+    return !!(this._orbitalParameters && this._starPlanetaryParameters && this._primaryPlanetaryParameters && this._dumbDwarfParameters);
   };
   public loadingStatus = (): number => {
     const total = 4;
@@ -342,11 +245,8 @@ export default class DataService {
     // return this.processPlanetaryPhysicalData(data.bodies as SolarSystemOpenDataResponse[]);
   };
 
-  private _wikiExtract?: string
-  public tempFetchCelestialBodyExtract = async (
-    planetName: string,
-    bodyType: string,
-  ): Promise<WikiSummary> => {
+  private _wikiExtract?: string;
+  public tempFetchCelestialBodyExtract = async (planetName: string, bodyType: string): Promise<WikiSummary> => {
     planetName = planetName.toLocaleLowerCase();
     const response = await fetch("/api/rest/tempsummary", {
       method: "POST",

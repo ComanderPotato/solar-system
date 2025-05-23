@@ -12,6 +12,7 @@ interface CameraParameters {
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { PMREMGenerator } from "three";
 import { assetManager, uiManager } from ".";
+import { DataLoader } from "../loaders";
 
 interface GridParameters {
   size: number;
@@ -46,6 +47,7 @@ export default class App {
     this.cameraParameters = cameraParameters ? cameraParameters : this.cameraParameters;
     this.initialise(initialisedHelpers);
     this.initialiseFocusedBodyCSS();
+    new DataLoader().fetchPhysicalParameters(["Earth", "Mars"]).then((data) => console.log(data));
   }
 
   get data() {
@@ -97,7 +99,7 @@ export default class App {
     const initialiseHelpers = (): void => {
       // const axes = new AxesHelper(10);
       // const size = 100000;
-      // const divisions = 1000;
+      // const divisions = 10000;
       // const gridHelper = new GridHelper(size, divisions);
       // this.scene.add(gridHelper);
       // this.scene.add(axes);
@@ -125,6 +127,7 @@ export default class App {
 
   // ====== RENDER LOOP-START ======
   private hasHandledFocusedBodyMoonLoad = false;
+
   public render = (): void => {
     const solarSystem = new SolarSystem();
     const clock = new Clock();
@@ -140,13 +143,11 @@ export default class App {
     let hasHandledSolarSystemLoad = false;
     const animate = () => {
       requestAnimationFrame(animate);
-      
+
       if (!this._data.hasFinishedLoading()) {
         this._data.loadingStatus();
         console.log("Loading screen");
-      } else 
-      
-      if (this._data.hasFinishedLoading()) {
+      } else if (this._data.hasFinishedLoading()) {
         if (!hasHandledSolarSystemLoad) {
           solarSystem.initialiseSolarSystem(this._data.solarSystemParameters);
           hasHandledSolarSystemLoad = true;
@@ -156,10 +157,6 @@ export default class App {
         if (this._focusedCelestialBody && this._data._focusedPlanetsMoons && !this.hasHandledFocusedBodyMoonLoad) {
           this._focusedCelestialBody.initialiseSecondaryBodies(undefined, this._data._focusedPlanetsMoons);
           this._data._focusedPlanetsMoons = undefined;
-          // uiManager().updateBodyInformation(this._data.a.extract)
-          // console.log(this._data.a)
-          // console.log("Hello")
-          // this._data.a = undefined
           this.hasHandledFocusedBodyMoonLoad = true;
         }
 
@@ -169,9 +166,10 @@ export default class App {
         currentTime = newTime;
         accumulator += frameTime;
         deltaTime += clock.getDelta();
-        // console.log(`${Math.floor(t / 86400)} days passed`)
+        // console.log(`${Math.floor(t / 86400)} days passed`);
         if (deltaTime >= FRAME_RATE) {
           while (accumulator >= TIME_STEP) {
+            // console.log(t);
             this.moveCameraWithFocused(SCALED_TIME_STEP);
             solarSystem.simulate(SCALED_TIME_STEP);
             t += SCALED_TIME_STEP;
@@ -181,14 +179,12 @@ export default class App {
         }
         this.controls.update();
         this.labelRenderer.render(this.scene, this.camera);
-
-        
       }
       this._renderer.render(this.scene, this.camera);
     };
     window.addEventListener("resize", this.resize);
 
-    animate()
+    animate();
   };
   // ====== RENDER LOOP-END ======
 
@@ -201,8 +197,7 @@ export default class App {
       if (this._focusedCelestialBody instanceof OrbitingBody) {
         this._camera.position.add(this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt));
       }
-    }
-    else {
+    } else {
       this.controls.disconnect();
       if (this._focusedCelestialBody instanceof OrbitingBody) {
         // this.calculateLerpDestination();
@@ -291,6 +286,7 @@ export default class App {
       const secondaryBodyNames = focusedCelestialBody.secondaryBodyParameters?.map((secondaryBodyParameter) => secondaryBodyParameter.MetaData.EnglishName);
       if (secondaryBodyNames) {
         this._data.fetchFocusedPlanetsMoonData(focusedCelestialBody.metadata.EnglishName, secondaryBodyNames);
+        console.log(`Loading ${secondaryBodyNames.length} moons for ${focusedCelestialBody.metadata.EnglishName}`);
       }
     }
     // if (focusedCelestialBody.primaryBody) {
@@ -304,8 +300,9 @@ export default class App {
     //   this._data.fetchFocusedPlanetsMoonData(focusedCelestialBody.metadata.EnglishName, secondaryBodyNames);
     // }
     this.hasHandledFocusedBodyMoonLoad = false;
-    this._data.getCelestialBodyExtract(this._focusedCelestialBody.metadata.EnglishName, this._focusedCelestialBody.metadata.BodyType)
-    .then(value => uiManager().updateBodyInformation(value.extract));
+    this._data
+      .getCelestialBodyExtract(this._focusedCelestialBody.metadata.EnglishName, this._focusedCelestialBody.metadata.BodyType)
+      .then((value) => uiManager().updateBodyInformation(value.extract));
     this.calculateLerpDestination();
     // this.hideFocusedInformation();
   }
