@@ -1,0 +1,231 @@
+.icon-circle--earth {
+  background-position: -36px -195px;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-circle--jupiter {
+  background-position: -72px -195px;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-circle--mars {
+  background-position: -108px -195px;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-circle--mercury {
+  background-position: -144px -195px;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-circle--neptune {
+  background-position: -180px -195px;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-circle--saturn {
+  background-position: -216px -195px;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-circle--sun {
+  background-position: -252px -195px;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-circle--uranus {
+  background-position: -288px -195px;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-circle--venus {
+  background-position: -324px -195px;
+  height: 20px;
+  width: 20px;
+}
+
+.icon-circle--white {
+  background-position: -360px -195px;
+  height: 20px;
+  width: 20px;
+}
+
+.pioneer-label-div {
+  --fontSize: 16px;
+  --fontSizeLarge: 18px;
+  --fontSizeSmall: 14px;
+  --fontSizeXSmall: 12px;
+  --fontSizeTiny: 10px;
+  --secondaryFadeIn: 0.35;
+  --secondaryFadeOut: 0.05;
+  --primaryFadeIn: 0.75;
+  --primaryFadeOut: 0.05;
+  --hoverOpacity: 1;
+  cursor: pointer;
+  color: var(--white);
+  font-size: var(--fontSizeSmall);
+  left: 12 / px;
+  pointer-events: all;
+  top: -4px;
+  transition: opacity 0.25s ease-out;
+  white-space: nowrap;
+  /* position: absolute;
+    z-index: 100; */
+  &.unclickable {
+    pointer-events: none;
+  }
+
+  &.hidden,
+  &.hiddenByLabelQuadtree {
+    display: initial;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.75s ease-out;
+    .icon,
+    .text {
+      opacity: var(--secondaryFadeOut);
+      transition: opacity 0.75s, transform 0.75s ease-in-out;
+    }
+  }
+
+  .icon,
+  .text {
+    opacity: var(--secondaryFadeIn);
+    transition: opacity 0.25s, transform 0.25s ease-in-out;
+  }
+
+  .text {
+    transition: opacity 0.25s ease-out;
+    position: absolute;
+    bottom: 0;
+  }
+
+  .icon {
+    background-image: url(../assets/svg/sprite.svg);
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 16px;
+    left: 50%;
+    height: 16px;
+    position: absolute;
+    top: 50%;
+    transform: translate(calc(-50% - 12px), calc(-50% + 4px));
+    width: 16px;
+    &.no-icon {
+      display: none;
+    }
+  }
+
+  @media (pointer: fine) and (hover: hover) {
+    &:hover {
+      .icon {
+        transform: translate(calc(-50% - 12px), calc(-50% + 4px)) scale(1.2);
+        transform-origin: center center;
+      }
+
+      .icon,
+      .text {
+        opacity: var(--hoverOpacity);
+      }
+    }
+  }
+
+  &.spacecraft {
+    left: 14px;
+    top: -4px;
+    .icon {
+      transform: translate(calc(-50% - 14px), calc(-50% + 4px));
+      width: 14px;
+    }
+
+    @media (pointer: fine) and (hover: hover) {
+      &:hover {
+        .icon {
+          transform: translate(calc(-50% - 14px), calc(-50% + 4px)) scale(1.2);
+        }
+      }
+    }
+  }
+
+  &.planet {
+    left: 18px;
+    letter-spacing: 0.3em;
+    position: relative;
+    top: -6px;
+    .icon,
+    .text {
+      opacity: var(--primaryFadeIn);
+    }
+
+    .text {
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .icon {
+      height: 20px;
+      transform: translate(calc(-50% - 18px), calc(-50% + 6px));
+      width: 20px;
+    }
+
+    &.hidden,
+    &.hiddenByLabelQuadtree {
+      .icon,
+      .text {
+        opacity: var(--primaryFadeOut);
+      }
+    }
+
+    @media (pointer: fine) and (hover: hover) {
+      &:hover {
+        .icon {
+          transform: translate(calc(-50% - 18px), calc(-50% + 6px)) scale(1.2);
+        }
+
+        .icon,
+        .text {
+          opacity: var(--hoverOpacity);
+        }
+      }
+    }
+  }
+
+  &.star {
+    bottom: unset;
+    font-size: var(--fontSize);
+    /* left: 20px; */
+    letter-spacing: 0.3em;
+    /* top: 8px; */
+    .icon,
+    .text {
+      opacity: var(--primaryFadeIn);
+    }
+
+    .text {
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .icon {
+      height: 20px;
+      transform: translate(-50%, -30%);
+      width: 20px;
+    }
+
+    &.hidden,
+    &.hiddenByLabelQuadtree {
+      .icon,
+      .text {
+        opacity: var(--primaryFadeOut);
+      }
+    }
+  }
+}

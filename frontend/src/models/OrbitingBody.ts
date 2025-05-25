@@ -29,7 +29,7 @@ import { app } from "../core";
 import { CelestialBodyColour } from "../utils/constants";
 
 export default abstract class OrbitingBody<
-  T extends OrbitingBodyParameters = OrbitingBodyParameters,
+  T extends OrbitingBodyParameters = OrbitingBodyParameters
 > extends CelestialBody<T> {
   protected _primaryBody: CelestialBody;
   protected _orbitingBodyParameters: T["Orbital"];
@@ -49,7 +49,7 @@ export default abstract class OrbitingBody<
   constructor(
     orbitingBodyParameters: OrbitingBodyParameters,
     primaryBody: CelestialBody,
-    secondaryBodyParameters?: OrbitingBodyParameters[],
+    secondaryBodyParameters?: OrbitingBodyParameters[]
   ) {
     super(orbitingBodyParameters, secondaryBodyParameters);
     this._primaryBody = primaryBody;
@@ -60,7 +60,7 @@ export default abstract class OrbitingBody<
     if (this._physicalParameters.SideralRotation != 0) {
       OrbitingBody.totalFactor += Math.abs(
         this._orbitingBodyParameters.PeriodInDays /
-          this._physicalParameters.SideralRotation,
+          this._physicalParameters.SideralRotation
       );
       OrbitingBody.totalDistance +=
         this._orbitingBodyParameters.DistanceFromPrimary;
@@ -97,7 +97,7 @@ export default abstract class OrbitingBody<
   private calculateAcceleration(
     other?: CelestialBody,
     clonePrimary?: Vector3,
-    cloneSecondary?: Vector3,
+    cloneSecondary?: Vector3
   ): Vector3 {
     let acceleration = new Vector3();
     // if (!this.primaryBody || !other) return acceleration;
@@ -141,59 +141,54 @@ export default abstract class OrbitingBody<
     // return Math.sqrt(x * x + y * y + z * z).toString();
   };
   private drawOrbit = (): void => {
-    const a = this._orbitingBodyParameters.SemiMajorAxis;
-    const b = this._orbitingBodyParameters.SemiMinorAxis;
-    const e = this._orbitingBodyParameters.Eccentricity;
-    const c = e * a;
-    const curve = new EllipseCurve(-c, 0, a, b, 0, 2 * Math.PI, false, 0);
-    const points = curve.getPoints(180);
+  const a = this._orbitingBodyParameters.SemiMajorAxis;
+  const b = this._orbitingBodyParameters.SemiMinorAxis;
+  const e = this._orbitingBodyParameters.Eccentricity;
+  const c = e * a;
+  const curve = new EllipseCurve(-c, 0, a, b, 0, 2 * Math.PI, false, 0);
+  const points = curve.getPoints(180);
 
-    const positions: number[] = [];
-    const colours: number[] = [];
-    const startColor = new Color(0xffffff);
-    const endColour = new Color(
-      CelestialBodyColour[this._metadata.EnglishName.toUpperCase()] ??
-        CelestialBodyColour[
-          this._primaryBody.metadata.EnglishName.toUpperCase()
-        ],
-    );
-    for (let i = 0; i < points.length; i++) {
-      const point = points[i];
-      positions.push(point.x, 0, point.y);
-      const t = i / (points.length - 1);
-      const color = startColor.clone().lerp(endColour, t);
-      colours.push(color.r, color.g, color.b);
-    }
-    const geometry = new LineGeometry();
-    geometry.setPositions(positions);
-    geometry.setColors(colours);
+  const positions: number[] = [];
+  for (const point of points) {
+    positions.push(point.x, 0, point.y);
+  }
 
-    const material = new LineMaterial({
-      vertexColors: true,
-      transparent: this instanceof Moon,
-      opacity: 0.6,
-      linewidth: 2,
-      resolution: new Vector2(window.innerWidth, window.innerHeight), // MUST be updated on resize
-    });
+  const colour = new Color(
+    CelestialBodyColour[this._metadata.EnglishName.toUpperCase()] ??
+    CelestialBodyColour[
+      this._primaryBody.metadata.EnglishName.toUpperCase()
+    ]
+  );
 
-    const orbit = new Line2(geometry, material);
-    orbit.computeLineDistances();
-    //orbit.rotateOnWorldAxis(new Vector3(1, 0, 0), Math.PI / 2);
-    orbit.rotateOnAxis(
-      new Vector3(1, 0, 0),
-      this._orbitingBodyParameters.Inclination,
-    );
-    orbit.rotateOnWorldAxis(
-      new Vector3(0, 1, 0),
-      this._orbitingBodyParameters.LongitudeOfAscendingNode,
-    );
-    orbit.rotateOnAxis(
-      new Vector3(0, 1, 0),
-      this._orbitingBodyParameters.ArgumentOfPeriapsis,
-    );
+  const geometry = new LineGeometry();
+  geometry.setPositions(positions);
 
-    this._primaryBody.addOrbit(this._metadata.EnglishName, orbit);
-  };
+  const material = new LineMaterial({
+    color: colour,
+    transparent: true,
+    opacity: 0.4, // Static opacity (adjust if needed)
+    linewidth: 2,
+    resolution: new Vector2(window.innerWidth, window.innerHeight),
+  });
+
+  const orbit = new Line2(geometry, material);
+
+  orbit.rotateOnAxis(
+    new Vector3(1, 0, 0),
+    this._orbitingBodyParameters.Inclination
+  );
+  orbit.rotateOnWorldAxis(
+    new Vector3(0, 1, 0),
+    this._orbitingBodyParameters.LongitudeOfAscendingNode
+  );
+  orbit.rotateOnAxis(
+    new Vector3(0, 1, 0),
+    this._orbitingBodyParameters.ArgumentOfPeriapsis
+  );
+
+  this._primaryBody.addOrbit(this._metadata.EnglishName, orbit);
+};
+
   // private drawOrbit = (): void => {
   //   const a = this._orbitingBodyParameters.SemiMajorAxis;
   //   const b = this._orbitingBodyParameters.SemiMinorAxis;
@@ -236,7 +231,7 @@ export default abstract class OrbitingBody<
   // };
   private initialiseOrbit = (): void => {
     this._celestialBodyGroup.position.copy(
-      this._orbitingBodyParameters.Position,
+      this._orbitingBodyParameters.Position
     );
     this._position = this._orbitingBodyParameters.Position;
     const { x, y, z } = this._orbitingBodyParameters.Velocity;
@@ -248,9 +243,11 @@ export default abstract class OrbitingBody<
     // }
     this._currentVelocity = orbitalVelocity;
     this._currentVelocity =
-      this._primaryBody instanceof OrbitingBody ? (this._currentVelocity = orbitalVelocity.add(this._primaryBody.currentVelocity)) : orbitalVelocity;
-
-    
+      this._primaryBody instanceof OrbitingBody
+        ? (this._currentVelocity = orbitalVelocity.add(
+            this._primaryBody.currentVelocity
+          ))
+        : orbitalVelocity;
   };
 
   // // Remove

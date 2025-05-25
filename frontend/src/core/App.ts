@@ -1,8 +1,30 @@
-import { Scene, WebGLRenderer, PerspectiveCamera, Clock, Vector3, Vector2, GridHelper, AxesHelper, Object3D, EquirectangularReflectionMapping } from "three";
-import { OrbitControls, CSS2DRenderer, CSS2DObject } from "three/examples/jsm/Addons.js";
+import {
+  Scene,
+  WebGLRenderer,
+  PerspectiveCamera,
+  Clock,
+  Vector3,
+  Vector2,
+  GridHelper,
+  AxesHelper,
+  Object3D,
+  EquirectangularReflectionMapping,
+} from "three";
+import {
+  OrbitControls,
+  CSS2DRenderer,
+  CSS2DObject,
+} from "three/examples/jsm/Addons.js";
 import { TIME_SCALE, SCALE, CelestialBodyDistance } from "../utils/constants";
 import DataService from "../services/DataService";
-import { SolarSystem, CelestialBody, OrbitingBody, Star, Planet, Moon } from "../models";
+import {
+  SolarSystem,
+  CelestialBody,
+  OrbitingBody,
+  Star,
+  Planet,
+  Moon,
+} from "../models";
 interface CameraParameters {
   fov: number;
   aspectRatio: number;
@@ -23,49 +45,43 @@ interface OrbitControlsParameters {
   enableDamping: boolean;
 }
 export default class App {
-  // Core ThreeJS application variables
+  // Replace with a DataManager!!
   private _data: DataService = new DataService();
+
+  // Core threejs variables
   private _scene!: Scene;
   private _camera!: PerspectiveCamera;
   private _renderer!: WebGLRenderer;
   private _labelRenderer!: CSS2DRenderer;
   private _controls!: OrbitControls;
 
+  // Lerp destination
   private _lerpDestination?: Vector3;
 
+  // Variables for focused body
   private _focusedCelestialBody?: CelestialBody;
   private _focusedBodyInformation!: CSS2DObject;
-  private _focusedBodyVelocityElement!: HTMLSpanElement;
-  private _focusedBodyDistanceElement!: HTMLSpanElement;
+  // private _focusedBodyVelocityElement!: HTMLSpanElement;
+  // private _focusedBodyDistanceElement!: HTMLSpanElement;
+
+  // Do i need this?
   private cameraParameters: CameraParameters = {
     fov: 75,
     aspectRatio: window.innerWidth / window.innerHeight,
     near: 0.00001,
     far: Number.MAX_SAFE_INTEGER,
   };
-  constructor(initialisedHelpers: boolean = true, cameraParameters?: CameraParameters) {
-    this.cameraParameters = cameraParameters ? cameraParameters : this.cameraParameters;
+  constructor(
+    initialisedHelpers: boolean = true,
+    cameraParameters?: CameraParameters
+  ) {
+    this.cameraParameters = cameraParameters
+      ? cameraParameters
+      : this.cameraParameters;
     this.initialise(initialisedHelpers);
-    this.initialiseFocusedBodyCSS();
-    new DataLoader().fetchPhysicalParameters(["Earth", "Mars"]).then((data) => console.log(data));
+    // this.initialiseFocusedBodyCSS();
   }
 
-  get data() {
-    return this._data;
-  }
-
-  private initialiseFocusedBodyCSS = () => {
-    const containerElement = document.createElement("div");
-    containerElement.className = `orbital-information orbital-information--hidden`;
-    this._focusedBodyVelocityElement = document.createElement("span");
-    this._focusedBodyDistanceElement = document.createElement("span");
-    containerElement.append(this._focusedBodyVelocityElement, this._focusedBodyDistanceElement);
-    this._focusedBodyInformation = new CSS2DObject(containerElement);
-    // this._app.scene.add(new CSS2DObject(containerElement));
-    // this._renderer.domElement.append(containerElement);
-    document.body.append(containerElement);
-    // this.scene.add(this._focusedBodyInformation);
-  };
   // ====== INITIALISATION-START ======
   private initialise = (initialisedHelpers: boolean): void => {
     this._scene = new Scene();
@@ -90,7 +106,11 @@ export default class App {
       document.body.appendChild(this.labelRenderer.domElement);
     };
     const initialiseOrbitControls = (): void => {
-      this._controls = new OrbitControls(this.camera, this._renderer.domElement);
+      this._controls = new OrbitControls(
+        this.camera,
+        this._renderer.domElement
+      );
+      this._controls.enablePan = false;
       this.controls.dampingFactor = 0.04;
       this.controls.enableDamping = true;
       this.controls.update();
@@ -105,7 +125,9 @@ export default class App {
       // this.scene.add(axes);
     };
     const initialiseHDRI = async (): Promise<void> => {
-      const hdri = await assetManager().loadHDRI("./static/src/assets/HDR_multi_nebulae.hdr");
+      const hdri = await assetManager().loadHDRI(
+        "./static/src/assets/HDR_multi_nebulae.hdr"
+      );
       if (hdri) hdri.mapping = EquirectangularReflectionMapping;
       this._scene.environment = hdri;
       this._scene.background = hdri;
@@ -142,6 +164,8 @@ export default class App {
     let currentTime = performance.now() / 1000;
     let hasHandledSolarSystemLoad = false;
     const animate = () => {
+      // If loading Showing loading screen (initial or spinner and halt animation/simulation)
+      // Else animate
       requestAnimationFrame(animate);
 
       if (!this._data.hasFinishedLoading()) {
@@ -154,8 +178,15 @@ export default class App {
           uiManager().hideLoadScreen();
           // uiManager().hideSpinner();
         }
-        if (this._focusedCelestialBody && this._data._focusedPlanetsMoons && !this.hasHandledFocusedBodyMoonLoad) {
-          this._focusedCelestialBody.initialiseSecondaryBodies(undefined, this._data._focusedPlanetsMoons);
+        if (
+          this._focusedCelestialBody &&
+          this._data._focusedPlanetsMoons &&
+          !this.hasHandledFocusedBodyMoonLoad
+        ) {
+          this._focusedCelestialBody.initialiseSecondaryBodies(
+            undefined,
+            this._data._focusedPlanetsMoons
+          );
           this._data._focusedPlanetsMoons = undefined;
           this.hasHandledFocusedBodyMoonLoad = true;
         }
@@ -166,7 +197,6 @@ export default class App {
         currentTime = newTime;
         accumulator += frameTime;
         deltaTime += clock.getDelta();
-        // console.log(`${Math.floor(t / 86400)} days passed`);
         if (deltaTime >= FRAME_RATE) {
           while (accumulator >= TIME_STEP) {
             // console.log(t);
@@ -195,18 +225,25 @@ export default class App {
     if (!this._focusedCelestialBody) return;
     if (!this._lerpDestination) {
       if (this._focusedCelestialBody instanceof OrbitingBody) {
-        this._camera.position.add(this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt));
+        this._camera.position.add(
+          this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt)
+        );
       }
     } else {
       this.controls.disconnect();
       if (this._focusedCelestialBody instanceof OrbitingBody) {
-        // this.calculateLerpDestination();
-        this._lerpDestination.add(this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt));
-        this._camera.position.add(this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt));
+        this._lerpDestination.add(
+          this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt)
+        );
+        this._camera.position.add(
+          this._focusedCelestialBody.currentVelocity.clone().multiplyScalar(dt)
+        );
       }
-      this._camera.position.lerp(this._lerpDestination, 0.1);
-      // if (this.camera.position.distanceTo(this._lerpDestination) <= this._focusedCelestialBody.physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE) {
-      if (this.camera.position.distanceTo(this._lerpDestination) <= this._focusedCelestialBody.physicalParameters.MeanRadius * 0.01) {
+      this._camera.position.lerp(this._lerpDestination, 0.1); // Maybe use radius and Distance
+      if (
+        this.camera.position.distanceTo(this._lerpDestination) <=
+        this._focusedCelestialBody.physicalParameters.MeanRadius * 0.01
+      ) {
         this._lerpDestination = undefined;
         this.controls.connect(this._renderer.domElement);
       }
@@ -221,20 +258,22 @@ export default class App {
         .primaryBody!.position.clone()
         .sub(focused.position.clone())
         .normalize()
-        .multiplyScalar(focused.physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE);
+        .multiplyScalar(
+          focused.physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE
+        );
     } else {
-      lerpDestination = focused.position.clone().setZ(focused.position.clone().z + focused.physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE);
+      lerpDestination = focused.position
+        .clone()
+        .setZ(
+          focused.position.clone().z +
+            focused.physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE
+        );
     }
     this.lerpDestination = focused.position.clone().add(lerpDestination);
   };
+
+  // FIX
   set focusedCelestialBody(focusedCelestialBody: CelestialBody) {
-    // focusedOptions
-    // if focus == sun
-    // if focus == planet
-    // if focus == moon
-    // if focus == new planet from other planet
-    // if focus == primary planet from moon
-    // if focus == other planet from moon
     if (this._focusedCelestialBody == focusedCelestialBody) return;
     let shouldDestroy = false;
     let shouldLoad = this._focusedCelestialBody ? false : true;
@@ -250,8 +289,8 @@ export default class App {
         }
       } else if (focusedCelestialBody instanceof Planet) {
         if (this._focusedCelestialBody instanceof Star) {
-          shouldDestroy = true;
           // Remove current planets moons
+          shouldLoad = true;
         } else if (this._focusedCelestialBody instanceof Planet) {
           shouldDestroy = true;
           shouldLoad = true;
@@ -276,17 +315,25 @@ export default class App {
       console.log("Destroying");
       if (this._focusedCelestialBody) {
         if (this._focusedCelestialBody.secondaryBodies) {
+          console.log(this._focusedCelestialBody.secondaryBodies);
           this._focusedCelestialBody.destroySecondaries();
-        } else {
-          this._focusedCelestialBody.primaryBody?.destroySecondaries();
         }
       }
     }
     if (shouldLoad) {
-      const secondaryBodyNames = focusedCelestialBody.secondaryBodyParameters?.map((secondaryBodyParameter) => secondaryBodyParameter.MetaData.EnglishName);
+      const secondaryBodyNames =
+        focusedCelestialBody.secondaryBodyParameters?.map(
+          (secondaryBodyParameter) =>
+            secondaryBodyParameter.MetaData.EnglishName
+        );
       if (secondaryBodyNames) {
-        this._data.fetchFocusedPlanetsMoonData(focusedCelestialBody.metadata.EnglishName, secondaryBodyNames);
-        console.log(`Loading ${secondaryBodyNames.length} moons for ${focusedCelestialBody.metadata.EnglishName}`);
+        this._data.fetchFocusedPlanetsMoonData(
+          focusedCelestialBody.metadata.EnglishName,
+          secondaryBodyNames
+        );
+        console.log(
+          `Loading ${secondaryBodyNames.length} moons for ${focusedCelestialBody.metadata.EnglishName}`
+        );
       }
     }
     // if (focusedCelestialBody.primaryBody) {
@@ -301,10 +348,22 @@ export default class App {
     // }
     this.hasHandledFocusedBodyMoonLoad = false;
     this._data
-      .getCelestialBodyExtract(this._focusedCelestialBody.metadata.EnglishName, this._focusedCelestialBody.metadata.BodyType)
-      .then((value) => uiManager().updateBodyInformation(value.extract));
+      .getCelestialBodyExtract(
+        this._focusedCelestialBody.metadata.EnglishName,
+        this._focusedCelestialBody.metadata.BodyType
+      )
+      .then((value) =>
+        uiManager().updateBodyInformation(
+          this._focusedCelestialBody!,
+          value.extract
+        )
+      );
     this.calculateLerpDestination();
     // this.hideFocusedInformation();
+  }
+
+  get focusedCelestialBody(): CelestialBody | undefined {
+    return this._focusedCelestialBody;
   }
   get scene(): Scene {
     return this._scene;
@@ -321,12 +380,26 @@ export default class App {
   get labelRenderer(): CSS2DRenderer {
     return this._labelRenderer;
   }
+  get data() {
+    return this._data;
+  }
   private resize = () => {
     this._camera.aspect = window.innerWidth / window.innerHeight;
     this._camera.updateProjectionMatrix();
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     this._labelRenderer.setSize(window.innerWidth, window.innerHeight);
   };
+
+  // Maybe don't need
+  // private initialiseFocusedBodyCSS = () => {
+  //   const containerElement = document.createElement("div");
+  //   containerElement.className = `orbital-information orbital-information--hidden`;
+  //   this._focusedBodyVelocityElement = document.createElement("span");
+  //   this._focusedBodyDistanceElement = document.createElement("span");
+  //   containerElement.append(this._focusedBodyVelocityElement, this._focusedBodyDistanceElement);
+  //   this._focusedBodyInformation = new CSS2DObject(containerElement);
+  //   document.body.append(containerElement);
+  // };
 
   // // FIgure this out
   // private showFocusedInformation = () => {

@@ -5,6 +5,7 @@ let assetManagerInstance: AssetLoadingManager | null = null;
 let uiManagerInstance: UIManager | null = null;
 let dataManagerInstance: DataManager | null = null;
 
+
 export const dataManager = (): DataManager => {
   if (!dataManagerInstance) dataManagerInstance = new DataManager();
   return dataManagerInstance;

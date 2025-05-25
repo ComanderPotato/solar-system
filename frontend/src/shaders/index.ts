@@ -1,2 +1,2 @@
 export { getRingMat } from "./ringMat";
-export { getFresnelMat } from "./fresnelMat"
+export { getAtmosphericGlowMat as getFresnelMat } from "./fresnelMat"

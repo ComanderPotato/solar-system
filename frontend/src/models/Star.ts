@@ -97,6 +97,7 @@ export default class Star extends CelestialBody<StarParameters> implements IMesh
     this._celestialBodyMaterial = new MeshPhongMaterial({
       map: this.loader.load(this._textures.Map),
     });
+    
     this.celestialBodyMaterial.specularMap = this._textures.Specular ? this.loader.load(this._textures.Specular) : null;
     // this._celestialBodyMaterial.bumpMap =  this._textures.Bump ? this._loader.load(this._textures.Bump) : null
     // this._celestialBodyMaterial.displacementMap = this._textures.Bump ? this._loader.load(this._textures.Bump) : null
@@ -117,6 +118,7 @@ export default class Star extends CelestialBody<StarParameters> implements IMesh
     }
     return this._geometryCache[detail];
   }
+  
   public updateDetail = (): void => {
     // Add cooldown .. or add caching
     const distance = app().camera.position.distanceTo(this._position);

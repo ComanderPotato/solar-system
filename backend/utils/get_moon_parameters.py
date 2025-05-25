@@ -60,8 +60,12 @@ def get_moon_parameters(planet_name: str, moon_list: list[str]):
                 continue
 
             for moon in list(unresolved_moons):
-                body_code = find_naif_code(ephemeris.comments(), moon)
-                # moon_key = moon.replace(" ", "_")
+                # body_code = find_naif_code(ephemeris.comments(), moon)
+                try:
+                    body_code = ephemeris.decode(moon)
+                except:
+                    body_code = find_naif_code(ephemeris.comments(), moon)
+                    
                 if body_code == None: continue
                 try:
                     observation = PLANET_BARYCENTER.at(CURRENT_TIME_SCALE).observe(ephemeris[body_code])

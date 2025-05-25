@@ -13,12 +13,23 @@ import {
   ShaderMaterial,
 } from "three";
 import IMeshProvider from "../interfaces/IMeshProvider";
-import { PlanetParameters, PlanetPhysicalParameters, TextureParameters } from "../types";
-import { CelestialBodyDetail, CelestialBodyDistance, SCALE } from "../utils/constants";
+import {
+  PlanetParameters,
+  PlanetPhysicalParameters,
+  TextureParameters,
+} from "../types";
+import {
+  CelestialBodyDetail,
+  CelestialBodyDistance,
+  SCALE,
+} from "../utils/constants";
 import { CelestialBody, OrbitingBody } from ".";
 import { app, assetManager } from "../core";
 import { getFresnelMat, getRingMat } from "../shaders";
-export default class Planet extends OrbitingBody<PlanetParameters> implements IMeshProvider {
+export default class Planet
+  extends OrbitingBody<PlanetParameters>
+  implements IMeshProvider
+{
   private _loader: TextureLoader = new TextureLoader();
   private _celestialBodyGeometry!: BufferGeometry;
   private _celestialBodyMaterial!: MeshPhongMaterial;
@@ -31,7 +42,11 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
   private _cloudMesh?: Mesh;
 
   constructor(planetParameters: PlanetParameters, primaryBody: CelestialBody) {
-    super(planetParameters, primaryBody, planetParameters.SecondaryBodyParameters);
+    super(
+      planetParameters,
+      primaryBody,
+      planetParameters.SecondaryBodyParameters
+    );
     this._textures = planetParameters.Texture;
     this.initialiseBaseMesh();
     this.addGlowMesh();
@@ -99,7 +114,9 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
     // this._orbitGroup.position.add(newVelocity)
     this._position = this._celestialBodyGroup.position;
     if (this._secondaryBodies) {
-      this._secondaryBodies.forEach((secondaryBody) => secondaryBody.updatePosition(dt));
+      this._secondaryBodies.forEach((secondaryBody) =>
+        secondaryBody.updatePosition(dt)
+      );
     }
     this.updateDetail();
   };
@@ -107,7 +124,8 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
   // MeshProvider interface functions
   public rotateOnAxis = (dt: number): void => {
     if (!this._celestialBodyMesh) return;
-    const rotationSpeed = (2 * Math.PI) / this._physicalParameters.SideralRotation;
+    const rotationSpeed =
+      (2 * Math.PI) / this._physicalParameters.SideralRotation;
     // const rotationSpeed = (2 * Math.PI) / (this.celestialBodyParameters.RotationPeriod * TIME_SCALE);
     const deltaRotation = rotationSpeed * dt;
     const y = new Vector3(0, 1, 0);
@@ -128,7 +146,10 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
     // }
   };
   public initialiseOrbitalPlane = (): void => {
-    this._celestialBodyGroup.rotateOnAxis(new Vector3(-1, 0, 0), this._physicalParameters.AxialTilt);
+    this._celestialBodyGroup.rotateOnAxis(
+      new Vector3(-1, 0, 0),
+      this._physicalParameters.AxialTilt
+    );
   };
   // public initialiseOrbit = (): void => {
   //   // const { x, y, z } = this._orbitingBodyParameters.Position;
@@ -146,18 +167,30 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
   //   this._currentVelocity = this._currentVelocity.applyQuaternion(this._celestialBodyGroup.quaternion);
   // };
   public initialiseBaseMesh = async (): Promise<void> => {
-    this._celestialBodyGeometry = new IcosahedronGeometry(this._physicalParameters.MeanRadius, this._meshDetail);
+    this._celestialBodyGeometry = new IcosahedronGeometry(
+      this._physicalParameters.MeanRadius,
+      this._meshDetail
+    );
     this._celestialBodyMaterial = new MeshPhongMaterial({
       // map: this.loader.load(this._textures.Map),
       map: await assetManager().loadTexure(this._textures.Map),
     });
-    this.celestialBodyMaterial.specularMap = await assetManager().loadTexure(this._textures.Specular);
-    this._celestialBodyMesh = new Mesh(this._celestialBodyGeometry, this._celestialBodyMaterial);
+    this.celestialBodyMaterial.specularMap = await assetManager().loadTexure(
+      this._textures.Specular
+    );
+    this._celestialBodyMesh = new Mesh(
+      this._celestialBodyGeometry,
+      this._celestialBodyMaterial
+    );
     this._celestialBodyGroup.add(this._celestialBodyMesh);
   };
   private initialiseTextures = async (): Promise<void> => {
-    (this.celestialBodyMaterial.map = await assetManager().loadTexure(this._textures.Map)),
-      (this.celestialBodyMaterial.specularMap = await assetManager().loadTexure(this._textures.Specular));
+    (this.celestialBodyMaterial.map = await assetManager().loadTexure(
+      this._textures.Map
+    )),
+      (this.celestialBodyMaterial.specularMap = await assetManager().loadTexure(
+        this._textures.Specular
+      ));
   };
   public addGlowMesh = (): void => {
     this._glowMesh = new Mesh(this._celestialBodyGeometry, getFresnelMat());
@@ -189,10 +222,14 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
   };
 
   // Test
-  private _geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>> = {};
+  private _geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>> =
+    {};
   private getGeometryForDetail(detail: CelestialBodyDetail) {
     if (!this._geometryCache[detail]) {
-      this._geometryCache[detail] = new IcosahedronGeometry(this._physicalParameters.MeanRadius, detail);
+      this._geometryCache[detail] = new IcosahedronGeometry(
+        this._physicalParameters.MeanRadius,
+        detail
+      );
     }
     return this._geometryCache[detail];
   }
@@ -212,6 +249,12 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
       this._meshDetail = CelestialBodyDetail.NONE;
     }
     if (oldDetail != this._meshDetail) {
+      // if (app().focusedCelestialBody == this) {
+      this._container.visible = this._meshDetail < CelestialBodyDetail.LOW;
+      const orbitLine = this._primaryBody.orbits.get(this.metadata.EnglishName);
+      if (orbitLine)
+        orbitLine.visible = this._meshDetail < CelestialBodyDetail.LOW;
+      // }
       this._celestialBodyMesh.visible = Boolean(this._meshDetail);
       if (this._meshDetail == CelestialBodyDetail.NONE) return;
       const baseGeometry = this.getGeometryForDetail(this._meshDetail);

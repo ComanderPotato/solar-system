@@ -63,5 +63,4 @@ export interface OrbitalElements {
   SemiMinorAxis: number; // Semi-minor axis in meters
   TrueAnomaly: number; // True anomaly in radians
   TrueLongitude: number; // True longitude in radians
-  ParentBody: string;
 }

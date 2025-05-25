@@ -1,18 +1,18 @@
 import { AdditiveBlending, Color, DoubleSide, ShaderMaterial } from "three";
-let fresnelInstance: ShaderMaterial | null = null
-export const getFresnelMat = ( rimHex: number = 0x0088ff, facingHex: number = 0x000000): ShaderMaterial => {
-  if(fresnelInstance) return fresnelInstance
+let atmosphericGlowInstance: ShaderMaterial | null = null
+export const getAtmosphericGlowMat = ( rimHex: number = 0x0088ff, facingHex: number = 0x000000): ShaderMaterial => {
+  if(atmosphericGlowInstance) return atmosphericGlowInstance
   const uniforms = {
     color1: { value: new Color(rimHex) },
     color2: { value: new Color(facingHex) },
-    fresnelBias: { value: 0.1 },
-    fresnelScale: { value: 1.0 },
-    fresnelPower: { value: 4.0 },
+    atmostSphericGlowBias: { value: 0.1 },
+    atmostSphericGlowScale: { value: 1.0 },
+    atmostSphericGlowPower: { value: 4.0 },
   };
   const vertexShader = `
-    uniform float fresnelBias;
-    uniform float fresnelScale;
-    uniform float fresnelPower;
+    uniform float atmostSphericGlowBias;
+    uniform float atmostSphericGlowScale;
+    uniform float atmostSphericGlowPower;
     
     varying float vReflectionFactor;
     
@@ -24,7 +24,7 @@ export const getFresnelMat = ( rimHex: number = 0x0088ff, facingHex: number = 0x
     
       vec3 I = worldPosition.xyz - cameraPosition;
     
-      vReflectionFactor = fresnelBias + fresnelScale * pow( 1.0 + dot( normalize( I ), worldNormal ), fresnelPower );
+      vReflectionFactor = atmostSphericGlowBias + atmostSphericGlowScale * pow( 1.0 + dot( normalize( I ), worldNormal ), atmostSphericGlowPower );
     
       gl_Position = projectionMatrix * mvPosition;
     }
@@ -40,7 +40,7 @@ export const getFresnelMat = ( rimHex: number = 0x0088ff, facingHex: number = 0x
       gl_FragColor = vec4(mix(color2, color1, vec3(f)), f);
     }
     `;
-  fresnelInstance = new ShaderMaterial({
+  atmosphericGlowInstance = new ShaderMaterial({
     uniforms: uniforms,
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,
@@ -49,5 +49,5 @@ export const getFresnelMat = ( rimHex: number = 0x0088ff, facingHex: number = 0x
     // side: DoubleSide maybe add?
     // wireframe: true,
   });
-  return fresnelInstance;
+  return atmosphericGlowInstance;
 }

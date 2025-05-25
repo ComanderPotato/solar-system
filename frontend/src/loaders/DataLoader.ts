@@ -1,51 +1,72 @@
-import { PlanetNames, SecondaryOrbitalElements } from "../types";
-
-interface WikiSummary {
+import { BodyTypes, OrbitalElementsResponse, PlanetNames } from "../types";
+export interface PhysicalParametersResponse {
+  id: string;
+  name: string;
+  englishName: PlanetNames;
+  mass?: {
+    massValue: number;
+    massExponent: number;
+  };
+  vol?: {
+    volValue: number;
+    volExponent: number;
+  };
+  aroundPlanet: {
+    planet: string;
+  };
+  moons: [
+    {
+      moon: string;
+    }
+  ];
+  density: number;
+  gravity: number;
+  escape: number;
+  meanRadius: number;
+  equaRadius: number;
+  polarRadius: number;
+  flattening: number;
+  axialTilt: number;
+  avgTemp: number;
+  sideralRotation: number;
+  bodyType: BodyTypes;
+}
+type FetchedSummary = {
   extract: string;
 }
+
+export type FetchedPhysicalParameters = {
+  [secondaryName: string]: PhysicalParametersResponse;
+};
+
+export type FetchedOrbitalParameters = {
+  [secondaryName: string]: OrbitalElementsResponse;
+};
 export default class DataLoader {
-  // private _initialData;
 
-  constructor() {}
-
-  public fetchPhysicalParameters = async (bodyNames: string[]) /* Check DataService for return type*/ => {
-    const response = await fetch(`/api/rest/tempphysical`, {
+  public fetchPhysicalParameters = async (bodyNames: string[]): Promise<FetchedPhysicalParameters> => {
+    const response = await fetch("/api/rest/physical", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ bodyNames: bodyNames }),
     });
     const data = await response.json();
-    // return ... Check DataService
     return data;
   };
-
-  public fetchMoonOrbitalParameters = async (
-    primaryName: string,
-    secondaryMoons: string[]
-  ): Promise<SecondaryOrbitalElements> /* Check DataService for return type*/ => {
-    const response = await fetch(`/api/rest/orbital`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ primaryName: primaryName, secondaryMoons: secondaryMoons }),
-    });
-    const data = await response.json();
-    // return ... Check DataService
-    return data;
-  };
-  public fetchPlanetaryData = async (primaryName: string, secondaryNames: string[]) /* Check DataService for return type*/ => {
-    // Can join fetchMoon and fetchPlanetary if refactor backend
+  public fetchOrbitalParameters = async (primaryName: string, secondaryNames: string[]): Promise<FetchedOrbitalParameters> /* Check DataService for return type*/ => {
     const response = await fetch("/api/rest/orbital", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ primaryName: primaryName, secondaryNames: secondaryNames }),
     });
     const data = await response.json();
-
-    // return ... Check DataService
+    return data
   };
-  public fetchSummary = async (planetName: string, bodyType: string): Promise<WikiSummary> => {
+
+  
+  public fetchSummary = async (planetName: string, bodyType: string): Promise<FetchedSummary> => {
     planetName = planetName.toLocaleLowerCase();
-    const response = await fetch("/api/rest/tempsummary", {
+    const response = await fetch("/api/rest/summary", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ planetName: planetName, bodyType: bodyType }),

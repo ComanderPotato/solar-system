@@ -17,61 +17,61 @@ body {
   overflow: hidden;
 }
 
-.icon-circle-earth {
+.icon-circle--earth {
   background-position: -36px -195px;
   height: 20px;
   width: 20px;
 }
 
-.icon-circle-jupiter {
+.icon-circle--jupiter {
   background-position: -72px -195px;
   height: 20px;
   width: 20px;
 }
 
-.icon-circle-mars {
+.icon-circle--mars {
   background-position: -108px -195px;
   height: 20px;
   width: 20px;
 }
 
-.icon-circle-mercury {
+.icon-circle--mercury {
   background-position: -144px -195px;
   height: 20px;
   width: 20px;
 }
 
-.icon-circle-neptune {
+.icon-circle--neptune {
   background-position: -180px -195px;
   height: 20px;
   width: 20px;
 }
 
-.icon-circle-saturn {
+.icon-circle--saturn {
   background-position: -216px -195px;
   height: 20px;
   width: 20px;
 }
 
-.icon-circle-sun {
+.icon-circle--sun {
   background-position: -252px -195px;
   height: 20px;
   width: 20px;
 }
 
-.icon-circle-uranus {
+.icon-circle--uranus {
   background-position: -288px -195px;
   height: 20px;
   width: 20px;
 }
 
-.icon-circle-venus {
+.icon-circle--venus {
   background-position: -324px -195px;
   height: 20px;
   width: 20px;
 }
 
-.icon-circle-white {
+.icon-circle--white {
   background-position: -360px -195px;
   height: 20px;
   width: 20px;
@@ -114,7 +114,7 @@ body {
 .hidden {
   display: none;
 }
-.pioneer-label-div {
+.celestial-body--label {
   --fontSize: 16px;
   --fontSizeLarge: 18px;
   --fontSizeSmall: 14px;
@@ -460,7 +460,8 @@ result-container .loading-bar {
   -webkit-animation: fadeInDelayed 0.8s linear;
   animation: fadeInDelayed 0.8s linear;
   opacity: 0;
-  transition: opacity 0.5s var(--ease-out-bezier), visibility 0.5s var(--ease-out-bezier);
+  transition: opacity 0.5s var(--ease-out-bezier),
+    visibility 0.5s var(--ease-out-bezier);
   visibility: hidden;
 }
 
@@ -632,7 +633,8 @@ result-container .loading-bar {
   transition-duration: 0.5s;
   transition-property: opacity, visibility, -webkit-backdrop-filter;
   transition-property: backdrop-filter, opacity, visibility;
-  transition-property: backdrop-filter, opacity, visibility, -webkit-backdrop-filter;
+  transition-property: backdrop-filter, opacity, visibility,
+    -webkit-backdrop-filter;
   transition-timing-function: var(--ease-out-bezier);
   visibility: hidden;
   z-index: 2;

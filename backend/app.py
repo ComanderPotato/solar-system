@@ -3,9 +3,10 @@ import json
 import requests
 from flask import Flask, render_template, send_file, request, jsonify
 from backend.utils.constants import PLANET_NATURAL_SATELLITE_DICT, PLANETS_LIST
-from backend.utils.load_moon_data_async import load_moon_data_async
+from backend.utils.load_moon_data_async import load_moon_data_async 
 from backend.utils.get_planet_parameters import get_planet_parameters
 from backend.utils.get_moon_parameters import get_moon_parameters as g
+from backend.utils.get_orbital_parameters import get_orbitals
 import urllib.parse
 app = Flask(__name__)
 
@@ -84,15 +85,17 @@ def summary():
 
 @app.route('/get_parameters', methods=['GET'])
 def get():
-    load_moon_data_async()
+    # load_moon_data_async()
+    # return get_orbital_parameters_temp("sun", ["earth", "pluto", "uranus", "mars", "jupiter", "venus", "mercury", "neptune"])
     return get_planet_parameters()
+    # return get_orbital_parameters_temp("sun", ["Earth", "Mars", "Jupiter", "Saturn", "Mercury", "Uranus", "Pluto", "Venus", "Neptune"])
 
 @app.route('/get_moon_parameters', methods=['POST'])
 def get_moon_parameters():
     data = request.get_json()
     planet_name = data.get('planetName')
     moons = data.get('moons')
-    return g(planet_name, moons)
+    return jsonify(get_orbitals(planet_name, moons))
 
 
 
@@ -103,6 +106,15 @@ if __name__ == '__main__':
 
 
 
+@app.route("/api/rest/orbital", methods=["POST"])
+def orbital():
+    data = request.get_json()
+    primary_name = data.get("primaryName")
+    secondary_names = data.get("secondaryNames")
+    if not primary_name or not secondary_names:
+        return jsonify({"error": "No primaryName or secondaryNames provided"}), 400
+    
+    return jsonify(get_orbitals(primary_name, secondary_names))
 
 @app.route("/api/rest/tempsummary", methods=["POST"])
 def tempsummary():

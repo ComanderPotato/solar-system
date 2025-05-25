@@ -104,7 +104,8 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
   protected initialiseCSS = (): void => {
     const containerElement = document.createElement("div");
     containerElement.style.pointerEvents = "auto";
-    containerElement.className = `pioneer-label-div ${this._metadata.BodyType.toLowerCase()} clickable selection`;
+    // containerElement.className = `pioneer-label-div ${this._metadata.BodyType.toLowerCase()} clickable selection`;
+    containerElement.className = `celestial-body--label ${this._metadata.BodyType.toLowerCase()} clickable selection`;
     containerElement.append(this.initialiseIcon(), this.initialiseLabel());
 
     // Hold reference to delete later ... or add to this._container.element
@@ -139,7 +140,7 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
   protected initialiseIcon = (): HTMLSpanElement => {
     const iconElement = document.createElement("span");
     const suffix = this instanceof Moon ? "white" : this._metadata.EnglishName.toLowerCase();
-    iconElement.className = `icon icon-circle-${suffix}`;
+    iconElement.className = `icon icon-circle--${suffix}`;
     return iconElement;
   };
   protected addSecondaryOrbit = (): void => {};

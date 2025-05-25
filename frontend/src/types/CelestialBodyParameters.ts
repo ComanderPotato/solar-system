@@ -18,6 +18,7 @@ export interface BaseCelestialBodyParameters {
   MetaData: CelestialMetadata;
   Physical: PhysicalParameters;
   SecondaryBodyParameters?: OrbitingBodyParameters[];
+  // SecondaryBodyParameters?: string[]; // Change if need be
 }
 // Maybe pass physical into individual parameters
 export interface StarParameters extends BaseCelestialBodyParameters {

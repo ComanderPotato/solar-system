@@ -95,7 +95,6 @@ export default class DataService {
       ...orbitalParameters,
       Position: new Vector3(...orbitalParameters.Position).multiplyScalar(SCALE),
       Velocity: new Vector3(...orbitalParameters.Velocity).multiplyScalar(SCALE),
-      ParentBody: String(),
     };
   };
   private handleOrbitalData = async () => {
@@ -158,7 +157,6 @@ export default class DataService {
           Physical: this.processPhysicalData(parameters, bodyType),
           Orbital: {
             ...orbitalParameters,
-            ParentBody: parentBody,
           },
           SecondaryBodyParameters: secondaryBodies,
           Texture: this._textureData[parameters.englishName],
