@@ -16,7 +16,7 @@ import {
 import { CelestialBody, OrbitingBody } from ".";
 import { CelestialBodyDetail, CelestialBodyDistance } from "../utils/constants";
 import { getFresnelMat } from "../shaders";
-import { app, assetManager } from "../core";
+import { app, dataManager } from "../core";
 export default class Moon
   extends OrbitingBody<MoonParameters>
   implements IMeshProvider
@@ -144,11 +144,10 @@ export default class Moon
       this._meshDetail
     );
     this._celestialBodyMaterial = new MeshPhongMaterial({
-      map: await assetManager().loadTexure(this._textures.Map),
+      map: await dataManager().getTexture(this._textures.Map),
     });
-    this.celestialBodyMaterial.specularMap = await assetManager().loadTexure(
-      this._textures.Specular
-    );
+    this.celestialBodyMaterial.specularMap =
+      await dataManager().getTexture(this._textures.Specular);
     this._celestialBodyMesh = new Mesh(
       this._celestialBodyGeometry,
       this._celestialBodyMaterial
@@ -188,10 +187,10 @@ export default class Moon
     }
     if (oldDetail != this._meshDetail) {
       // if (app().focusedCelestialBody == this) {
-      this._container.visible = this._meshDetail < CelestialBodyDetail.LOW;
+      this._container.visible = this._meshDetail <= CelestialBodyDetail.MEDIUM;
       const orbitLine = this._primaryBody.orbits.get(this.metadata.EnglishName);
       if (orbitLine)
-        orbitLine.visible = this._meshDetail < CelestialBodyDetail.LOW;
+        orbitLine.visible = this._meshDetail <= CelestialBodyDetail.MEDIUM;
       // }
       this._container.visible = this._meshDetail <= CelestialBodyDetail.MEDIUM;
       this._celestialBodyMesh.visible = Boolean(this._meshDetail);

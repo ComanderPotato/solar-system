@@ -1,6 +1,6 @@
 import json
 import os
-
+from pprint import pprint
 from .time import CURRENT_TIME, CURRENT_TIME_SCALE
 from .get_orbital_information import get_orbital_parameters
 from .constants import LOAD, PLANETS_LIST, INITIAL_EPHEMERIS
@@ -23,7 +23,6 @@ def get_orbitals(primary_name: str, secondary_names: list[str]):
             if os.path.exists(ephemeris_path):
                 ephemeris_files += [os.path.join(secondary_name, ephemeris_file) for ephemeris_file in os.listdir(ephemeris_path)]
 
-
     orbital_dict = {}
     t = CURRENT_TIME_SCALE
     for ephemeris_file in ephemeris_files:
@@ -36,7 +35,7 @@ def get_orbitals(primary_name: str, secondary_names: list[str]):
 
         if primary_code == None:
             continue
-        orbital_dict[primary_name] = get_orbital_parameters(ephemeris[primary_code].at(CURRENT_TIME_SCALE))
+        # orbital_dict[primary_name] = get_orbital_parameters(ephemeris[primary_code].at(CURRENT_TIME_SCALE))
         for secondary_name in list(unresolved_secondaries):
             try:
                 secondary_code = ephemeris.decode(secondary_name)
@@ -46,7 +45,11 @@ def get_orbitals(primary_name: str, secondary_names: list[str]):
             if secondary_code == None:
                 continue
             if secondary_code is not None:
-                orbital_dict[secondary_name] = get_orbital_parameters(ephemeris[primary_code].at(CURRENT_TIME_SCALE).observe(ephemeris[secondary_code]))
-                unresolved_secondaries.remove(secondary_name)
+                try:
+                    orbital_dict[secondary_name] = get_orbital_parameters(ephemeris[primary_code].at(CURRENT_TIME_SCALE).observe(ephemeris[secondary_code]))
+                    unresolved_secondaries.remove(secondary_name)
+                except Exception:
+                    # find_naif_code still buggy
+                    print(Exception)
     
     return orbital_dict

@@ -15,7 +15,7 @@ import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/examples/jsm/Addons.js";
-import { TIME_SCALE, SCALE, CelestialBodyDistance } from "../utils/constants";
+import { TIME_SCALE, CelestialBodyDistance } from "../utils/constants";
 import DataService from "../services/DataService";
 import {
   SolarSystem,
@@ -31,10 +31,7 @@ interface CameraParameters {
   near: number;
   far: number;
 }
-import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
-import { PMREMGenerator } from "three";
-import { assetManager, uiManager } from ".";
-import { DataLoader } from "../loaders";
+import { dataManager, uiManager, clock as balls } from ".";
 
 interface GridParameters {
   size: number;
@@ -61,9 +58,6 @@ export default class App {
   // Variables for focused body
   private _focusedCelestialBody?: CelestialBody;
   private _focusedBodyInformation!: CSS2DObject;
-  // private _focusedBodyVelocityElement!: HTMLSpanElement;
-  // private _focusedBodyDistanceElement!: HTMLSpanElement;
-
   // Do i need this?
   private cameraParameters: CameraParameters = {
     fov: 75,
@@ -80,6 +74,12 @@ export default class App {
       : this.cameraParameters;
     this.initialise(initialisedHelpers);
     // this.initialiseFocusedBodyCSS();
+    dataManager()
+      .onLoad()
+      .then(() => {
+        console.log(dataManager().fetchedOrbitalParameters);
+        console.log(dataManager().fetchedPhysicalParameters);
+      });
   }
 
   // ====== INITIALISATION-START ======
@@ -111,10 +111,10 @@ export default class App {
         this._renderer.domElement
       );
       this._controls.enablePan = false;
-      this.controls.dampingFactor = 0.04;
-      this.controls.enableDamping = true;
-      this.controls.update();
-      this.controls.target.set(0, 0, 0);
+      this._controls.dampingFactor = 0.4;
+      this._controls.enableDamping = true;
+      this._controls.update();
+      this._controls.target.set(0, 0, 0);
     };
     const initialiseHelpers = (): void => {
       // const axes = new AxesHelper(10);
@@ -124,13 +124,17 @@ export default class App {
       // this.scene.add(gridHelper);
       // this.scene.add(axes);
     };
-    const initialiseHDRI = async (): Promise<void> => {
-      const hdri = await assetManager().loadHDRI(
-        "./static/src/assets/HDR_multi_nebulae.hdr"
-      );
-      if (hdri) hdri.mapping = EquirectangularReflectionMapping;
-      this._scene.environment = hdri;
-      this._scene.background = hdri;
+    const initialiseHDRI = (): void => {
+      dataManager()
+        .getHDRI("./static/src/assets/HDR_multi_nebulae.hdr")
+        .then((hdri) => {
+          if (hdri) hdri.mapping = EquirectangularReflectionMapping;
+          this._scene.environment = hdri;
+          this._scene.background = hdri;
+        });
+      // if (hdri) hdri.mapping = EquirectangularReflectionMapping;
+      // this._scene.environment = hdri;
+      // this._scene.background = hdri;
     };
     initialiseHelpers();
     initialiseCamera();
@@ -150,9 +154,10 @@ export default class App {
   // ====== RENDER LOOP-START ======
   private hasHandledFocusedBodyMoonLoad = false;
 
+  // Need to fix/refactor render
   public render = (): void => {
     const solarSystem = new SolarSystem();
-    const clock = new Clock();
+    const currentClock = new Clock();
     const fps = 24;
     const FRAME_RATE = 1 / fps;
     // In game time
@@ -163,6 +168,9 @@ export default class App {
     let accumulator = 0.0;
     let currentTime = performance.now() / 1000;
     let hasHandledSolarSystemLoad = false;
+    balls().timeScale = TIME_SCALE;
+    const time = document.querySelector(".time") as HTMLElement;
+    const date = document.querySelector(".date") as HTMLElement;
     const animate = () => {
       // If loading Showing loading screen (initial or spinner and halt animation/simulation)
       // Else animate
@@ -196,12 +204,17 @@ export default class App {
         if (frameTime >= FRAME_RATE) frameTime = FRAME_RATE;
         currentTime = newTime;
         accumulator += frameTime;
-        deltaTime += clock.getDelta();
+        deltaTime += currentClock.getDelta();
         if (deltaTime >= FRAME_RATE) {
           while (accumulator >= TIME_STEP) {
             // console.log(t);
+            balls().update();
+            // time.textContent = balls().formattedTime();
+            // date.textContent = balls().formattedDate();
+            // console.log(balls().simulatedDate);
             this.moveCameraWithFocused(SCALED_TIME_STEP);
             solarSystem.simulate(SCALED_TIME_STEP);
+
             t += SCALED_TIME_STEP;
             accumulator -= TIME_STEP;
           }
@@ -312,7 +325,6 @@ export default class App {
       }
     }
     if (shouldDestroy) {
-      console.log("Destroying");
       if (this._focusedCelestialBody) {
         if (this._focusedCelestialBody.secondaryBodies) {
           console.log(this._focusedCelestialBody.secondaryBodies);
@@ -348,14 +360,14 @@ export default class App {
     // }
     this.hasHandledFocusedBodyMoonLoad = false;
     this._data
-      .getCelestialBodyExtract(
+      .fetchCelestialBodyExtract(
         this._focusedCelestialBody.metadata.EnglishName,
         this._focusedCelestialBody.metadata.BodyType
       )
       .then((value) =>
         uiManager().updateBodyInformation(
           this._focusedCelestialBody!,
-          value.extract
+          value.summary
         )
       );
     this.calculateLerpDestination();

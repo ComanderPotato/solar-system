@@ -1,26 +1,33 @@
-import { DataManager, UIManager, AssetLoadingManager } from "../managers";
+import { DataManager, UIManager } from "../managers";
+import { Clock } from "../utils/Clock";
 import App from "./App";
 let appInstance: App | null = null;
-let assetManagerInstance: AssetLoadingManager | null = null;
+// let assetLoadingManagerInstance: AssetLoadingManager | null = null;
 let uiManagerInstance: UIManager | null = null;
 let dataManagerInstance: DataManager | null = null;
-
+let clockInstance: Clock | null = null
 
 export const dataManager = (): DataManager => {
   if (!dataManagerInstance) dataManagerInstance = new DataManager();
+
   return dataManagerInstance;
 };
-export const assetManager = (): AssetLoadingManager => {
-  if (!assetManagerInstance)
-    assetManagerInstance = new AssetLoadingManager(
-      (url, p) => {
-        // console.log(`Loaded ${url}`);
-      },
-      () => {}
-    );
+export const clock = (): Clock => {
+  if (!clockInstance) clockInstance = new Clock();
 
-  return assetManagerInstance;
+  return clockInstance;
 };
+// export const assetLoadingManager = (): AssetLoadingManager => {
+//   if (!assetLoadingManagerInstance)
+//     assetLoadingManagerInstance = new AssetLoadingManager(
+//       (url, p) => {
+//         // console.log(`Loaded ${url}`);
+//       },
+//       () => {}
+//     );
+
+//   return assetLoadingManagerInstance;
+// };
 export const uiManager = (): UIManager => {
   if (!uiManagerInstance) uiManagerInstance = new UIManager();
   return uiManagerInstance;

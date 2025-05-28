@@ -7,11 +7,11 @@ export const SECOND_TO_HOUR = 1 / HOUR_TO_SECOND;
 const DEGREE = Math.PI / 180;
 export const DEG_TO_RAD = DEGREE;
 export const RAD_TO_DEG = 1 / DEGREE;
-export const SCALE = 250 / AU_CONSTANT;
+export const SCALE = 500 / AU_CONSTANT;
 export const GRAVITATIONAL_CONSTANT = 6.6743e-11 * SCALE ** 2;
 
 // TIME_SCALE AT HIGH SPEEDS ISNT WORKING FOR MOONS BECAUSE IT IS USING CURRENT TIME RATHER THAN SCALED
-export const TIME_SCALE = 1;
+export const TIME_SCALE = 0;
 
 export enum CelestialBodyDetail {
   NONE = 0,

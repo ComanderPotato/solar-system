@@ -1,7 +1,7 @@
 export interface OptionalPhysicalParameters {
   LengthOfDay?: number;
   MeanTemperature?: number;
-  SurfacePressure?: number | null;
+  SurfacePressure?: number | null; // Atmospheric Pressure
   RingSystem?: boolean;
   InnerRingRadius?: number;
   OuterRingRadius?: number;

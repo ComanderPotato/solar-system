@@ -44,11 +44,11 @@ export interface OrbitalElements {
   Position: Vector3; // X, Y, Z position in meters
   DistanceFromPrimary: number; // Distance from the primary body (Earth) in meters
   Velocity: Vector3; // Velocity in m/s along X, Y, Z axes
-  ApoapsisDistance: number; // Apoapsis (farthest point) distance in meters
+  ApoapsisDistance: number; // Apoapsis (farthest point) distance in meters MAYBE CHANGE TO APSIS FOR WIKI
   ArgumentOfLatitude: number; // Argument of latitude in radians
   ArgumentOfPeriapsis: number; // Argument of periapsis in radians
   EccentricAnomaly: number; // Eccentric anomaly in radians
-  Eccentricity: number; // Orbit eccentricity (0 = circular, 1 = parabolic)
+  Eccentricity: number; // Orbit eccentricity (0 = circular, 1 = parabolic) // Doesnt work ORBITALECCENTRICTY
   Inclination: number; // Inclination angle in radians
   LongitudeOfAscendingNode: number; // Longitude of ascending node in radians
   LongitudeOfPeriapsis: number; // Longitude of periapsis in radians

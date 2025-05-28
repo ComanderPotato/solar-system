@@ -10,7 +10,7 @@ export default class AssetLoader {
   //   private _modelLoader: ModelLoader;
   private _textureLoader: TextureLoader;
   private _hdriLoader: HDRILoader;
-  private _isLoaded: boolean = false;
+  private _hasLoaded: boolean = false;
   //   private onProgress: ProgressCallback;
   //   private onLoadComplete: LoadCompleteCallback;
   private _progress: number = 0;
@@ -37,21 +37,21 @@ export default class AssetLoader {
   get progress(): number {
     return this._progress;
   }
-  get isLoaded(): boolean {
-    return this._isLoaded;
+  get hasLoaded(): boolean {
+    return this._hasLoaded;
   }
   async loadTexure(url?: string): Promise<Texture | null> {
     if (!url) return null;
-    this._isLoaded = false;
+    this._hasLoaded = false;
     return await this._textureLoader.load(url);
   }
   async loadHDRI(url?: string): Promise<DataTexture | null> {
     if (!url) return null;
-    this._isLoaded = false;
+    this._hasLoaded = false;
     return await this._hdriLoader.load(url);
   }
   async loadAssets(): Promise<{ textures: Texture[]; hdris: Texture[] }> {
-    const modelUrls = ["/models/solarSystem.glb", "/models/moon.glb"];
+    // const modelUrls = ["/models/solarSystem.glb", "/models/moon.glb"];
     const textureUrls = ["/textures/earth_diffuse.jpg", "/textures/moon_diffuse.jpg"];
     const hdriUrls = ["/hdris/space.hdr"];
 

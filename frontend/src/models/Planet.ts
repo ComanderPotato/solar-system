@@ -11,6 +11,7 @@ import {
   DoubleSide,
   Vector3,
   ShaderMaterial,
+  ArrowHelper,
 } from "three";
 import IMeshProvider from "../interfaces/IMeshProvider";
 import {
@@ -24,7 +25,7 @@ import {
   SCALE,
 } from "../utils/constants";
 import { CelestialBody, OrbitingBody } from ".";
-import { app, assetManager } from "../core";
+import { app, dataManager } from "../core";
 import { getFresnelMat, getRingMat } from "../shaders";
 export default class Planet
   extends OrbitingBody<PlanetParameters>
@@ -97,8 +98,8 @@ export default class Planet
     const inner = this._physicalParameters.InnerRingRadius! * 1000 * SCALE;
     const outer = this._physicalParameters.OuterRingRadius! * 1000 * SCALE;
     const [ringTexture, alphaTexture] = await Promise.all([
-      assetManager().loadTexure(this._textures.Ring),
-      assetManager().loadTexure(this._textures.RingAlpha),
+      dataManager().getTexture(this._textures.Ring),
+      dataManager().getTexture(this._textures.RingAlpha),
     ]);
     const geometry = new RingGeometry(inner, outer, 64);
     geometry.rotateX(-Math.PI / 2);
@@ -146,7 +147,7 @@ export default class Planet
     // }
   };
   public initialiseOrbitalPlane = (): void => {
-    this._celestialBodyGroup.rotateOnAxis(
+    this._celestialBodyGroup.rotateOnWorldAxis(
       new Vector3(-1, 0, 0),
       this._physicalParameters.AxialTilt
     );
@@ -167,15 +168,22 @@ export default class Planet
   //   this._currentVelocity = this._currentVelocity.applyQuaternion(this._celestialBodyGroup.quaternion);
   // };
   public initialiseBaseMesh = async (): Promise<void> => {
+    const arrowHelper = new ArrowHelper(
+      new Vector3(0, 1, 0),
+      new Vector3(0, 0, 0),
+      this._physicalParameters.MeanRadius * 1.5,
+      0x6b93d6
+    );
+    this._celestialBodyGroup.add(arrowHelper);
     this._celestialBodyGeometry = new IcosahedronGeometry(
       this._physicalParameters.MeanRadius,
       this._meshDetail
     );
     this._celestialBodyMaterial = new MeshPhongMaterial({
       // map: this.loader.load(this._textures.Map),
-      map: await assetManager().loadTexure(this._textures.Map),
+      map: await dataManager().getTexture(this._textures.Map),
     });
-    this.celestialBodyMaterial.specularMap = await assetManager().loadTexure(
+    this.celestialBodyMaterial.specularMap = await dataManager().getTexture(
       this._textures.Specular
     );
     this._celestialBodyMesh = new Mesh(
@@ -185,10 +193,12 @@ export default class Planet
     this._celestialBodyGroup.add(this._celestialBodyMesh);
   };
   private initialiseTextures = async (): Promise<void> => {
-    (this.celestialBodyMaterial.map = await assetManager().loadTexure(
+    // Promise.all(Object.values(this._textures))
+    
+    (this.celestialBodyMaterial.map = await dataManager().getTexture(
       this._textures.Map
     )),
-      (this.celestialBodyMaterial.specularMap = await assetManager().loadTexure(
+      (this.celestialBodyMaterial.specularMap = await dataManager().getTexture(
         this._textures.Specular
       ));
   };
@@ -200,7 +210,7 @@ export default class Planet
   public addLightingMesh = async (): Promise<void> => {
     if (!this.textures.Light) return;
     const lightMaterial = new MeshBasicMaterial({
-      map: await assetManager().loadTexure(this.textures.Light),
+      map: await dataManager().getTexture(this.textures.Light),
       blending: AdditiveBlending,
       transparent: true,
       opacity: 0.6,
@@ -211,7 +221,7 @@ export default class Planet
   public addCloudMesh = async (): Promise<void> => {
     if (!this.textures.Cloud) return;
     const cloudMaterial = new MeshStandardMaterial({
-      map: await assetManager().loadTexure(this.textures.Cloud),
+      map: await dataManager().getTexture(this.textures.Cloud),
       // transparent: true,
       // opacity: 0.8,
       blending: AdditiveBlending,
@@ -251,6 +261,7 @@ export default class Planet
     if (oldDetail != this._meshDetail) {
       // if (app().focusedCelestialBody == this) {
       this._container.visible = this._meshDetail < CelestialBodyDetail.LOW;
+
       const orbitLine = this._primaryBody.orbits.get(this.metadata.EnglishName);
       if (orbitLine)
         orbitLine.visible = this._meshDetail < CelestialBodyDetail.LOW;

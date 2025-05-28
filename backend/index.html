@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./static/src/styles/App.css" />
     <link rel="stylesheet" href="./static/src/styles/SidePanel.css" />
+    <link rel="stylesheet" href="./static/src/styles/DateController.css" />
     <title>Document</title>
     <style>
       body {
@@ -74,7 +75,33 @@
         </div>
       </div>
     </div>
-
+    <div class="time-controls--container">
+      <div class="date-time--container">
+        <div class="date"></div>
+        <div class="time"></div>
+      </div>
+      <div class="rate-controls">
+        <button
+          class="clickable"
+          data-tippy-content="Decrease time rate"
+          aria-label="Decrease time rate"
+        >
+          <span class="icon rate-change decrease"></span></button
+        ><button
+          class="clickable"
+          data-tippy-content="Pause / play"
+          aria-label="Pause or play"
+        >
+          <span class="icon rate-play"></span></button
+        ><button
+          class="clickable"
+          data-tippy-content="Increase time rate"
+          aria-label="Increase time rate"
+        >
+          <span class="icon rate-change increase"></span>
+        </button>
+      </div>
+    </div>
     <!-- Side Panel -->
     <div class="information" id="infoPanel">
       <div class="information-content scrollable">
@@ -98,7 +125,6 @@
           </div>
           <button class="toggle-button" id="toggleSummary">Show more</button>
         </div>
-
         <div class="dropdown" id="physicalInfo">
           <button class="dropdown-header">Physical Info</button>
           <div class="dropdown-content">
@@ -121,7 +147,6 @@
             <div class="info-row"><span>Key</span><span>Value</span></div>
           </div>
         </div>
-
       </div>
     </div>
     <script type="module" src="./static/src/index.js" defer></script>

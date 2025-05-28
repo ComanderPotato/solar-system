@@ -18,22 +18,12 @@ def normalise_name(body_name: str) -> str:
 
     match = re.match(r"([A-Za-z])\/(\d{4})\s+([A-Za-z])\s+(\d+)", body_name)
     if match:
-        print("Match", body_name)
         prefix, year, letter, number = match.groups()
         # return f"{prefix.lower()}{year}_{letter.lower()}{int(number):02d}"
         return [f"{prefix.lower()}{year}_{letter.lower()}{int(number):02d}" , f"{prefix.lower()}{year}_{letter.lower()}_{int(number):02d}"]
 
     
     return body_name.capitalize()
-
-# def normalise_name(body_name: str) -> str:
-
-#     m = re.match(r"s(\d{4})s(\d{1,2})", body_name, re.IGNORECASE)
-#     if m:
-#         year, num = m.groups()
-#         return f"S{year}_s{int(num):02d}" 
-#     else:
-#         return body_name.capitalize()
 
 def find_naif_code(text: str, input_name: str):
     normalized_names = normalise_name(input_name)
@@ -42,7 +32,6 @@ def find_naif_code(text: str, input_name: str):
         pattern = re.compile(rf"\b{re.escape(normalized_name)}\b\s+(\d+)", re.IGNORECASE)
 
         match = pattern.search(text)
-        print(match)
         if match:
             return int(match.group(1))
     return None
