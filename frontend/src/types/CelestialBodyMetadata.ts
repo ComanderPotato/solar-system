@@ -1,7 +1,10 @@
-export type BodyTypes = "Star" | "Planet" | "Dwarf Planet" | "Moon"
+// ==================================================================================================================
+// METADATA PARAMETERS
+// ==================================================================================================================
+export type BodyTypes = "Star" | "Planet" | "DwarfPlanet" | "Moon";
 export interface CelestialMetadata {
-    Id: string;
-    Name: string;
-    EnglishName: string;
-    BodyType: BodyTypes;
+	Id: string;
+	Name: string;
+	EnglishName: string;
+	BodyType: BodyTypes;
 }

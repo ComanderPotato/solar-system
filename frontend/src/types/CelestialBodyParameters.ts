@@ -1,50 +1,35 @@
-import { Vector3 } from "three";
-import {
-  CelestialMetadata,
-  TextureParameters,
-  PhysicalParameters,
-  OrbitalElements,
-  ModelParameters,
-  StarPhysicalParameters,
-  PlanetPhysicalParameters,
-  MoonPhysicalParameters,
-} from ".";
-type PlanetOrbitalElements = OrbitalElements;
-type MoonOrbitalElements = OrbitalElements;
-type SpacecraftOrbitalElements = OrbitalElements;
-export type OrbitalParameters = PlanetOrbitalElements | MoonOrbitalElements | SpacecraftOrbitalElements;
-
+import { CelestialMetadata, BasePhysicalParameters, PlanetPhysicalParameters, StarPhysicalParameters, OrbitalParameters, TextureParameters } from ".";
+// ==================================================================================================================
+// CELESTIAL BODY PARAMETERS
+// ==================================================================================================================
 export interface BaseCelestialBodyParameters {
-  MetaData: CelestialMetadata;
-  Physical: PhysicalParameters;
-  SecondaryBodyParameters?: OrbitingBodyParameters[];
-  // SecondaryBodyParameters?: string[]; // Change if need be
+	MetaData: CelestialMetadata;
+	Physical: BasePhysicalParameters;
+	SecondaryBodyNames?: string[];
+	Textures?: TextureParameters;
 }
-// Maybe pass physical into individual parameters
+export interface OrbitingBodyParameters extends BaseCelestialBodyParameters {
+	Orbital: OrbitalParameters;
+}
 export interface StarParameters extends BaseCelestialBodyParameters {
-  Texture: TextureParameters;
-  Physical: StarPhysicalParameters;
-  // SecondaryBodyParameters?: OrbitingBodyParameters[];
-  Position: Vector3;
+	Physical: StarPhysicalParameters;
+	Textures: TextureParameters;
 }
-export interface PlanetParameters extends BaseCelestialBodyParameters {
-  Orbital: OrbitalParameters;
-  Physical: PlanetPhysicalParameters;
-  // SecondaryBodyParameters?: (MoonParameters | SpacecraftParameters)[];
-  Texture: TextureParameters;
+export interface PlanetParameters extends OrbitingBodyParameters {
+	Physical: PlanetPhysicalParameters;
+	Orbital: OrbitalParameters;
+	Textures: TextureParameters;
 }
-export interface MoonParameters extends BaseCelestialBodyParameters {
-  Orbital: OrbitalParameters;
-  Physical: MoonPhysicalParameters;
-  // SecondaryBodyParameters?: SpacecraftParameters[];
-  Texture: TextureParameters;
+export interface MoonParameters extends OrbitingBodyParameters {
+	Orbital: OrbitalParameters;
+	Textures: TextureParameters;
 }
-export interface SpacecraftParameters extends BaseCelestialBodyParameters {
-  Orbital: OrbitalParameters;
-  // Physical: MoonPhysicalParameters
-  Model: ModelParameters;
-}
+// export interface SpacecraftParameters extends OrbitingBodyParameters {
+// 	SecondaryBodies: undefined;
+// }
 
-export type OrbitingBodyParameters = PlanetParameters | MoonParameters | SpacecraftParameters;
+export type CelestialBodyParameters = OrbitingBodyParameters | StarParameters | PlanetParameters | MoonParameters;
 
-export type CelestialBodyParameters = StarParameters | OrbitingBodyParameters;
+export interface CelestialBodies {
+	[celestialBodyName: string]: CelestialBodyParameters;
+}
