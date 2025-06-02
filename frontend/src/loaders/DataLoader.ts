@@ -1,56 +1,16 @@
-import { BodyTypes, OrbitalElementsResponse, PlanetNames } from "../types";
-export interface PhysicalParametersResponse {
-	id: string;
-	name: string;
-	englishName: PlanetNames;
-	mass?: {
-		massValue: number;
-		massExponent: number;
-	};
-	vol?: {
-		volValue: number;
-		volExponent: number;
-	};
-	aroundPlanet: {
-		planet: string;
-	};
-	moons: [
-		{
-			moon: string;
-		}
-	];
-	density: number;
-	gravity: number;
-	escape: number;
-	meanRadius: number;
-	equaRadius: number;
-	polarRadius: number;
-	flattening: number;
-	axialTilt: number;
-	avgTemp: number;
-	sideralRotation: number;
-	bodyType: BodyTypes;
-}
-type FetchedSummary = {
+import { FetchedPhysicalParameters, FetchedOrbitalParameters } from "../types";
+import { preprocessParameter } from "../utils";
+export interface FetchedSummary {
 	summary: string;
-};
+}
 
-export type FetchedPhysicalParameters = {
-	[secondaryName: string]: PhysicalParametersResponse;
-};
-
-export type FetchedOrbitalParameters = {
-	[secondaryName: string]: OrbitalElementsResponse;
-};
 export default class DataLoader {
 	private _extractCache: Map<string, Promise<FetchedSummary>> = new Map();
-	private _hasLoaded = false;
 
-	get hasLoaded(): boolean {
-		return this._hasLoaded;
-	}
-
-	public fetchPhysicalParameters = async (bodyNames: string[]): Promise<FetchedPhysicalParameters> => {
+	public hasExtract = (key: string): boolean => {
+		return this._extractCache.has(key);
+	};
+	public fetchPhysicalParameters = async (bodyNames: string[], filterBy: string = "englishName"): Promise<FetchedPhysicalParameters> => {
 		const response = await fetch("/api/rest/parameters/physical", {
 			method: "POST",
 			headers: {
@@ -58,6 +18,7 @@ export default class DataLoader {
 			},
 			body: JSON.stringify({
 				bodyNames: bodyNames,
+				filterBy: filterBy,
 			}),
 		});
 		const data = await response.json();
@@ -97,8 +58,8 @@ export default class DataLoader {
 	};
 
 	public fetchParameterSummary = async (parameterName: string): Promise<FetchedSummary> => {
-		parameterName = parameterName.replaceAll(" ", "_");
 		if (this._extractCache.has(parameterName)) return this._extractCache.get(parameterName)!;
+		const processedParamaterName = preprocessParameter(parameterName).replaceAll(" ", "_").toLowerCase();
 
 		const response = await fetch("/api/rest/summary/parameter", {
 			method: "POST",
@@ -106,7 +67,7 @@ export default class DataLoader {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				parameterName: parameterName,
+				parameterName: processedParamaterName,
 			}),
 		});
 		const data = await response.json();

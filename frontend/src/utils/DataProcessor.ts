@@ -1,178 +1,167 @@
 import { Vector3 } from "three";
-import { FetchedOrbitalParameters, FetchedPhysicalParameters, PhysicalParametersResponse } from "../loaders/DataLoader";
+// import { FetchedOrbitalParameters, FetchedPhysicalParameters, PhysicalParametersResponse } from "../loaders/DataLoader";
 import {
-	BasePhysicalParameters,
-	BodyTypes,
-	CelestialBodyParameters,
+	FetchedOrbitalParameters,
+	FetchedPhysicalParameters,
 	CelestialMetadata,
-	CelestialTextures,
-	distanceKeys,
-	MoonPhysicalParameters,
-	OrbitalElementsResponse,
-	OrbitalParameters,
-	PhysicalParameters,
-	PlanetPhysicalParameters,
-	RequiredMoonPhysicalParameters,
-	RequiredPlanetPhysicalParameters,
-	RequiredStarPhysicalParameters,
-	SolarSystemOpenDataResponse,
+	PhysicalParametersResponse,
+	BasePhysicalParameters,
 	StarPhysicalParameters,
-	TextureParameters,
+	Textures,
+	OptionalPhsyicalParametersJSON,
+	StarParameters,
+	OrbitalParametersResponse,
+	OrbitalParameters,
+	distanceParametersToProcess,
+	PlanetPhysicalParameters,
+	PlanetParameters,
+	MoonParameters,
+	CelestialBodyParameters,
+	PhysicalParameters,
+	MoonPhysicalParameters,
+	CelestialBodies,
+	BodyTypes,
 } from "../types";
-import { KM_TO_M, SCALE } from "./constants";
+import { HOUR_TO_SECOND, KM_TO_M, SCALE } from "./constants";
 import optionalPhysicalData from "../data/optionalPhysicalData.json";
 import textures from "../data/textures.json";
-
-interface tempCelestial {
-	MetaData: CelestialMetadata;
-	Physical: PhysicalParameters;
-	Orbital: OrbitalParameters;
-	SecondaryBodies?: string[];
-}
 export default class DataProcessor {
-	private _textures: CelestialTextures = textures;
-	constructor() {
-		// this._optionalPhysicalParameters = optionalPhysicalData
-		this._textures;
-	}
-	private _fetchedOrbitalParameters?: FetchedOrbitalParameters;
-	private _fetchedPhysicalParameters?: FetchedPhysicalParameters;
-
-	public process = (fetchedPhysicalParameters: FetchedPhysicalParameters, fetchedOrbitalParameters: FetchedOrbitalParameters): tempCelestial[] => {
-		const processedParameters: tempCelestial[] = [];
-		for (const secondaryName of Object.keys(fetchedOrbitalParameters)) {
-			// console.log(fetchedPhysicalParameters[secondaryName].id);
+	private _optionalPhysicalParameters: OptionalPhsyicalParametersJSON = optionalPhysicalData;
+	private _textures: Textures = textures;
+	private static _totalFactor: number = 0;
+	private static _totalDistance: number = 0;
+	private static _count: number = 0;
+	public process = (
+		fetchedPhysicalParameters: FetchedPhysicalParameters,
+		fetchedOrbitalParameters: FetchedOrbitalParameters,
+		requireOrbitalParameters: boolean = true
+	): CelestialBodies => {
+		const processedParameters: CelestialBodies = {};
+		for (const secondaryName of Object.keys(fetchedPhysicalParameters)) {
 			const physicalParameters: PhysicalParametersResponse = fetchedPhysicalParameters[secondaryName];
-			const orbitalParameters: OrbitalElementsResponse | null = fetchedOrbitalParameters[secondaryName];
+			const orbitalParameters: OrbitalParametersResponse | undefined = fetchedOrbitalParameters[secondaryName];
 
-			const processedMetaData = this.processMetaData(physicalParameters);
-			const processedPhysicalParameters = this.processPhysicalData(physicalParameters, processedMetaData.BodyType);
-			const processedOrbitalParameters = this.processOrbitalParameters(orbitalParameters);
-			const processedSecondaryBodies = this.processSecondaryBodies(physicalParameters);
-			const celestial: tempCelestial = {
-				MetaData: processedMetaData,
-				Physical: processedPhysicalParameters,
-				Orbital: processedOrbitalParameters,
-				SecondaryBodies: processedSecondaryBodies,
-			};
-			processedParameters.push(celestial);
+			if (requireOrbitalParameters && !orbitalParameters) continue;
+			const metaData = this.processMetadata(physicalParameters);
+			processedParameters[physicalParameters.englishName] = this.concatenateParameters(
+				metaData,
+				this.processPhysical(physicalParameters, metaData.BodyType),
+				this.processOrbitalParameters(orbitalParameters),
+				this.processSecondaryBodies(physicalParameters)
+			);
 		}
 		return processedParameters;
 	};
-	private concatenateParameters = () => {};
-	private processSecondaryBodies = (physicalParameters: PhysicalParametersResponse): string[] | undefined => {
-		if (!physicalParameters.moons) return;
-		return physicalParameters.moons.map((key) => key.moon);
-	};
 
-	private processMetaData = (physicalParameters: PhysicalParametersResponse): CelestialMetadata => {
-    if(!physicalParameters.id) console.log(physicalParameters)
+	private concatenateParameters = (metadata: CelestialMetadata, physical: PhysicalParameters, orbital?: OrbitalParameters, secondary?: string[]): CelestialBodyParameters => {
+		physical.SolarRotation = this.processSideralRotation(physical, orbital);
+		switch (metadata.BodyType) {
+			case "Star": {
+				return {
+					MetaData: metadata,
+					Physical: physical as StarPhysicalParameters,
+					SecondaryBodyNames: secondary,
+					Textures: this._textures[metadata.BodyType][metadata.EnglishName],
+				} as StarParameters;
+			}
+			case "Planet":
+			case "DwarfPlanet": {
+				return {
+					MetaData: metadata,
+					Physical: physical as PlanetPhysicalParameters,
+					Orbital: orbital,
+					SecondaryBodyNames: secondary,
+					Textures: this._textures[metadata.BodyType][metadata.EnglishName],
+				} as PlanetParameters;
+			}
+			case "Moon": {
+				return {
+					MetaData: metadata,
+					Physical: physical as BasePhysicalParameters,
+					Orbital: orbital,
+					SecondaryBodyNames: secondary,
+					Textures: this._textures[metadata.BodyType]["Moon"],
+				} as MoonParameters;
+			}
+		}
+	};
+	private processMetadata = (fetchedPhysicalParameters: PhysicalParametersResponse): CelestialMetadata => {
 		return {
-			Id: physicalParameters.id,
-			Name: physicalParameters.name,
-			EnglishName: physicalParameters.englishName,
-			BodyType: physicalParameters.bodyType,
+			Id: fetchedPhysicalParameters.id,
+			Name: fetchedPhysicalParameters.name,
+			EnglishName: fetchedPhysicalParameters.englishName,
+			BodyType: fetchedPhysicalParameters.bodyType.replace(" ", "") as BodyTypes,
 		};
 	};
+	private processPhysical = (fetchedPhysicalParameters: PhysicalParametersResponse, bodyType: BodyTypes): PhysicalParameters => {
+		switch (bodyType) {
+			case "Star": {
+				return {
+					...this.processBasePhysical(fetchedPhysicalParameters),
+					...this._optionalPhysicalParameters[fetchedPhysicalParameters.englishName],
+				} as StarPhysicalParameters;
+			}
+			case "DwarfPlanet":
+			case "Planet": {
+				return {
+					...this.processBasePhysical(fetchedPhysicalParameters),
+					...this._optionalPhysicalParameters[fetchedPhysicalParameters.englishName],
+				} as PlanetPhysicalParameters;
+			}
+			case "Moon": {
+				return {
+					...this.processBasePhysical(fetchedPhysicalParameters),
+				} as MoonPhysicalParameters;
+			}
+		}
+	};
 
-	// private concatenateParameters = (
-	//   metaData: CelestialMetadata,
-	//   physical: PhysicalParametersResponse,
-	//   orbital: OrbitalParameters,
-	//   secondary: string[],
-	//   textures: TextureParameters
-	// ): CelestialBodyParameters => {
-	//   return {
-	//     MetaData: metaData,
-	//     Physical: this.processPhysicalData(physical, metaData.BodyType),
-	//     Orbital: orbital,
-	//     SecondaryBodyParameters: secondary,
-	//     Texture: textures[],
-	//   };
-	// };
-	// private concatenateParamaters = (physicalParameters: FetchedPhysicalParameters, orbitalParameters: FetchedOrbitalParameters): CelestialBodyParameters => {
-	//   const orbitalParameters: OrbitalParameters | null = this._orbitalParameters![parameters.englishName];
-	//     const bodyType = physicalParametes.bodyType as BodyTypes;
-	//     const parentBody = parameters.aroundPlanet ? parameters.aroundPlanet.planet : "soleil";
-
-	//     const secondaryBodies = physicalParameters.
-	//     return {
-	//       MetaData: {
-	//         Id:
-	//       }
-	//     }
-	//       ? await Promise.all(
-	//           parameters.moons.map(async (m) => {
-	//             const data = await this.getPlanetaryPhysicalData(`name,eq,${m.moon}`);
-	//             return data[0];
-	//           })
-	//         )
-	//       : null;
-
-	//     return {
-	//       MetaData: {
-	//         Id: physicalParameters.id,
-	//         Name: physicalParameters.name,
-	//         EnglishName: physicalParameters.englishName,
-	//         BodyType: bodyType,
-	//       },
-	//       Physical: this.processPhysicalData(parameters, bodyType),
-	//       Orbital: {
-	//         ...orbitalParameters,
-	//         ParentBody: parentBody,
-	//       },
-	//       SecondaryBodyParameters: secondaryBodies,
-	//       Texture: this._textureData[parameters.englishName],
-	//     } as CelestialBodyParameters;
-	//   })
-	// }
-	private processOrbitalParameters = (orbitalParameters: OrbitalElementsResponse): OrbitalParameters => {
-		distanceKeys.map((distanceKey) => (orbitalParameters[distanceKey] = orbitalParameters[distanceKey] * SCALE));
+	private processOrbitalParameters = (orbitalParameters?: OrbitalParametersResponse): OrbitalParameters | undefined => {
+		if (!orbitalParameters) return;
+		distanceParametersToProcess.map((distanceParameter) => (orbitalParameters[distanceParameter] = orbitalParameters[distanceParameter] * SCALE));
 		return {
 			...orbitalParameters,
 			Position: new Vector3(...orbitalParameters.Position).multiplyScalar(SCALE),
 			Velocity: new Vector3(...orbitalParameters.Velocity).multiplyScalar(SCALE),
 		};
 	};
-	private processPhysicalData = (physicalParameters: PhysicalParametersResponse, bodyType: BodyTypes): PhysicalParameters => {
-		switch (bodyType) {
-			case "Star":
-				return {
-					...this.processBasePhysicalData(physicalParameters),
-					...(optionalPhysicalData[physicalParameters.englishName] as RequiredStarPhysicalParameters),
-				} as StarPhysicalParameters;
-			case "Planet":
-			case "Dwarf Planet":
-				return {
-					...this.processBasePhysicalData(physicalParameters),
-					...(optionalPhysicalData[physicalParameters.englishName] as RequiredPlanetPhysicalParameters),
-				} as PlanetPhysicalParameters;
-			case "Moon":
-				return {
-					...this.processBasePhysicalData(physicalParameters),
-					...(optionalPhysicalData[physicalParameters.englishName] as RequiredMoonPhysicalParameters),
-				} as MoonPhysicalParameters;
-		}
-	};
-	public static processBasePhysicalData = () => {};
-
-	public processBasePhysicalData = (basePhysicalParameters: SolarSystemOpenDataResponse): BasePhysicalParameters => {
+	public processBasePhysical = (basePhysicalParameters: PhysicalParametersResponse): BasePhysicalParameters => {
 		return {
-			Mass: this.processMass(basePhysicalParameters) * SCALE,
+			PlanetaryMass: this.processMass(basePhysicalParameters) * SCALE,
 			Volume: this.processVolume(basePhysicalParameters) * SCALE,
 			Density: basePhysicalParameters.density * 1000 /* Fix */,
 			Gravity: basePhysicalParameters.gravity,
-			Escape: basePhysicalParameters.escape,
+			EscapeVelocity: basePhysicalParameters.escape,
+			OrbitalPeriod: basePhysicalParameters.sideralOrbit,
 			MeanRadius: basePhysicalParameters.meanRadius * KM_TO_M * SCALE,
-			EquaRadius: basePhysicalParameters.equaRadius * KM_TO_M * SCALE,
+			EquatorialRadius: basePhysicalParameters.equaRadius * KM_TO_M * SCALE,
 			PolarRadius: basePhysicalParameters.polarRadius * KM_TO_M * SCALE,
 			Flattening: basePhysicalParameters.flattening,
 			AxialTilt: basePhysicalParameters.axialTilt * (Math.PI / 180),
-			SideralRotation: basePhysicalParameters.sideralRotation * 3600,
+			SolarRotation: basePhysicalParameters.sideralRotation * HOUR_TO_SECOND,
 			AverageTemperature: basePhysicalParameters.avgTemp,
 		};
 	};
-	public processMass = (basePhysicalParameters: SolarSystemOpenDataResponse): number => {
+
+	private processSideralRotation = (physicalParameters: PhysicalParameters, orbitalParameters?: OrbitalParameters): number => {
+		if (!orbitalParameters) return physicalParameters.SolarRotation;
+		if (physicalParameters.SolarRotation != 0) {
+			DataProcessor._totalFactor += Math.abs(orbitalParameters.PeriodInDays / physicalParameters.SolarRotation);
+			DataProcessor._totalDistance += orbitalParameters.DistanceFromPrimary;
+			DataProcessor._count += 1;
+			return physicalParameters.SolarRotation;
+		} else {
+			const averageFactor = DataProcessor._totalFactor / DataProcessor._count;
+			const averageDistance = DataProcessor._totalDistance / DataProcessor._count;
+			const adjustedFactor = averageFactor * (orbitalParameters.DistanceFromPrimary / averageDistance);
+			return orbitalParameters.PeriodInDays / adjustedFactor;
+		}
+	};
+	private processSecondaryBodies = (physicalParameters: PhysicalParametersResponse): string[] | undefined => {
+		if (!physicalParameters.moons) return;
+		return physicalParameters.moons.map((key) => key.rel.split("/").at(-1)!);
+	};
+	public processMass = (basePhysicalParameters: PhysicalParametersResponse): number => {
 		if (basePhysicalParameters.mass) {
 			const massValue = basePhysicalParameters.mass.massValue;
 			const massExponent = basePhysicalParameters.mass.massExponent;
@@ -181,7 +170,7 @@ export default class DataProcessor {
 		//   else if (basePhysicalParameters.meanRadius) moon.Physical.Mass = (4 / 3) * Math.PI * moon.Physical.MeanRadius ** 3 * moon.Physical.Density;
 		return -1;
 	};
-	public processVolume = (basePhysicalParameters: SolarSystemOpenDataResponse): number => {
+	public processVolume = (basePhysicalParameters: PhysicalParametersResponse): number => {
 		const { vol, mass, density, meanRadius, equaRadius, polarRadius } = basePhysicalParameters;
 		if (vol) {
 			return vol.volValue * 10 ** vol.volExponent;

@@ -2,18 +2,15 @@ import { TextureLoader as ThreeTextureLoader, LoadingManager, Texture } from "th
 
 export default class TextureLoader {
   private _loader: ThreeTextureLoader;
-  // private _lazyLoader: ThreeTextureLoader;
   private _cache: Map<string, Texture> = new Map();
   private _pendingLoads: Map<string, Promise<Texture>> = new Map();
   constructor(manager: LoadingManager) {
     this._loader = new ThreeTextureLoader(manager);
   }
   get textureCache(): Map<string, Texture> {
-    // this.lazyLoad([]);
     return this._cache;
   }
 
-  // private lazyLoad = async (url: string[]): Promise<Texture> => {};
   async load(url: string): Promise<Texture> {
     if (this._cache.has(url)) return this._cache.get(url)!;
 
