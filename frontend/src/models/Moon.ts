@@ -90,8 +90,10 @@ export default class Moon extends OrbitingBody<MoonParameters> implements IMeshP
 	public updateVisibilityDetail = (): void => {
 		if (app().canSeeBody(this._celestialBodyMesh)) {
 			this._container.visible = this._meshDetail < CelestialBodyDetail.LOW;
+			this._celestialBodyGroup.visible = true;
 		} else {
-			this._container.visible = false;
+			this._celestialBodyMesh.visible = false;
+			this._celestialBodyGroup.visible = false;
 		}
 		const orbitLine = this._primaryBody.orbits.get(this.metadata.EnglishName);
 		if (orbitLine) orbitLine.visible = this._meshDetail < CelestialBodyDetail.LOW;

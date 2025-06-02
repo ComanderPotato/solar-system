@@ -122,7 +122,7 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
 			map: await dataManager().getTexture(this.createTexturePath("lights")),
 			blending: AdditiveBlending,
 			transparent: true,
-			depthTest: false,
+			depthTest: true,
 			opacity: 0.6,
 		});
 		this._lightMesh = new Mesh(this.celestialBodyGeometry, lightMaterial);
@@ -133,6 +133,7 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
 		const cloudMaterial = new MeshStandardMaterial({
 			map: await dataManager().getTexture(this.createTexturePath("clouds")),
 			transparent: true,
+			depthTest: false,
 			opacity: 0.5,
 			blending: AdditiveBlending,
 		});
@@ -186,8 +187,10 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
 	public updateVisibilityDetail = (): void => {
 		if (app().canSeeBody(this._celestialBodyMesh)) {
 			this._container.visible = this._meshDetail < CelestialBodyDetail.LOW;
+			this._celestialBodyGroup.visible = true;
 		} else {
-			this._container.visible = false;
+			this._celestialBodyMesh.visible = false;
+			this._celestialBodyGroup.visible = false;
 		}
 		const orbitLine = this._primaryBody.orbits.get(this.metadata.EnglishName);
 		if (orbitLine) orbitLine.visible = this._meshDetail < CelestialBodyDetail.LOW;

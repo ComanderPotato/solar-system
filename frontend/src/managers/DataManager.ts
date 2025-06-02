@@ -74,15 +74,15 @@ export default class DataManager {
 			this.focusedBarycenter = focusedBody;
 			this._focusedCelestialBody = focusedBody;
 
+			if (temp && temp != this.focusedBarycenter && !(focusedBody instanceof Star)) {
+				temp.destroySecondaries();
+			}
 			if (secondaryNames && !this.focusedBarycenter.secondaryBodies) {
 				const newSecondaries = await this.getFocusedSecondaries(this._focusedCelestialBody, secondaryNames);
 				this._focusedSecondaries = newSecondaries;
 				this._focusedCelestialBody.initialiseSecondaryBodies(this._focusedSecondaries);
+				this._solarSystem.focusedSecondaries = this._focusedCelestialBody.secondaryBodies;
 			}
-			if (temp && temp != this.focusedBarycenter && !(focusedBody instanceof Star)) {
-				temp.destroySecondaries();
-			}
-			this._solarSystem.focusedSecondaries = this._focusedCelestialBody.secondaryBodies;
 			this._focusedSummary = await this.getFocusedSummary(focusedBody);
 			this._focusedCelestialBody.preLoadDetail();
 
