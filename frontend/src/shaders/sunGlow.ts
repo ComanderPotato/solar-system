@@ -1,4 +1,4 @@
-import { AdditiveBlending, Color, DoubleSide, FrontSide, ShaderMaterial, Texture } from "three";
+import { AdditiveBlending, Color, FrontSide, ShaderMaterial, Texture } from "three";
 export const sunGlowMat = (): ShaderMaterial => {
 //   const uniforms = {
 //     ringTexture: { value: ringTexture },

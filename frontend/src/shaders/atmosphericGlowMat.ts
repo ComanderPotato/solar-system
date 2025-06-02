@@ -1,15 +1,15 @@
-import { AdditiveBlending, Color, DoubleSide, ShaderMaterial } from "three";
-let atmosphericGlowInstance: ShaderMaterial | null = null
-export const getAtmosphericGlowMat = ( rimHex: number = 0x0088ff, facingHex: number = 0x000000): ShaderMaterial => {
-  if(atmosphericGlowInstance) return atmosphericGlowInstance
-  const uniforms = {
-    color1: { value: new Color(rimHex) },
-    color2: { value: new Color(facingHex) },
-    atmostSphericGlowBias: { value: 0.1 },
-    atmostSphericGlowScale: { value: 1.0 },
-    atmostSphericGlowPower: { value: 4.0 },
-  };
-  const vertexShader = `
+import { AdditiveBlending, Color, ShaderMaterial } from "three";
+let atmosphericGlowInstance: ShaderMaterial | null = null;
+export const getAtmosphericGlowMat = (rimHex: number = 0x0088ff, facingHex: number = 0x000000): ShaderMaterial => {
+	if (atmosphericGlowInstance) return atmosphericGlowInstance;
+	const uniforms = {
+		color1: { value: new Color(rimHex) },
+		color2: { value: new Color(facingHex) },
+		atmostSphericGlowBias: { value: 0.1 },
+		atmostSphericGlowScale: { value: 1.0 },
+		atmostSphericGlowPower: { value: 4.0 },
+	};
+	const vertexShader = `
     uniform float atmostSphericGlowBias;
     uniform float atmostSphericGlowScale;
     uniform float atmostSphericGlowPower;
@@ -29,7 +29,7 @@ export const getAtmosphericGlowMat = ( rimHex: number = 0x0088ff, facingHex: num
       gl_Position = projectionMatrix * mvPosition;
     }
     `;
-  const fragmentShader = `
+	const fragmentShader = `
     uniform vec3 color1;
     uniform vec3 color2;
     
@@ -40,14 +40,15 @@ export const getAtmosphericGlowMat = ( rimHex: number = 0x0088ff, facingHex: num
       gl_FragColor = vec4(mix(color2, color1, vec3(f)), f);
     }
     `;
-  atmosphericGlowInstance = new ShaderMaterial({
-    uniforms: uniforms,
-    vertexShader: vertexShader,
-    fragmentShader: fragmentShader,
-    transparent: true,
-    blending: AdditiveBlending,
-    // side: DoubleSide maybe add?
-    // wireframe: true,
-  });
-  return atmosphericGlowInstance;
-}
+	atmosphericGlowInstance = new ShaderMaterial({
+		uniforms: uniforms,
+		vertexShader: vertexShader,
+		fragmentShader: fragmentShader,
+		// transparent: true,
+    depthTest: false,
+		blending: AdditiveBlending,
+		// side: DoubleSide maybe add?
+		// wireframe: true,
+	});
+	return atmosphericGlowInstance;
+};

@@ -155,7 +155,7 @@
     }
   }
 
-  &.planet {
+  &.planet, &.dwarfplanet {
     left: 18px;
     letter-spacing: 0.3em;
     position: relative;
