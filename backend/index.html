@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./static/src/styles/App.css" />
-    <link rel="stylesheet" href="./static/src/styles/SidePanel.css" />
-    <link rel="stylesheet" href="./static/src/styles/DateController.css" />
-    <title>Document</title>
-    <style>
-      body {
-        margin: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- <script type="module" src="/script.js" defer></script> -->
-    <!-- <div
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="./static/src/styles/App.css" />
+		<link rel="stylesheet" href="./static/src/styles/SidePanel.css" />
+		<link rel="stylesheet" href="./static/src/styles/DateController.css" />
+		<title>Document</title>
+		<style>
+			body {
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- <script type="module" src="/script.js" defer></script> -->
+		<!-- <div
       id="loadingScreen"
       style="
         position: absolute;
@@ -38,117 +38,76 @@
         <div id="loadingBar" style="width: 0%; height: 100%; background: lime; transition: width 0.1s"></div>
       </div>
     </div> -->
-    <div id="spinner" class="load-icon hidden">
-      <div class="bg face"></div>
-      <div class="front face"></div>
-      <div class="left face"></div>
-      <div class="top face"></div>
-      <div class="right face"></div>
-      <div class="bottom face"></div>
-      <div class="text">Loading</div>
-    </div>
-    <div id="loading-screen" class="show">
-      <div id="loading-screen-wrapper">
-        <!-- <div
-          id="loading-screen-stars1"
-          style="
-            box-shadow: rgb(133, 133, 133) 500px 161px,
-              rgb(201, 201, 201) 834px 210px, rgb(166, 166, 166) 648px 122px,
-              rgb(99, 99, 99) 461px 201px, rgb(71, 71, 71) 665px 16px,
-              rgb(247, 247, 247) 77px 204px, rgb(66, 66, 66) 400px 612px,
-              rgb(242, 242, 242) 96px 411px, rgb(222, 222, 222) 623px 58px,
-              rgb(107, 107, 107) 239px 163px, rgb(252, 252, 252) 377px 491px,
-              rgb(125, 125, 125) 724px 65px, rgb(245, 245, 245) 405px 176px,
-              rgb(89, 89, 89) 84px 399px, rgb(184, 184, 184) 591px 280px,
-              rgb(252, 252, 252) 141px 55px, rgb(173, 173, 173) 23px 333px,
-              rgb(186, 186, 186) 495px 565px, rgb(105, 105, 105) 898px 178px,
-              rgb(84, 84, 84) 346px 270px, rgb(219, 219, 219) 348px 149px,
-              rgb(107, 107, 107) 898px 207px, rgb(105, 105, 105) 349px 484px,
-              rgb(69, 69, 69) 515px 330px;
-          "
-        ></div>
-        <div id="loading-screen-stars2"></div>
-        <div id="loading-screen-logo"></div> -->
-        <div id="loading-screen-container">
-          <div id="loading-screen-text">Loading</div>
-          <div id="loading-screen-bar"></div>
-        </div>
-      </div>
-    </div>
-    <div class="time-controls--container">
-      <div class="date-time--container">
-        <div class="date"></div>
-        <div class="time"></div>
-      </div>
-      <div class="rate-controls">
-        <button
-          class="clickable"
-          data-tippy-content="Decrease time rate"
-          aria-label="Decrease time rate"
-        >
-          <span class="icon rate-change decrease"></span></button
-        ><button
-          class="clickable"
-          data-tippy-content="Pause / play"
-          aria-label="Pause or play"
-        >
-          <span class="icon rate-play"></span></button
-        ><button
-          class="clickable"
-          data-tippy-content="Increase time rate"
-          aria-label="Increase time rate"
-        >
-          <span class="icon rate-change increase"></span>
-        </button>
-      </div>
-    </div>
-    <!-- Side Panel -->
-    <div class="information" id="infoPanel">
-      <div class="information-content scrollable">
-        <button class="collapse-button" id="collapseBtn">⮜</button>
+		<div id="spinner" class="load-icon hidden">
+			<div class="bg face"></div>
+			<div class="front face"></div>
+			<div class="left face"></div>
+			<div class="top face"></div>
+			<div class="right face"></div>
+			<div class="bottom face"></div>
+			<div class="text">Loading</div>
+		</div>
+		<div id="loading-screen" class="show">
+			<div id="loading-screen-wrapper">
+				<div
+					id="loading-screen-stars1"
+					style="
+						box-shadow: rgb(133, 133, 133) 500px 161px, rgb(201, 201, 201) 834px 210px, rgb(166, 166, 166) 648px 122px, rgb(99, 99, 99) 461px 201px, rgb(71, 71, 71) 665px 16px,
+							rgb(247, 247, 247) 77px 204px, rgb(66, 66, 66) 400px 612px, rgb(242, 242, 242) 96px 411px, rgb(222, 222, 222) 623px 58px, rgb(107, 107, 107) 239px 163px,
+							rgb(252, 252, 252) 377px 491px, rgb(125, 125, 125) 724px 65px, rgb(245, 245, 245) 405px 176px, rgb(89, 89, 89) 84px 399px, rgb(184, 184, 184) 591px 280px,
+							rgb(252, 252, 252) 141px 55px, rgb(173, 173, 173) 23px 333px, rgb(186, 186, 186) 495px 565px, rgb(105, 105, 105) 898px 178px, rgb(84, 84, 84) 346px 270px,
+							rgb(219, 219, 219) 348px 149px, rgb(107, 107, 107) 898px 207px, rgb(105, 105, 105) 349px 484px, rgb(69, 69, 69) 515px 330px;
+					"
+				></div>
+				<div id="loading-screen-stars2"></div>
+				<div id="loading-screen-logo"></div>
+				<div id="loading-screen-container">
+					<div id="loading-screen-text">Loading</div>
+					<div id="loading-screen-bar"></div>
+				</div>
+			</div>
+		</div>
+		<div id="global-tooltip" class="global-tooltip hidden"></div>
+		<!-- Time/Controls container -->
+		<div class="time-controls--container">
+			<div class="date-time--container">
+				<div id="date"></div>
+				<div id="time"></div>
+				<div id="timeRate">Real Rate</div>
+			</div>
+			<div class="rate-controls">
+				<button id="decreaseBtn" class="clickable" data-tippy-content="Decrease time rate" aria-label="Decrease time rate">
+					<span class="icon rate-change decrease"></span></button
+				><button id="pauseBtn" class="clickable" data-tippy-content="Pause / play" aria-label="Pause or play">
+					<span class="icon rate-play"></span></button
+				><button id="increaseBtn" class="clickable" data-tippy-content="Increase time rate" aria-label="Increase time rate">
+					<span class="icon rate-change increase"></span>
+				</button>
+			</div>
+		</div>
+		<!-- Side Panel -->
+		<div class="information hidden collapsed" id="infoPanel">
+			<div class="information-content scrollable">
+				<button class="collapse-button" id="collapseBtn">⮜</button>
 
-        <div class="title">Title</div>
+				<div class="title">Title</div>
 
-        <div class="summary-container">
-          <div class="summary" id="summary">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Numquam
-            enim consectetur officia alias culpa veniam cum, sunt molestiae
-            eaque, sint exercitationem ipsa. Sit deleniti quibusdam fugiat
-            molestiae laudantium, eligendi magnam. Lorem ipsum dolor sit amet
-            consectetur adipisicing elit. Amet autem commodi consectetur
-            corporis maxime. Cum nemo illo quaerat perferendis expedita culpa
-            sapiente. Inventore ut unde blanditiis tempore fugit ipsa
-            consectetur? Lorem ipsum dolor sit amet consectetur adipisicing
-            elit. Cum dolores blanditiis expedita quae voluptate repudiandae,
-            officia esse ducimus ea velit illo explicabo cupiditate, architecto
-            totam dolorum temporibus maiores! Officiis, repudiandae.
-          </div>
-          <button class="toggle-button" id="toggleSummary">Show more</button>
-        </div>
-        <div class="dropdown" id="physicalInfo">
-          <button class="dropdown-header">Physical Info</button>
-          <div class="dropdown-content">
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-          </div>
-        </div>
-        <div class="dropdown" id="orbitalInfo">
-          <button class="dropdown-header">Orbital Info</button>
-          <div class="dropdown-content">
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-            <div class="info-row"><span>Key</span><span>Value</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <script type="module" src="./static/src/index.js" defer></script>
-  </body>
+				<div class="summary-container">
+					<div class="summary" id="summary"></div>
+					<button class="toggle-button" id="toggleSummary">Show more</button>
+				</div>
+				<div class="dropdown" id="physicalInfo">
+					<button class="dropdown-header">Physical Info</button>
+					<div class="dropdown-content">
+					</div>
+				</div>
+				<div class="dropdown" id="orbitalInfo">
+					<button class="dropdown-header">Orbital Info</button>
+					<div class="dropdown-content">
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="module" src="./static/src/index.js" defer></script>
+	</body>
 </html>

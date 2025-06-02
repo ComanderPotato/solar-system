@@ -20,12 +20,14 @@ def normalise_name(body_name: str) -> str:
     if match:
         prefix, year, letter, number = match.groups()
         # return f"{prefix.lower()}{year}_{letter.lower()}{int(number):02d}"
-        return [f"{prefix.lower()}{year}_{letter.lower()}{int(number):02d}" , f"{prefix.lower()}{year}_{letter.lower()}_{int(number):02d}"]
+        return [f"{prefix.lower()}{year}_{letter.lower()}{int(number):02d}" , f"{prefix.lower()}{year}_{letter.lower()}_{int(number):02d}" , f"{prefix.lower()}{year}_{letter.lower()}_{int(number)}"]
 
     
-    return body_name.capitalize()
+    return [body_name.capitalize()]
 
 def find_naif_code(text: str, input_name: str):
+    if input_name.lower() == "megaclite":
+        input_name = "Magaclite"
     normalized_names = normalise_name(input_name)
 
     for normalized_name in normalized_names:

@@ -1,8 +1,8 @@
 from typing import TypedDict, List, Dict
 from skyfield.api import Loader
 
-LOAD = Loader("./static/src/data/ephemeris")
-# ts = LOAD.timescale()
+# LOAD = Loader("./ephemeris")
+LOAD = Loader("./ephemeris")
 INITIAL_EPHEMERIS = "de432s.bsp"
 
 PLANETS_LIST = [
@@ -52,7 +52,6 @@ JUPITERS_NATURAL_SATELLITES: NaturalSatelliteInfo = {
     "barycenter": "JUPITER_BARYCENTER",
     "folder": "jupiter",
     "moon_kernels": [
-        # "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup344.bsp",
         "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup347.bsp",
         "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup365.bsp",
     ],

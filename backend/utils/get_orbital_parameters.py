@@ -21,12 +21,15 @@ def get_orbitals(primary_name: str, secondary_names: list[str]):
         for secondary_name in secondary_names:
             ephemeris_path = os.path.join(LOAD.directory, secondary_name.lower())
             if os.path.exists(ephemeris_path):
-                ephemeris_files += [os.path.join(secondary_name, ephemeris_file) for ephemeris_file in os.listdir(ephemeris_path)]
+                ephemeris_files += [os.path.join(secondary_name.lower(), ephemeris_file) for ephemeris_file in os.listdir(ephemeris_path)]
 
     orbital_dict = {}
     t = CURRENT_TIME_SCALE
     for ephemeris_file in ephemeris_files:
-        ephemeris = LOAD(ephemeris_file)
+        try:
+            ephemeris = LOAD(ephemeris_file)
+        except:
+            print(ephemeris_file)
         comments = ephemeris.comments()
         try:
             primary_code = ephemeris.decode(primary_name)
@@ -42,14 +45,22 @@ def get_orbitals(primary_name: str, secondary_names: list[str]):
             except:
                 secondary_code = find_naif_code(comments, secondary_name)
 
+
             if secondary_code == None:
                 continue
             if secondary_code is not None:
                 try:
                     orbital_dict[secondary_name] = get_orbital_parameters(ephemeris[primary_code].at(CURRENT_TIME_SCALE).observe(ephemeris[secondary_code]))
                     unresolved_secondaries.remove(secondary_name)
-                except Exception:
-                    # find_naif_code still buggy
-                    print(Exception)
-    
+                except:
+                    continue
+    # import json
+    # from pprint import pprint
+
+    # # Assuming orbital_dict is already defined
+    # pprint(orbital_dict)  # For console display
+
+    # # Save to JSON file
+    # with open("orbital_data.json", "w") as f:
+    #     json.dump(orbital_dict, f, indent=4)
     return orbital_dict
