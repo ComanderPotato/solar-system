@@ -1,5 +1,0 @@
-HTML/CSS elements:
-    - celestial-body--label
-    - focused-body--panel
-    - loading-screen
-    - spinner

@@ -3,3 +3,5 @@ static/
 venv/
 dist/
 __pycache__
+backend/ephemeris_full/
+maps_old
