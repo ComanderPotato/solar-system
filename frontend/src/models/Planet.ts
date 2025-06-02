@@ -186,11 +186,11 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
 	};
 	public updateVisibilityDetail = (): void => {
 		if (app().canSeeBody(this._celestialBodyMesh)) {
+			if(this._cloudMesh) this._cloudMesh.visible = true
 			this._container.visible = this._meshDetail < CelestialBodyDetail.LOW;
-			this._celestialBodyGroup.visible = true;
 		} else {
-			this._celestialBodyMesh.visible = false;
-			this._celestialBodyGroup.visible = false;
+			if(this._cloudMesh) this._cloudMesh.visible = false
+			this._container.visible = false
 		}
 		const orbitLine = this._primaryBody.orbits.get(this.metadata.EnglishName);
 		if (orbitLine) orbitLine.visible = this._meshDetail < CelestialBodyDetail.LOW;
