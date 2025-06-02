@@ -1,15 +1,14 @@
-import { AxesHelper, BufferGeometry, Color, Group, Line, LineBasicMaterial, Material, Mesh, Vector3 } from "three";
-import { BaseCelestialBodyParameters, CelestialBodyParameters, CelestialMetadata, OrbitingBodyParameters, SecondaryOrbitalElements } from "../types";
+import { Group, Mesh, Vector3 } from "three";
+import { CelestialBodyParameters, CelestialMetadata, BaseCelestialBodyParameters, CelestialBodies } from "../types";
 import { CSS2DObject, Line2, LineMaterial } from "three/examples/jsm/Addons.js";
-import { OrbitingBody, CelestialBodyFactory, Moon } from ".";
+import { CelestialBodyFactory, OrbitingBody, Moon } from ".";
 import { app } from "../core";
-import { CelestialBodyColour, CelestialBodyColourHover } from "../utils/constants";
-
+import { CelestialBodyColour, CelestialBodyColourHover } from "../utils";
 export default abstract class CelestialBody<T extends CelestialBodyParameters = CelestialBodyParameters> {
 	protected _celestialBodyGroup: Group = new Group();
 	protected _metadata: CelestialMetadata;
 	protected _physicalParameters: T["Physical"];
-	protected _secondaryBodyParameters?: OrbitingBodyParameters[];
+	protected _secondaryBodyNames?: string[];
 	protected _secondaryBodies?: OrbitingBody[];
 	protected _position: Vector3 = new Vector3();
 	protected readonly _updateCooldown: number = 500;
@@ -18,12 +17,12 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
 
 	protected _orbitGroup: Group = new Group();
 	protected _orbits: Map<string, Line2> = new Map();
-	constructor(baseCelestialBodyParameters: BaseCelestialBodyParameters, secondaryBodyParameters?: OrbitingBodyParameters[], primaryBody?: CelestialBody) {
+	constructor(baseCelestialBodyParameters: BaseCelestialBodyParameters, secondaryBodyNames?: string[], primaryBody?: CelestialBody) {
 		this._primaryBody = primaryBody;
 		this._metadata = baseCelestialBodyParameters.MetaData;
 		this._physicalParameters = baseCelestialBodyParameters.Physical;
-		this._secondaryBodyParameters = baseCelestialBodyParameters.SecondaryBodyParameters;
-		this._secondaryBodyParameters = secondaryBodyParameters;
+		this._secondaryBodyNames = baseCelestialBodyParameters.SecondaryBodyNames;
+		this._secondaryBodyNames = secondaryBodyNames;
 		this._celestialBodyGroup.name = this._metadata.EnglishName;
 		this.initialiseCSS();
 	}
@@ -41,6 +40,10 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
 			this._orbits.delete(bodyName);
 		}
 	};
+
+	get celestialBodyGroup(): Group {
+		return this._celestialBodyGroup;
+	}
 	get orbitGroup(): Group {
 		return this._orbitGroup;
 	}
@@ -48,8 +51,8 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
 		return this._orbits;
 	}
 
-	get secondaryBodyParameters(): OrbitingBodyParameters[] | undefined {
-		return this._secondaryBodyParameters;
+	get secondaryBodyParameters(): string[] | undefined {
+		return this._secondaryBodyNames;
 	}
 	get primaryBody(): CelestialBody | undefined {
 		return this._primaryBody;
@@ -58,26 +61,17 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
 	get secondaryBodies(): OrbitingBody[] | undefined {
 		return this._secondaryBodies;
 	}
-	public initialiseSecondaryBodies = (secondaryBodyParameters?: CelestialBodyParameters[], secondaryOrbitalElements?: SecondaryOrbitalElements) => {
-		if (secondaryBodyParameters) {
-			this._secondaryBodies = [...secondaryBodyParameters.map((celestialBody) => CelestialBodyFactory.buildCelestialBody(celestialBody, this) as OrbitingBody)];
-		} else if (secondaryOrbitalElements) {
-			this._secondaryBodies = this.constructSecondaryBodies(secondaryOrbitalElements);
+	public initialiseSecondaryBodies = (secondaryBodies: CelestialBodies): void => {
+		this._secondaryBodies = [];
+		for (const secondaryBody of Object.values(secondaryBodies)) {
+			this._secondaryBodies.push(CelestialBodyFactory.buildCelestialBody(secondaryBody, this) as OrbitingBody);
 		}
 	};
-	private constructSecondaryBodies = (secondaryOrbitalElements: SecondaryOrbitalElements): OrbitingBody[] | undefined => {
-		if (!this._secondaryBodyParameters) return;
-		const temp = [];
-		for (let secondaryBody of this._secondaryBodyParameters) {
-			if (secondaryOrbitalElements[secondaryBody.MetaData.EnglishName] == null) continue;
-			secondaryBody.Orbital = secondaryOrbitalElements[secondaryBody.MetaData.EnglishName];
-			secondaryBody.Orbital.Position = secondaryBody.Orbital.Position.clone().add(this._position);
-			temp.push(CelestialBodyFactory.buildCelestialBody(secondaryBody, this) as OrbitingBody);
-		}
-		return temp;
+	public addSecondaryBody = (secondaryBody: OrbitingBody): void => {
+		if (!this._secondaryBodies) this._secondaryBodies = [];
+		this._secondaryBodies.push(secondaryBody);
 	};
 	// Getters
-	public getParameter = <T extends keyof typeof this._physicalParameters>(query: T): (typeof this._physicalParameters)[T] => this._physicalParameters[query];
 
 	get metadata(): CelestialMetadata {
 		return this._metadata;
@@ -88,13 +82,8 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
 	abstract get physicalParameters(): T["Physical"];
 
 	protected addToScene = (): void => {
-		// this._orbitGroup.position.copy(this._celestialBodyGroup.position);
-		// this._celestialBodyGroup.add(this._orbitGroup);
 		app().scene.add(this._orbitGroup);
-		// this._celestialBodyGroup.add(this._orbitGroup);
 		app().scene.add(this._celestialBodyGroup);
-		// this._orbitGroup.quaternion.copy(this._celestialBodyGroup.quaternion).invert();
-		// app().scene.add(this._orbitGroup);
 	};
 
 	public destroySecondaries = (): void => {
@@ -136,12 +125,12 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
 		// containerElement.className = `pioneer-label-div ${this._metadata.BodyType.toLowerCase()} clickable selection`;
 		containerElement.className = `celestial-body--label ${this._metadata.BodyType.toLowerCase()} clickable selection`;
 		containerElement.append(this.initialiseIcon(), this.initialiseLabel());
-		// Hold reference to delete later ... or add to this._container.element
-		// containerElement.addEventListener("click", this.handleClick);
 		this._container = new CSS2DObject(containerElement);
 		this._container.element.addEventListener("click", this.handleClick);
 		this._container.element.addEventListener("mouseover", this.handleHover);
 		this._container.element.addEventListener("mouseleave", this.handleLeave);
+		this._container.visible;
+		// this._container.position.copy(this._position)
 		this._celestialBodyGroup.add(this._container);
 		// this.updateContainerPosition()
 	};
@@ -158,6 +147,7 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
 		return iconElement;
 	};
 	protected handleClick = (): void => {
+		if (app().lerpDestination) return;
 		app().focusedCelestialBody = this;
 		app().controls.target = this._position;
 	};
@@ -173,5 +163,17 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
 		(this._primaryBody.orbits.get(this._metadata.EnglishName)!.material as LineMaterial).color.set(colour);
 	};
 
+	public updateMeshDetail = () => {
+		this.updateDetail();
+		if (this._secondaryBodies) {
+			this._secondaryBodies.forEach((secondaryBody) => {
+				secondaryBody.updateMeshDetail();
+			});
+		}
+	};
+
+	// Preload for focusedObject
+	abstract preLoadDetail(): void;
+	abstract updateDetail(): void;
 	abstract rotateOnAxis(dt: number): void;
 }
