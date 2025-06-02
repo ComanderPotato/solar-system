@@ -4,7 +4,7 @@ import { CelestialBodies, FetchedOrbitalParameters, FetchedPhysicalParameters, p
 import { DataProcessor } from "../utils";
 import { DataTexture, Texture } from "three";
 import SolarSystem, { SOLAR_SYSTEM_PRIMARY, SOLAR_SYSTEM_SECONDARIES } from "../models/Solarsystem";
-import { uiManager } from "../core";
+import { timeManager, uiManager } from "../core";
 import { CelestialBody, OrbitingBody, Planet, Star } from "../models";
 interface FocusedSystem {
 	Barycenter?: CelestialBody;
@@ -182,6 +182,10 @@ export default class DataManager {
 		} else {
 			uiManager().hideLoadScreen();
 			if (this._focusedCelestialBody && this._focusedSummary) uiManager().updateInformationPanel(this._focusedCelestialBody, this._focusedSummary.summary);
+			if(!this._hasInitialDataLoaded) {
+				timeManager().reset()
+				this._hasInitialDataLoaded = true
+			}
 		}
 		// this._isLoading ? uiManager().showLoadScreen() : uiManager().hideLoadScreen();
 	};
