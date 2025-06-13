@@ -12,12 +12,6 @@ A 3D interactive simulation of our solar system built with [Three.js](https://th
 - 🖱️ Basic camera controls for navigation (orbit, zoom, pan)
 - 📚 Potential for educational or gamified enhancements
 
-<!-- ## 📸 Screenshots
-
-<!-- Include screenshots or demo GIFs here -->
-![screenshot1](./assets/screenshot1.png)
-![screenshot2](./assets/screenshot2.png) -->
-
 ## 🔧 Technologies Used
 
 - [Three.js](https://threejs.org/)
