@@ -1,16 +1,26 @@
-## To Do
+# 🌌 Solar System Simulation
 
-- Glow mesh and clouds not working
-- Bulk physical parameter API call
-- Moon loading and de-loading
-- Texture caching
-- Use comments to find NAIF code for body names
-- On focus wiki summary and body information
-- Hide circle when body is close
-- Tidy frontend and backend
-- Update cooldown
-- Add orbitline to parent
-- Fix glow for bodies (need atmosphere for glow, i.e., moons dont have one)
-- Fix planet axial tilt?
-- Refactor
-- Update closest orbit zoom to be focused bodys target + radius
+A 3D interactive simulation of our solar system built with [Three.js](https://threejs.org/), designed to visualize planetary motion, orbits, and other celestial dynamics in a visually engaging and educational way.
+
+## 🚀 Features
+
+- 🌍 Realistic orbits for all major planets
+- 🔄 Planetary rotation and revolution
+- 🛰️ Moons orbiting their respective planets
+- 🧭 Axial tilt for planets (where applicable)
+- ☀️ Sun as a central light source
+- 🖱️ Basic camera controls for navigation (orbit, zoom, pan)
+- 📚 Potential for educational or gamified enhancements
+
+<!-- ## 📸 Screenshots
+
+<!-- Include screenshots or demo GIFs here -->
+![screenshot1](./assets/screenshot1.png)
+![screenshot2](./assets/screenshot2.png) -->
+
+## 🔧 Technologies Used
+
+- [Three.js](https://threejs.org/)
+- JavaScript / TypeScript
+- Python - Flask
+- HTML5 / CSS3
