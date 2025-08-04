@@ -19,4 +19,5 @@ A 3D interactive simulation of our solar system built with [Three.js](https://th
 - Python - Flask
 - HTML5 / CSS3
 
-## [![Video Demonstration](https://img.youtube.com/vi/Cz1DIkZZJwk&t=2s&ab/0.jpg)]](https://www.youtube.com/watch?v=Cz1DIkZZJwk&t=2s&ab_channel=TomGolding)
+## [![Video Demonstration](https://img.youtube.com/vi/Cz1DIkZZJwk/0.jpg)](https://www.youtube.com/watch?v=Cz1DIkZZJwk&t=2s&ab_channel=TomGolding)
+
