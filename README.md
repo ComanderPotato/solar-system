@@ -24,9 +24,6 @@ A 3D interactive simulation of our solar system built with [Three.js](https://th
 - HTML5 / CSS3
 
 ---
-Absolutely — here's a clean and professional section you can add to your README to showcase those images. I’ll assume they’re stored in an `assets/` folder at the project root, but you can adjust the path if needed:
-
----
 
 ## 🖼️ Visuals
 
@@ -37,15 +34,6 @@ Absolutely — here's a clean and professional section you can add to your READM
 | 🪐 Saturn                    | 🌘 Deimos                    |
 | ---------------------------- | ---------------------------- |
 | ![Saturn](assets/images/Saturn.PNG) | ![Deimos](assets/images/Deimos.PNG) |
-
----
-
-### 💡 Tips:
-
-* Keep image dimensions consistent (or compress them if needed).
-* If using GitHub, it’s best to keep images under \~2MB to ensure fast rendering.
-
-Let me know if you want to include captions or alt text describing what each panel does.
 
 ---
 
