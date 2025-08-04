@@ -30,15 +30,13 @@ Absolutely — here's a clean and professional section you can add to your READM
 
 ## 🖼️ Visuals
 
-Below are some screenshots of planetary panels and visuals from the simulation:
+| 🌞 Sun                 | 🌍 Earth                   |
+| ---------------------- | -------------------------- |
+| ![Sun](assets/images/Sun.PNG) | ![Earth](assets/images/Earth.PNG) |
 
-| 🌞 Sun                 | 🌍 Earth                   | 🪐 Saturn                    |
-| ---------------------- | -------------------------- | ---------------------------- |
-| ![Sun](assets/images/Sun.PNG) | ![Earth](assets/images/Earth.PNG) | ![Saturn](assets/images/Saturn.PNG) |
-
-| 🌘 Deimos                    | 🛰️ Deimos Info Panel                    |
-| ---------------------------- | ---------------------------------------- |
-| ![Deimos](assets/images/Deimos.PNG) | ![Deimos Panel](assets/images/Deimos_panel.PNG) |
+| 🪐 Saturn                    | 🌘 Deimos                    |
+| ---------------------------- | ---------------------------- |
+| ![Saturn](assets/images/Saturn.PNG) | ![Deimos](assets/images/Deimos.PNG) |
 
 ---
 
