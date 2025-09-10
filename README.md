@@ -25,6 +25,18 @@ A 3D interactive simulation of our solar system built with [Three.js](https://th
 
 ---
 
+## 🖼️ Visuals
+
+| 🌞 Sun                 | 🌍 Earth                   |
+| ---------------------- | -------------------------- |
+| ![Sun](assets/images/Sun.PNG) | ![Earth](assets/images/Earth.PNG) |
+
+| 🪐 Saturn                    | 🌘 Deimos                    |
+| ---------------------------- | ---------------------------- |
+| ![Saturn](assets/images/Saturn.PNG) | ![Deimos](assets/images/Deimos.PNG) |
+
+---
+
 ## Video Demonstration
 [![Video Demonstration](https://img.youtube.com/vi/Cz1DIkZZJwk/0.jpg)](https://www.youtube.com/watch?v=Cz1DIkZZJwk&t=2s&ab_channel=TomGolding)
 
