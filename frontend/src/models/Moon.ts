@@ -1,9 +1,15 @@
 import { BufferGeometry, IcosahedronGeometry, Mesh, MeshBasicMaterial, MeshPhongMaterial, Vector3 } from "three";
+// import { AppContext } from "../core";
 import IMeshProvider from "../interfaces/IMeshProvider";
-import { MoonParameters, MoonPhysicalParameters, TextureParameters } from "../types";
-import { CelestialBody, OrbitingBody } from ".";
-import { CelestialBodyDetail, CelestialBodyDistance } from "../utils";
-import { app, dataManager, timeManager } from "../core";
+// import { MoonParameters, MoonPhysicalParameters, TextureParameters } from "../types";
+import { MoonParameters } from "../types/CelestialBodyParameters";
+import { MoonPhysicalParameters } from "../types/PhysicalParameters";
+import { TextureParameters } from "../types/TextureParameters";
+import CelestialBody from "./CelestialBody";
+import OrbitingBody from "./OrbitingBody";
+// import { CelestialBodyDetail, CelestialBodyDistance } from "../utils";
+import { CelestialBodyDetail, CelestialBodyDistance } from "../utils/constants";
+
 export default class Moon extends OrbitingBody<MoonParameters> implements IMeshProvider {
 	private _celestialBodyGeometry!: BufferGeometry;
 	private _celestialBodyMaterial!: MeshPhongMaterial;
@@ -36,7 +42,6 @@ export default class Moon extends OrbitingBody<MoonParameters> implements IMeshP
 	get celestialBodyMesh(): Mesh {
 		return this._celestialBodyMesh;
 	}
-
 	get textures(): TextureParameters {
 		return this._textures;
 	}
@@ -62,9 +67,9 @@ export default class Moon extends OrbitingBody<MoonParameters> implements IMeshP
 		this._randomNumber = Math.floor(Math.random() * 4) + 1;
 		this._celestialBodyGeometry = new IcosahedronGeometry(this._physicalParameters.MeanRadius, this._meshDetail);
 		this._celestialBodyMaterial = new MeshPhongMaterial({
-			map: await dataManager().getTexture(this.createTexturePath("color")),
+			map: await AppContext.instance.DataManager.getTexture(this.createTexturePath("color")),
 		});
-		// this.celestialBodyMaterial.specularMap = await dataManager().getTexture(this.createTexturePath("specular"));
+		// this.celestialBodyMaterial.specularMap = await appContext.DataManager.getTexture(this.createTexturePath("specular"));
 		this._celestialBodyMesh = new Mesh(this._celestialBodyGeometry, this._celestialBodyMaterial);
 		this._celestialBodyGroup.add(this._celestialBodyMesh);
 	}
@@ -82,42 +87,49 @@ export default class Moon extends OrbitingBody<MoonParameters> implements IMeshP
 		this._celestialBodyMesh.geometry = baseGeometry.clone();
 	};
 	public calculateDetailLevel = (distance: number): CelestialBodyDetail => {
-		if (distance < this._physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE) return CelestialBodyDetail.HIGH;
+		if (distance < this._physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE)
+			return CelestialBodyDetail.HIGH;
 		// if (distance < this._physicalParameters.MeanRadius * CelestialBodyDistance.MEDIUM) return CelestialBodyDetail.MEDIUM;
 		if (distance < this._physicalParameters.MeanRadius * CelestialBodyDistance.FAR) return CelestialBodyDetail.LOW;
 		return CelestialBodyDetail.NONE;
 	};
 	public updateVisibilityDetail = (): void => {
-		if (app().canSeeBody(this._celestialBodyMesh)) {
-			this._container.visible = this._meshDetail < CelestialBodyDetail.LOW;
-		} else {
-			this._container.visible = false
-		}
+		// if (AppContext.instance.App.canSeeBody(this._celestialBodyMesh)) {
+		// 	this._container.visible = this._meshDetail < CelestialBodyDetail.LOW;
+		// } else {
+		// 	this._container.visible = false;
+		// }
 		const orbitLine = this._primaryBody.orbits.get(this.metadata.EnglishName);
 		if (orbitLine) orbitLine.visible = this._meshDetail < CelestialBodyDetail.LOW;
 
 		this._celestialBodyMesh.visible = Boolean(this._meshDetail);
 	};
 	public updateDetail = (): void => {
-		if (!this._celestialBodyMesh) return;
-		const distance = app().camera.position.distanceTo(this._position);
-
-		const newDetail = this.calculateDetailLevel(distance);
-		const oldDetail = this._meshDetail;
-		this._meshDetail = newDetail;
-		this.updateVisibilityDetail();
-		this._meshDetail = app().focusedCelestialBody == this ? CelestialBodyDetail.HIGH : this._meshDetail;
-		const currentTime = timeManager().elapsedTime;
-		if (currentTime - this._lastDetailUpdateTime < this.DETAIL_COOLDOWN) {
-			this._lastDetailUpdateTime = oldDetail == this._meshDetail ? currentTime : this._lastDetailUpdateTime;
-			return;
-		}
-		if (oldDetail != this._meshDetail) {
-			if (this._meshDetail == CelestialBodyDetail.NONE || app().lerpDestination || app().focusedCelestialBody != this) return;
-			this.updateTextureDetail();
-			this.updateMeshDetailLevel();
-			this._lastDetailUpdateTime = currentTime;
-		}
+		// if (!this._celestialBodyMesh) return;
+		// const distance = AppContext.instance.App.camera.position.distanceTo(this._position);
+		//
+		// const newDetail = this.calculateDetailLevel(distance);
+		// const oldDetail = this._meshDetail;
+		// this._meshDetail = newDetail;
+		// this.updateVisibilityDetail();
+		// this._meshDetail =
+		// 	AppContext.instance.App.focusedCelestialBody == this ? CelestialBodyDetail.HIGH : this._meshDetail;
+		// const currentTime = AppContext.instance.TimeManager.elapsedTime;
+		// if (currentTime - this._lastDetailUpdateTime < this.DETAIL_COOLDOWN) {
+		// 	this._lastDetailUpdateTime = oldDetail == this._meshDetail ? currentTime : this._lastDetailUpdateTime;
+		// 	return;
+		// }
+		// if (oldDetail != this._meshDetail) {
+		// 	if (
+		// 		this._meshDetail == CelestialBodyDetail.NONE ||
+		// 		AppContext.instance.App.lerpDestination ||
+		// 		AppContext.instance.App.focusedCelestialBody != this
+		// 	)
+		// 		return;
+		// 	this.updateTextureDetail();
+		// 	this.updateMeshDetailLevel();
+		// 	this._lastDetailUpdateTime = currentTime;
+		// }
 	};
 	public createTexturePath = (texture: string): string => {
 		const folderName = this._isGeneric ? "generic" : "moon";
@@ -126,7 +138,9 @@ export default class Moon extends OrbitingBody<MoonParameters> implements IMeshP
 		}.webp`;
 	};
 	public updateTextureDetail = async (): Promise<void> => {
-		(this._celestialBodyMesh.material as MeshBasicMaterial).map = await dataManager().getTexture(this.createTexturePath("color"));
+		(this._celestialBodyMesh.material as MeshBasicMaterial).map = await AppContext.instance.DataManager.getTexture(
+			this.createTexturePath("color"),
+		);
 	};
 	public preLoadDetail = (): void => {
 		this._meshDetail = CelestialBodyDetail.HIGH;
@@ -138,7 +152,7 @@ export default class Moon extends OrbitingBody<MoonParameters> implements IMeshP
 // public updateDetail = (): void => {
 // 	if (!this._celestialBodyMesh) return;
 // 	// Add cooldown .. or add caching
-// 	const distance = app().camera.position.distanceTo(this._position);
+// 	const distance = appContext.App.camera.position.distanceTo(this._position);
 // 	const oldDetail = this._meshDetail;
 // 	const radius = this._physicalParameters.MeanRadius;
 // 	if (distance < radius * CelestialBodyDistance.CLOSE) {
@@ -157,7 +171,7 @@ export default class Moon extends OrbitingBody<MoonParameters> implements IMeshP
 
 // 		this._celestialBodyMesh.visible = Boolean(this._meshDetail);
 
-// 		if (this._meshDetail == CelestialBodyDetail.NONE || app().lerpDestination) return;
+// 		if (this._meshDetail == CelestialBodyDetail.NONE || appContext.App.lerpDestination) return;
 // 		const baseGeometry = this.getGeometryForDetail(this._meshDetail);
 // 		this._celestialBodyMesh.geometry.dispose();
 // 		this._celestialBodyMesh.geometry = baseGeometry.clone();

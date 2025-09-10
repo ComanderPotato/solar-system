@@ -1,22 +1,27 @@
-import { Clock } from "../utils";
+import Clock from "../utils/Clock";
+import ITimeManager from "../interfaces/managers/ITimeManager";
+import Manager from "../core/Manager";
 
-export default class TimeManager {
+export default class TimeManager extends Manager implements ITimeManager {
 	private _accumulator: number = 0.0;
 	private _timeStep: number = 1 / 60;
 	private _timeScales = [-3600, -1800, -1200, -600, -60, -30, -3, -1, 1, 3, 30, 60, 600, 1200, 1800, 3600];
 	private _timeScaleIndex = 8;
-	private _clock: Clock;
-	constructor() {
-		this._clock = new Clock();
+	private _clock: Clock = new Clock();
+	public constructor() {
+		super();
 	}
-	public incrementTimeScale = () => {
+	get clock(): Clock {
+		return this._clock;
+	}
+	public incrementTimeScale() {
 		if (this._timeScaleIndex >= this._timeScales.length - 1) return;
 		this._timeScaleIndex++;
-	};
-	public decrementTimeScale = () => {
+	}
+	public decrementTimeScale() {
 		if (this._timeScaleIndex <= 0) return;
 		this._timeScaleIndex--;
-	};
+	}
 	get accumulator(): number {
 		return this._accumulator;
 	}
@@ -41,9 +46,9 @@ export default class TimeManager {
 	public get simulatedDate(): Date {
 		return this._clock.simulatedDate;
 	}
-	public updateClock = () => {
+	public updateClock() {
 		this._clock.update();
-	};
+	}
 	public pause = (): void => {
 		this._clock.pause();
 	};
@@ -57,9 +62,9 @@ export default class TimeManager {
 	public togglePause = (): void => {
 		this._clock.togglePause();
 	};
-	public isRunning = () => {
+	public isRunning() {
 		return this._clock.isRunning;
-	};
+	}
 	public reset(toDate: Date = new Date()): void {
 		this._clock.reset(toDate);
 		this._accumulator = 0;

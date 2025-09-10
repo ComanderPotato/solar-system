@@ -1,13 +1,34 @@
-import { CelestialBody, CelestialBodyFactory, OrbitingBody, Star } from ".";
-import { CelestialBodies } from "../types";
+import CelestialBody from "./CelestialBody";
+import OrbitingBody from "./OrbitingBody";
+import Star from "./Star";
+
+import { CelestialBodies } from "../types/CelestialBodyParameters";
 
 export const SOLAR_SYSTEM_PRIMARY = "Sun";
-export const SOLAR_SYSTEM_SECONDARIES = ["Earth", "Mars", "Jupiter", "Saturn", "Mercury", "Uranus", "Pluto", "Venus", "Neptune"];
+export const SOLAR_SYSTEM_SECONDARIES = [
+	"Earth",
+	"Mars",
+	"Jupiter",
+	"Saturn",
+	"Mercury",
+	"Uranus",
+	"Pluto",
+	"Venus",
+	"Neptune",
+];
+
+export interface InitialSolarSystem {
+	primary: string;
+	secondaries: string[];
+}
 export default class SolarSystem {
 	private _primaryBody!: Star;
-	private _celestialBodies!: CelestialBodies;
+	private _secondaryBodies!: OrbitingBody[];
 	private _focusedSecondaries?: OrbitingBody[];
-	constructor() {}
+	constructor(primary: CelestialBody, secondaries: CelestialBody[]) {
+		this.initialisePrimary(primary);
+		this.initialiseSecondaries(secondaries);
+	}
 
 	get allBodies(): CelestialBody[] {
 		return [this._primaryBody, ...(this._primaryBody.secondaryBodies ?? []), ...(this._focusedSecondaries ?? [])];
@@ -19,21 +40,23 @@ export default class SolarSystem {
 		return this._focusedSecondaries;
 	}
 	get primaryBody(): Star {
-		return this._primaryBody
+		return this._primaryBody;
 	}
-	public initialiseSolarSystem = (celestialBodies: CelestialBodies) => {
-		this._celestialBodies = celestialBodies;
-		this.initialisePrimaryBody();
-		this.initialiseSecondaryBodies();
-	};
-	private initialisePrimaryBody = () => {
-		this._primaryBody = CelestialBodyFactory.buildCelestialBody(this._celestialBodies[SOLAR_SYSTEM_PRIMARY]) as Star;
-	};
-	private initialiseSecondaryBodies = () => {
-		SOLAR_SYSTEM_SECONDARIES.forEach((secondaryName) => {
-			this._primaryBody.addSecondaryBody(CelestialBodyFactory.buildCelestialBody(this._celestialBodies[secondaryName], this._primaryBody) as OrbitingBody);
-		});
-	};
+
+	get initialData(): InitialSolarSystem {
+		return {
+			primary: SOLAR_SYSTEM_PRIMARY,
+			secondaries: SOLAR_SYSTEM_SECONDARIES,
+		};
+	}
+	public initialisePrimary(primary: CelestialBody) {
+		if (!(primary instanceof Star)) throw new Error();
+		this._primaryBody = primary;
+	}
+	public initialiseSecondaries(secondaries: CelestialBody[]) {
+		if (!secondaries.every((secondary) => secondary instanceof OrbitingBody)) throw new Error();
+		this._secondaryBodies = secondaries;
+	}
 	public updateDetail = (): void => {
 		if (!this._primaryBody || !this._primaryBody.secondaryBodies) return;
 		this._primaryBody.updateDetail();
@@ -56,10 +79,10 @@ export default class SolarSystem {
 		this._primaryBody.rotateOnAxis(elapsedTime);
 		this._primaryBody.updateDetail();
 		this._primaryBody.secondaryBodies.forEach((secondaryBody) => {
-			secondaryBody.updateVelocity(elapsedTime);
+			// secondaryBody.updateVelocity(elapsedTime);
 		});
 		this._primaryBody.secondaryBodies.forEach((secondaryBody) => {
-			secondaryBody.updatePosition(elapsedTime);
+			// secondaryBody.updatePosition(elapsedTime);
 		});
 	};
 	// public nBodySimulate(elapsedTime: number) {

@@ -1,5 +1,3 @@
-import { uiManager } from "../core";
-
 export default class Clock {
 	private lastTime: number = performance.now();
 	private _delta: number = 0;
@@ -18,7 +16,6 @@ export default class Clock {
 	get delta(): number {
 		return this._delta;
 	}
-
 	get elapsedTime(): number {
 		return this._elapsedTime;
 	}
@@ -55,7 +52,7 @@ export default class Clock {
 		if (this._running) {
 			this._delta = rawDelta;
 			this._elapsedTime += this._delta;
-			uiManager().updateDateTime(this.formattedSimDate(), this.formattedSimTime());
+			// AppContext.instance.UIManager.updateDateTime(this.formattedSimDate(), this.formattedSimTime());
 		} else {
 			this._delta = 0;
 		}

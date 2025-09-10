@@ -17,11 +17,11 @@ if (!existsSync(backendStaticSrc)) {
 
 console.log("Creating Python virtual environment...");
 
-const venvCmd =
-	platform() === 'win32'
-		? 'python -m venv venv'
-		: 'python3 -m venv venv';
+// const venvCmd =
+// 	platform() === 'win32'
+// 		? 'python -m venv venv'
+// 		: 'python3 -m venv venv';
 
-execSync(venvCmd, { cwd: 'backend', stdio: 'inherit' });
+// execSync(venvCmd, { cwd: 'backend', stdio: 'inherit' });
 
-console.log("Setup complete!");
+// console.log("Setup complete!");

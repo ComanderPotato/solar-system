@@ -1,53 +1,86 @@
 const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
-
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  entry: "./src/core/index.ts",
-  mode: "development",
-  output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "index.js",
-  },
-  resolve: {
-    extensions: [".ts", ".js"],
-  },
-  optimization: {
-    minimize: true,
-    minimizer: [new TerserPlugin()],
-  },
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
-      },
-    ],
-  },
-  plugins: [
-    new CopyPlugin({
-      patterns: [
-        { from: "src/assets", to: "assets" },
-        { from: "src/data", to: "data" },
-        { from: "src/styles", to: "styles" },
-      ],
-    }),
-  ],
-  // devServer: {
-  //   static: {
-  //     directory: path.join(__dirname, "dist"),
-  //   },
-  //   compress: true,
-  //   port: 9000,
-  //   proxy: {
-  //     "/api": {
-  //       target: "https://api.le-systeme-solaire.net",
-  //       changeOrigin: true,
-  //       pathRewrite: { "^/api": "" },
-  //       secure: false,
-  //     },
-  //   },
-  // },
+	entry: "./src/index.ts",
+	mode: "development",
+	devtool: "inline-source-map",
+	output: {
+		filename: "bundle.js",
+		path: path.resolve(__dirname, "dist"),
+		clean: true,
+	},
+	resolve: {
+		extensions: [".ts", ".js"],
+	},
+	module: {
+		rules: [
+			{
+				test: /\.ts$/,
+				use: "ts-loader",
+				exclude: /node_modules/,
+			},
+			{
+				test: /\.css$/i,
+				use: ["style-loader", "css-loader"],
+			},
+			// {
+			// 	test: /\.(png|svg|jpg|jpeg|gif|webp)$/i,
+			// 	type: "asset/resource",
+			// },
+		],
+	},
+	optimization: {
+		minimize: true,
+		minimizer: [new TerserPlugin()],
+	},
+	plugins: [
+		new HtmlWebpackPlugin({
+			template: "./src/index.html", // source file
+			filename: "index.html", // output in dist/
+		}),
+		new CopyPlugin({
+			patterns: [
+				{ from: "src/assets", to: "assets" },
+				{ from: "src/data", to: "data" },
+				{ from: "src/styles", to: "styles" },
+			],
+		}),
+	],
 };
+// module.exports = {
+//   entry: "./src/core/index.ts",
+//   mode: "production",
+//   output: {
+//     path: path.resolve(__dirname, "dist"),
+//     filename: "bundle.js",
+//   },
+//   resolve: {
+//     extensions: [".ts", ".js"],
+//   },
+//   optimization: {
+//     minimize: true,
+//     minimizer: [new TerserPlugin()],
+//   },
+//   module: {
+//     rules: [
+//       {
+//         test: /\.ts$/,
+//         use: "ts-loader",
+//         exclude: /node_modules/,
+//       },
+//     ],
+//   },
+//   plugins: [
+//     new CopyPlugin({
+//       patterns: [
+//         { from: "src/assets", to: "assets" },
+//         { from: "src/data", to: "data" },
+//         { from: "src/styles", to: "styles" },
+//       ],
+//     }),
+//   ],
+// };
+// "build": "rimraf dist && tsc && webpack && cpy dist/**/* ../backend/static/src --parents"

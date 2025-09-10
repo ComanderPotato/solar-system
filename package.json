@@ -7,7 +7,6 @@
     "dev": "concurrently \"cd frontend && npm run build\" \"cd backend && flask run\"",
     "server": "cd backend && flask run",
     "setup": "node setup.mjs"
-    
   },
   "devDependencies": {
     "concurrently": "^8.0.0"

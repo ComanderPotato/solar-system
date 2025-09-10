@@ -1,15 +1,24 @@
 import { Vector3 } from "three";
-import {
-	OrbitingBodyParameters,
-	PhysicalParameters,
-	distanceParameters,
-	angleParameters,
-	timeParameters,
-	temperatureParameters,
-	pressureParameters,
-	energyParameters,
-	parametersToIgnore,
-} from "../types";
+// import {
+// 	OrbitingBodyParameters,
+// 	PhysicalParameters,
+// 	distanceParameters,
+// 	angleParameters,
+// 	timeParameters,
+// 	temperatureParameters,
+// 	pressureParameters,
+// 	energyParameters,
+// 	parametersToIgnore,
+// } from "../types";
+import { OrbitingBodyParameters } from "../types/CelestialBodyParameters";
+import { PhysicalParameters } from "../types/PhysicalParameters";
+import { distanceParameters } from "../types/ParameterCategories";
+import { angleParameters } from "../types/ParameterCategories";
+import { timeParameters } from "../types/ParameterCategories";
+import { temperatureParameters } from "../types/ParameterCategories";
+import { pressureParameters } from "../types/ParameterCategories";
+import { energyParameters } from "../types/ParameterCategories";
+import { parametersToIgnore } from "../types/ParameterCategories";
 import { SCALE } from "./constants";
 
 export const preprocessParameter = (parameter: string): string =>

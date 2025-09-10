@@ -1,17 +1,36 @@
 import { Color, EllipseCurve, Vector2, Vector3 } from "three";
-import { OrbitingBodyParameters } from "../types";
-import { calculateAttractiveForce, calculateForceDirection, calculateSquaredDistance, calculateAcceleration, CelestialBodyColour } from "../utils";
-import { CelestialBody } from ".";
+// import { OrbitingBodyParameters } from "../types";
+import { OrbitingBodyParameters } from "../types/CelestialBodyParameters";
+// import {
+// 	calculateAttractiveForce,
+// 	calculateForceDirection,
+// 	calculateSquaredDistance,
+// 	calculateAcceleration,
+// 	CelestialBodyColour,
+// } from "../utils";
+import {
+	calculateAttractiveForce,
+	calculateForceDirection,
+	calculateSquaredDistance,
+	calculateAcceleration,
+} from "../utils/formulas";
+import { CelestialBodyColour } from "../utils/constants";
+import CelestialBody from "./CelestialBody";
 import { Line2, LineGeometry, LineMaterial } from "three/examples/jsm/Addons.js";
 
-export default abstract class OrbitingBody<T extends OrbitingBodyParameters = OrbitingBodyParameters> extends CelestialBody<T> {
+export default abstract class OrbitingBody<
+	T extends OrbitingBodyParameters = OrbitingBodyParameters,
+> extends CelestialBody<T> {
 	// Can probably put primaryBody in the root
 
 	protected _primaryBody: CelestialBody;
-	// protected _orbitingBodyParameters: T["Orbital"];
 	protected _orbitingBodyParameters: T["Orbital"];
 	protected _currentVelocity!: Vector3;
-	constructor(orbitingBodyParameters: OrbitingBodyParameters, primaryBody: CelestialBody, secondaryBodyNames?: string[]) {
+	constructor(
+		orbitingBodyParameters: OrbitingBodyParameters,
+		primaryBody: CelestialBody,
+		secondaryBodyNames?: string[],
+	) {
 		super(orbitingBodyParameters, secondaryBodyNames);
 		this._primaryBody = primaryBody;
 		this._orbitingBodyParameters = orbitingBodyParameters.Orbital;
@@ -79,7 +98,10 @@ export default abstract class OrbitingBody<T extends OrbitingBodyParameters = Or
 		for (const point of points) {
 			positions.push(point.x, 0, point.y);
 		}
-		const colour = new Color(CelestialBodyColour[this._metadata.EnglishName.toUpperCase()] ?? CelestialBodyColour[this._primaryBody.metadata.EnglishName.toUpperCase()]);
+		const colour = new Color(
+			CelestialBodyColour[this._metadata.EnglishName.toUpperCase()] ??
+				CelestialBodyColour[this._primaryBody.metadata.EnglishName.toUpperCase()],
+		);
 		const geometry = new LineGeometry();
 		geometry.setPositions(positions);
 		const material = new LineMaterial({

@@ -1,6 +1,6 @@
 import { BufferGeometry, MeshPhongMaterial, Mesh } from "three";
 import { CelestialBodyDetail } from "../utils/constants";
-import { TextureParameters } from "../types";
+import { TextureParameters } from "../types/TextureParameters";
 export default interface IMeshProvider {
 	readonly textures: TextureParameters;
 	readonly meshDetail: CelestialBodyDetail;

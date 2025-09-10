@@ -1,4 +1,4 @@
-import { BodyTypes } from ".";
+import { BodyTypes } from "./CelestialBodyMetadata";
 // ==================================================================================================================
 // PHYSICAL PARAMETERS
 // ==================================================================================================================
@@ -22,7 +22,7 @@ export interface PhysicalParametersResponse {
 		{
 			moon: string;
 			rel: string;
-		}
+		},
 	];
 	density: number;
 	gravity: number;
@@ -83,3 +83,4 @@ export type PhysicalParameters = MoonPhysicalParameters | StarPhysicalParameters
 export type OptionalPhsyicalParametersJSON = {
 	[celestialBodyName: string]: OptionalPhysicalParameters;
 };
+

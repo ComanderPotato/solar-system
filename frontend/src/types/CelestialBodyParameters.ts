@@ -1,4 +1,9 @@
-import { CelestialMetadata, BasePhysicalParameters, PlanetPhysicalParameters, StarPhysicalParameters, OrbitalParameters, TextureParameters } from ".";
+import { CelestialMetadata } from "./CelestialBodyMetadata";
+import { BasePhysicalParameters } from "./PhysicalParameters";
+import { PlanetPhysicalParameters } from "./PhysicalParameters";
+import { StarPhysicalParameters } from "./PhysicalParameters";
+import { OrbitalParameters } from "./OrbitalParameters";
+import { TextureParameters } from "./TextureParameters";
 // ==================================================================================================================
 // CELESTIAL BODY PARAMETERS
 // ==================================================================================================================
@@ -33,3 +38,4 @@ export type CelestialBodyParameters = OrbitingBodyParameters | StarParameters | 
 export interface CelestialBodies {
 	[celestialBodyName: string]: CelestialBodyParameters;
 }
+
