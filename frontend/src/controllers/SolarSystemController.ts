@@ -13,8 +13,8 @@ export default class SolarSystemController extends Controller<ISolarSystemManage
 
 	get focusedBodyInformation(): FocusedBodyInformation | undefined {
 		if (!this.focusedCelestialBody) return;
-		let velocity;
-		let primaryPosition;
+		let velocity = undefined;
+		let primaryPosition = undefined;
 		if (this.focusedCelestialBody instanceof OrbitingBody) {
 			velocity = this.focusedCelestialBody.currentVelocity;
 			primaryPosition = this.focusedCelestialBody.primaryBody!.position;

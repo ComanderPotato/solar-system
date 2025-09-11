@@ -84,27 +84,31 @@ export default class DataController extends Controller<IDataManager> implements 
 		}
 	}
 
-	private async handleFocusedElements(): Promise<void> {
+	private async handleFocusedElements(newFocusedBody: CelestialBody): Promise<void> {
 		const body = this.focusedCelestialBody;
 		return await this.handleTracking(TaskName.FocusedElements, async () => {
-			let temp = this.focusedCelestialBody;
-			if (!(temp.primaryBody instanceof Star)) {
-				while (temp.primaryBody) {
+			let temp: CelestialBody | undefined = newFocusedBody;
+			if (!temp.primaryBody && !(temp instanceof Star)) {
+				while (temp) {
 					if (temp == body || temp instanceof Star) {
-						this.celestialBodyController.handleSecondaryDisposal(temp);
+						this.celestialBodyController.handleSecondaryDisposal(body);
 						// temp.destroySecondaries();
 						break;
 					}
 					temp = temp.primaryBody;
 				}
 			}
+
+			// if (temp && temp != this.focusedBarycenter && !(focusedBody instanceof Star)) {
+			// 	temp.destroySecondaries();
+			// }
 			// Destroy secondaries if needed
 			// Load secondaries if needed
 
-			if (true /*old secondary != new secondary*/) {
+			if (newFocusedBody.secondaryBodyParameters && !body.secondaryBodyParameters) {
 				const focusedSecondaries = await this.manager.fetchFocusedSecondaries(
-					temp,
-					temp.secondaryBodyParameters,
+					newFocusedBody,
+					newFocusedBody.secondaryBodyParameters,
 				);
 			}
 			// get focused summary and pre load detail and parameter summaries
@@ -113,6 +117,21 @@ export default class DataController extends Controller<IDataManager> implements 
 			this.focusedCelestialBody.preLoadDetail();
 
 			await this.manager.fetchParameterSummaries(body);
+		});
+	}
+	private async getFocusedSecondaries(
+		primaryBody: CelestialBody,
+		secondaryNames?: string[],
+	): Promise<CelestialBodies> {
+		if (!secondaryNames) throw new Error("Secondary names must be provided.");
+		return await this.trackLoading("focusedSecondaries", async () => {
+			this._focusedCelestialBody = primaryBody;
+			this._fetchedPhysicalParameters = await this._dataLoader.fetchPhysicalParameters(secondaryNames, "id");
+			this._fetchedOrbitalParameters = await this._dataLoader.fetchOrbitalParameters(
+				this._focusedCelestialBody.metadata.EnglishName,
+				Object.keys(this._fetchedPhysicalParameters),
+			);
+			return await this.processBodies();
 		});
 	}
 	// get focusedBarycenter(): CelestialBody | undefined {

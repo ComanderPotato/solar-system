@@ -24,9 +24,11 @@ export default class CelestialBodyController
 		this.uiController.removeCelestialBodyListeners(body);
 		this.manager.destroyBody(body);
 
-		if (body.container.element.parentElement) {
+		// if (body.container.element.parentElement) {
+		// 	body.container.element.parentElement.removeChild(body.container.element);
+		// }
+		body.container.element.parentElement &&
 			body.container.element.parentElement.removeChild(body.container.element);
-		}
 		this.sceneController.removeFromScene(body.container, body.celestialBodyGroup);
 	}
 	handleSecondaryDisposal(body: CelestialBody): void {
@@ -50,13 +52,9 @@ export default class CelestialBodyController
 		body.celestialBodyGroup.add(body.container);
 	}
 	public handleSecondaryCreation(primary: CelestialBody, secondaries: CelestialBodies): OrbitingBody[] {
-		const a = this.solarSystemController.focusedCelestialBody;
-
-		const orbitingBodies: OrbitingBody[] = [];
-		for (const secondaryParameters of Object.values(secondaries)) {
-			orbitingBodies.push(this.handleCreation(secondaryParameters, primary) as OrbitingBody);
-		}
-		return orbitingBodies;
+		return Object.values(secondaries).map(
+			(secondaryParamters) => this.handleCreation(secondaryParamters, primary) as OrbitingBody,
+		);
 	}
 	public handleMeshCreation(body: CelestialBody): void {}
 

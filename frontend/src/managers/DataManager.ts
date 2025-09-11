@@ -82,7 +82,7 @@ export default class DataManager extends Manager implements IDataManager {
 	// 	this._focusedSystem.Barycenter = focused instanceof Planet ? focused : this._focusedSystem.Barycenter;
 	// }
 
-	/* FIX THIS
+	// /* FIX THIS
 	public async getFocusedElements(focusedBody: CelestialBody, secondaryNames?: string[]): Promise<void> {
 		return await this.trackLoading("focusedElements", async () => {
 			const temp = this.focusedBarycenter;
@@ -105,7 +105,7 @@ export default class DataManager extends Manager implements IDataManager {
 			this.disposeOfFetched();
 		});
 	}
-    */
+	// */
 
 	public async getParameterSummary(parameter: string): Promise<FetchedSummary> {
 		return await this._dataLoader.fetchParameterSummary(parameter);
