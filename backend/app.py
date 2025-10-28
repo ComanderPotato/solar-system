@@ -6,6 +6,8 @@ import urllib.parse
 
 app = Flask(__name__, static_folder="../frontend/dist/", static_url_path="/")
 
+YOUR_API_TOKEN = "10fdf93f-65c0-49bc-83d4-c8725c9e0ea7"
+auth = {"Authorization": f"Bearer {YOUR_API_TOKEN}"}
 API_INCLUDE_DATA: list[str] = [
     "id",
     "name",
@@ -35,11 +37,17 @@ API_INCLUDE_DATA: list[str] = [
     "bodyType",
 ]
 
+session = requests.session()
+session.headers.update(
+    {"User-Agent": "WikiSummary/1.0 (https://github.com/ComanderPotato/solar-system)"}
+)
+
 
 @app.route("/")
 async def home():
     # return send_file('index.html')
-    return send_file("index.html")
+    return send_file("./static/src/index.html")
+    # return send_file("index.html")
 
 
 # if __name__ == '__main__':
@@ -53,8 +61,8 @@ def orbital():
     secondary_names = data.get("secondaryNames")
     if not primary_name or not secondary_names:
         return jsonify({"error": "No primary name or secondary names provided"}), 400
-    # pprint(primary_name, secondary_names)
-    return jsonify(get_orbitals(primary_name, secondary_names))
+    json = get_orbitals(primary_name, secondary_names)
+    return jsonify(json)
 
 
 @app.route("/api/rest/parameters/physical", methods=["POST"])
@@ -71,7 +79,7 @@ def physical():
     include_data = ",".join(API_INCLUDE_DATA)
     full_url = f"{base_url}?data={include_data}&{filters}&satisfy=any"
     try:
-        response = requests.get(full_url)
+        response = session.get(full_url, headers=auth)
         response.raise_for_status()
         data = response.json()
 
@@ -86,6 +94,7 @@ def physical():
 
 @app.route("/api/rest/summary/celestial", methods=["POST"])
 def temp_celestial_summary():
+
     data = request.get_json()
     planet_name = data.get("planetName", "")
     body_type = data.get("bodyType", "")
@@ -94,17 +103,26 @@ def temp_celestial_summary():
 
     planet_name = urllib.parse.quote(planet_name)
     base_url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
-
+    headers = {
+        "User-Agent": "CelestialSummaryBot/1.0 (https://github.com/tomgolding/celestial)"
+    }
     first_attempt = f"{base_url}{planet_name}_({body_type.lower()})"
-    response = requests.get(first_attempt)
-    if response.status_code == 404 or response.status_code == 400:
+    response = session.get(first_attempt, headers=headers)
+
+    if (
+        response.status_code == 404
+        or response.status_code == 400
+        or response.status_code == 403
+    ):
         fallback_url = f"{base_url}{planet_name}"
-        response = requests.get(fallback_url)
+        response = session.get(fallback_url, headers=headers)
     if response.ok:
+
         data = response.json()
         summary = data.get("extract", "No summary available.")
         return jsonify({"summary": summary}), response.status_code
     else:
+
         return (
             jsonify(
                 {
@@ -128,7 +146,7 @@ def temp_parameter_summary():
     base_url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
 
     end_point = f"{base_url}{processed_parameter}"
-    response = requests.get(end_point)
+    response = session.get(end_point, headers=auth)
 
     if response.ok:
         data = response.json()

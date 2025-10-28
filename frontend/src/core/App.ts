@@ -2,19 +2,14 @@ import Singleton from "./Singleton";
 import AppContext from "./AppContext";
 export default class App extends Singleton {
 	private _appContext!: AppContext;
-
+	// private _controllerRegistry
 	private constructor() {
 		super();
 	}
 	initialise() {
 		this._appContext = AppContext.instance;
 		this._appContext.initialiseContext();
-	}
-
-	initialiseScene() {
-		this._appContext.assetController
-			.getHDRI("./static/src/assets/HDR_multi_nebula.hdr")
-			.then((hdri) => this._appContext.sceneController.setHDRI(hdri));
+		this._appContext.dataController.onLoad();
 	}
 
 	static override get instance(): App {
@@ -22,6 +17,12 @@ export default class App extends Singleton {
 	}
 
 	start(): void {
+		this.initialise();
+		this._appContext.engineController.start();
+		// this._appContext.sceneController.sceneResources.renderer.setAnimationLoop(() =>
+		// 	this._appContext.engineController.handleRenderLoop(),
+		// );
+		// this._appContext.engineController.handleRenderLoop();
 		// this._controller.renderLoop();
 	}
 

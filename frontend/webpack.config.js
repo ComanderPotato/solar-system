@@ -34,7 +34,13 @@ module.exports = {
 	},
 	optimization: {
 		minimize: true,
-		minimizer: [new TerserPlugin()],
+		minimizer: [
+			new TerserPlugin({
+				terserOptions: {
+					keep_classnames: true,
+				},
+			}),
+		],
 	},
 	plugins: [
 		new HtmlWebpackPlugin({

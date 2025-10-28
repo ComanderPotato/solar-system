@@ -1,30 +1,70 @@
-import { Texture, DataTexture } from "three";
+import { BufferGeometry, DataTexture, Loader, Texture } from "three";
 import IAssetController from "../interfaces/controllers/IAssetController";
 import Controller from "../core/Controller";
-import IAssetManager from "../interfaces/managers/IAssetManager";
+import IAssetManager, { AssetType, LoaderType } from "../interfaces/managers/IAssetManager";
 import IAppContext from "../interfaces/IAppContext";
 import { TaskName } from "../interfaces/managers/IDataManager";
+import { CelestialBodyDetail } from "../utils/constants";
+import { GLTF } from "three/examples/jsm/Addons.js";
+import CelestialBody from "../models/CelestialBody";
+import { isMeshProvider } from "../utils/CelestialHelpers";
 
 export default class AssetController extends Controller<IAssetManager> implements IAssetController {
 	public constructor(manager: IAssetManager) {
 		super(manager);
 	}
-	protected injectControllers(appContext: IAppContext): void {
+	async loadAssetsForBody(paths: string[]): Promise<void> {
+		await this.dataController.handleTracking(TaskName.TODO, async () => {
+			Promise.all(paths.map(async (assetPath) => await this.getTexture(assetPath)));
+		});
+	}
+	public injectControllers(appContext: IAppContext): void {
 		this.dataController = appContext.dataController;
 	}
 	destroy(): void {
 		throw new Error("Method not implemented.");
 	}
-	async getTexture(url: string): Promise<Texture | null> {
+	// async getAsset(url: string, assetType: LoaderType): Promise<IAssetLoaderType> {
+	// 	return await this.dataController.handleTracking(
+	// 		TaskName.TODO,
+	// 		async () => await this.manager.loadAsset(url, assetType),
+	// 	);
+	// }
+	async getTexture(url: string): Promise<Texture> {
 		return await this.dataController.handleTracking(
 			TaskName.LoadTexture,
-			async () => await this.manager.loadTexture(url),
+			// async () => await this.manager.load(url, AssetType.Texture),
+			async () => (await this.manager.loadAsset(url, LoaderType.Texture)) as Texture,
 		);
 	}
-	async getHDRI(url: string): Promise<DataTexture | null> {
+	async getHDRI(url: string): Promise<DataTexture> {
 		return await this.dataController.handleTracking(
 			TaskName.LoadHDRI,
-			async () => await this.manager.loadHDRI(url),
+			async () => (await this.manager.loadAsset(url, LoaderType.HDRI)) as DataTexture,
+			// async () => await this.manager.loadHDRI(url),
 		);
+	}
+	async getModel(url: string): Promise<GLTF> {
+		return await this.dataController.handleTracking(
+			TaskName.TODO,
+			async () => (await this.manager.loadAsset(url, LoaderType.Model)) as GLTF,
+		);
+	}
+	getGeometryLOD(detail: CelestialBodyDetail): BufferGeometry {
+		return this.manager.loadGeometryLOD(detail).clone();
+	}
+	async lazyLoad(urls: string[]): Promise<void> {
+		await Promise.all(urls.map((texturePath) => this.getTexture(texturePath)));
+	}
+	async lazyLoadTextures(urls: string[]): Promise<void> {
+		await this.dataController.handleTracking(TaskName.TODO, async () =>
+			Promise.all(urls.map(async (texturePath) => await this.getTexture(texturePath))),
+		);
+	}
+
+	async lazyLoadAllAssets(paths: string[]): Promise<void> {
+		await this.dataController.handleTracking(TaskName.TODO, async () => {
+			Promise.all(paths.map(async (texturePath) => await this.getTexture(texturePath)));
+		});
 	}
 }

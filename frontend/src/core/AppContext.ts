@@ -19,55 +19,168 @@ import IEngineController from "../interfaces/controllers/IEngineController";
 import IEngineManager from "../interfaces/managers/IEngineManager";
 import EngineController from "../controllers/EngineController";
 import EngineManager from "../managers/EngineManager";
+import IRendererManager from "../interfaces/managers/IRendererManager";
+import IRendererController from "../interfaces/controllers/IRendererController";
+import RendererController from "../controllers/RendererController";
+import RendererManager from "../managers/RendererManager";
+import IManager from "../interfaces/IManager";
+import IController from "../interfaces/IController";
+import IInjectableController from "../interfaces/IInjectableController";
+import EventBus from "./EventBus";
+import RequestBus from "./RequestBus";
+import IInitializable from "../interfaces/IInitializable";
 
+type RequestMap = {
+	"planet:getInfo": { request: { id: string }; response: { name: string; mass: number } };
+	"asset:getTexture": { request: { path: string }; response: { textureUrl: string } };
+};
+type EventMap = {
+	"time:tick": { delta: number };
+};
+type ControllerKey =
+	| "assetController"
+	| "celestialBodyController"
+	| "dataController"
+	| "engineController"
+	| "rendererController"
+	| "sceneController"
+	| "solarSystemController"
+	| "timeController"
+	| "uiController";
+
+type ManagerKey =
+	| "assetManager"
+	| "celestialBodyManager"
+	| "dataManager"
+	| "engineManager"
+	| "rendererManager"
+	| "sceneManager"
+	| "solarSystemManager"
+	| "timeManager"
+	| "uiManager";
+interface ControllerConfig<M extends IManager> {
+	Controller: new (...args: any[]) => IController<M>;
+	manager: () => M;
+	key: ControllerKey;
+}
+interface ManagerConfig {
+	Manager: new () => IManager;
+	key: ManagerKey;
+}
+// type ControllerEntry<C extends IManager> = [new (...args: any[]) => IController<C>, () => C, string];
 export default class AppContext extends Singleton implements IAppContext {
+	private controllerConfigs: ControllerConfig<IManager>[] = [
+		{ Controller: AssetController, manager: () => this.assetManager, key: "assetController" },
+		{
+			Controller: CelestialBodyController,
+			manager: () => this.celestialBodyManager,
+			key: "celestialBodyController",
+		},
+		{ Controller: DataController, manager: () => this.dataManager, key: "dataController" },
+		{ Controller: EngineController, manager: () => this.engineManager, key: "engineController" },
+		{ Controller: RendererController, manager: () => this.rendererManager, key: "rendererController" },
+		{ Controller: SceneController, manager: () => this.sceneManager, key: "sceneController" },
+		{ Controller: SolarSystemController, manager: () => this.solarSystemManager, key: "solarSystemController" },
+		{ Controller: TimeController, manager: () => this.timeManager, key: "timeController" },
+		{ Controller: UIController, manager: () => this.uiManager, key: "uiController" },
+	];
+	private managerConfigs: ManagerConfig[] = [
+		{ Manager: AssetManager, key: "assetManager" },
+		{
+			Manager: CelestialBodyManager,
+			key: "celestialBodyManager",
+		},
+		{ Manager: DataManager, key: "dataManager" },
+		{ Manager: EngineManager, key: "engineManager" },
+		{ Manager: RendererManager, key: "rendererManager" },
+		{ Manager: SceneManager, key: "sceneManager" },
+		{ Manager: SolarSystemManager, key: "solarSystemManager" },
+		{ Manager: TimeManager, key: "timeManager" },
+		{ Manager: UIManager, key: "uiManager" },
+	];
+	eventBus: EventBus<EventMap> = new EventBus<EventMap>();
+	requestBus: RequestBus<RequestMap> = new RequestBus<RequestMap>();
+
+	// =================== Controllers ===================
+	assetController!: AssetController;
 	celestialBodyController!: CelestialBodyController;
 	dataController!: DataController;
+	engineController!: IEngineController;
+	rendererController!: IRendererController;
+	sceneController!: ISceneController;
 	solarSystemController!: SolarSystemController;
 	timeController!: TimeController;
-	assetController!: AssetController;
-	sceneController!: ISceneController;
 	uiController!: UIController;
 
-	dataManager!: DataManager;
-	timeManager!: TimeManager;
-	uiManager!: UIManager;
+	// =================== Managers ===================
 	assetManager!: AssetManager;
 	celestialBodyManager!: CelestialBodyManager;
-	solarSystemManager!: SolarSystemManager;
+	dataManager!: DataManager;
+	engineManager!: IEngineManager;
+	rendererManager!: IRendererManager;
 	sceneManager!: SceneManager;
+	solarSystemManager!: SolarSystemManager;
+	timeManager!: TimeManager;
+	uiManager!: UIManager;
 	private constructor() {
 		super();
 	}
-	engineManager!: IEngineManager;
-	engineController!: IEngineController;
+
 	initialiseContext() {
 		this.initialiseManagers();
 		this.initialiseControllers();
 	}
-	private injectManagers() {}
 
+	private _controllers?: IController[];
+	private get controllers(): IController[] {
+		if (!this._controllers) {
+			this._controllers = [];
+			for (const [key, value] of Object.entries(this)) {
+				if (this.isController(value)) {
+					this._controllers.push(value);
+				}
+			}
+		}
+		return this._controllers;
+	}
+	private isController(controller: unknown): controller is IController {
+		return typeof (controller as IController).injectControllers === "function";
+	}
+	private injectControllers(): void {
+		for (const { key } of this.controllerConfigs) {
+			const controller = (this as any)[key];
+			if (this.isInjectable(controller)) controller.injectControllers(this);
+		}
+	}
+
+	private hasMethod<T extends object>(obj: unknown, method: keyof T): obj is T {
+		return typeof (obj as T)[method] === "function";
+	}
+	private isInjectable(controller: any): controller is IInjectableController {
+		return typeof (controller as IInjectableController).injectControllers === "function";
+	}
+	private isInitializable(controller: any): controller is IInitializable {
+		return typeof (controller as IInitializable).init === "function";
+	}
 	private initialiseControllers(): void {
-		this.dataController = new DataController(this.dataManager);
-		this.celestialBodyController = new CelestialBodyController(this.celestialBodyManager);
-		this.timeController = new TimeController(this.timeManager);
-		this.solarSystemController = new SolarSystemController(this.solarSystemManager);
-		this.assetController = new AssetController(this.assetManager);
-		this.sceneController = new SceneController(this.sceneManager);
-		this.uiController = new UIController(this.uiManager);
-		this.engineController = new EngineController(this.engineManager);
+		const injectionQueue: (() => void)[] = [];
+		const initQueue: (() => void)[] = [];
+		for (const { Controller, manager, key } of this.controllerConfigs) {
+			const mgr = manager();
+			const controller = new Controller(mgr);
+			(this as any)[key] = controller;
+			if (this.isInjectable(controller)) injectionQueue.push(() => controller.injectControllers(this));
+			if (this.isInitializable(controller)) initQueue.push(() => controller.init());
+		}
+		injectionQueue.forEach((inject) => inject());
+		initQueue.forEach((init) => init());
 	}
 	private initialiseManagers(): void {
-		this.dataManager = new DataManager();
-		this.celestialBodyManager = new CelestialBodyManager();
-		this.timeManager = new TimeManager();
-		this.solarSystemManager = new SolarSystemManager();
-		this.assetManager = new AssetManager(
-			() => {},
-			() => {},
-		);
-		this.uiManager = new UIManager();
-		this.engineManager = new EngineManager();
+		for (const { Manager, key } of this.managerConfigs) {
+			const manager = new Manager();
+			(this as any)[key] = manager;
+			if (this.isInitializable(manager)) manager.init();
+		}
 	}
 	public static override get instance(): AppContext {
 		return AppContext.getInstance(AppContext, () => new AppContext());

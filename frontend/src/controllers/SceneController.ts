@@ -1,9 +1,9 @@
-import { DataTexture, EquirectangularReflectionMapping, Object3D } from "three";
+import { DataTexture, EquirectangularReflectionMapping, Object3D, Texture } from "three";
 import ISceneController, { SceneResources } from "../interfaces/controllers/ISceneController";
 import Controller from "../core/Controller";
-import CelestialBody from "../models/CelestialBody";
 import ISceneManager from "../interfaces/managers/ISceneManager";
 import IAppContext from "../interfaces/IAppContext";
+import IInitializable from "../interfaces/IInitializable";
 // interface CameraParameters {
 // 	fov: number;
 // 	aspectRatio: number;
@@ -16,12 +16,16 @@ import IAppContext from "../interfaces/IAppContext";
 // 	near: 0.000001,
 // 	far: Number.MAX_SAFE_INTEGER,
 // };
-export default class SceneController extends Controller<ISceneManager> implements ISceneController {
+export default class SceneController extends Controller<ISceneManager> implements ISceneController, IInitializable {
 	public constructor(manager: ISceneManager) {
 		super(manager);
 	}
-	setHDRI(hdri: DataTexture | null): void {
+	init(): void {
+		this.assetController.getHDRI("../assets/HDR_multi_nebulae.hdr").then((hdri) => this.setHDRI(hdri));
+	}
+	setHDRI(hdri: DataTexture): void {
 		if (hdri) hdri.mapping = EquirectangularReflectionMapping;
+
 		this.manager.scene.environment = hdri;
 		this.manager.scene.background = hdri;
 	}
@@ -40,7 +44,11 @@ export default class SceneController extends Controller<ISceneManager> implement
 			raycaster: this.manager.raycaster,
 		};
 	}
-	protected injectControllers(appContext: IAppContext): void {
+	setRenderLoop(renderLoop: any): void {
+		this._manager.renderer.setAnimationLoop(renderLoop);
+	}
+	public injectControllers(appContext: IAppContext): void {
+		this.assetController = appContext.assetController;
 		this.solarSystemController = appContext.solarSystemController;
 	}
 	public handleRender(): void {
@@ -54,6 +62,7 @@ export default class SceneController extends Controller<ISceneManager> implement
 	}
 	handleLerp(): void {
 		if (!this.solarSystemController.focusedBodyInformation) return;
+
 		this.manager.calculateLerpDestination(this.solarSystemController.focusedBodyInformation);
 	}
 	public addToScene(...object: Object3D[]): void {

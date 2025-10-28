@@ -20,6 +20,7 @@ import { pressureParameters } from "../types/ParameterCategories";
 import { energyParameters } from "../types/ParameterCategories";
 import { parametersToIgnore } from "../types/ParameterCategories";
 import { SCALE } from "./constants";
+import { OrbitalParameters } from "../types/OrbitalParameters";
 
 export const preprocessParameter = (parameter: string): string =>
 	parameter
@@ -81,7 +82,7 @@ export const preprocessValue = (parameter: string, value: number | Vector3): str
 	}
 };
 
-export const fillDropdown = async (panel: HTMLElement, entries: PhysicalParameters | OrbitingBodyParameters) => {
+export const fillDropdown = async (panel: HTMLElement, entries: PhysicalParameters | OrbitalParameters) => {
 	const section = panel.querySelector(".dropdown-content") as HTMLElement;
 	section.innerHTML = "";
 	for (const [key, value] of Object.entries(entries)) {

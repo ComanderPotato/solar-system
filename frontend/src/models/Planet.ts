@@ -1,207 +1,85 @@
-import {
-	BufferGeometry,
-	MeshPhongMaterial,
-	Mesh,
-	IcosahedronGeometry,
-	MeshStandardMaterial,
-	AdditiveBlending,
-	MeshBasicMaterial,
-	RingGeometry,
-	Vector3,
-	ArrowHelper,
-	Color,
-} from "three";
+import { BufferGeometry, MeshPhongMaterial, Mesh, IcosahedronGeometry, Vector3 } from "three";
 import IMeshProvider from "../interfaces/IMeshProvider";
-// import { PlanetParameters, PlanetPhysicalParameters, TextureParameters } from "../types";
-// import { CelestialBodyColour, CelestialBodyDetail, CelestialBodyDistance, KM_TO_M, SCALE } from "../utils";
 import { PlanetParameters } from "../types/CelestialBodyParameters";
 import { PlanetPhysicalParameters } from "../types/PhysicalParameters";
-import { TextureParameters } from "../types/TextureParameters";
-import { CelestialBodyColour, CelestialBodyDetail, CelestialBodyDistance, KM_TO_M, SCALE } from "../utils/constants";
+import { TextureFlags } from "../types/TextureParameters";
+import { CelestialBodyDetail, CelestialBodyDistance } from "../utils/constants";
 import CelestialBody from "./CelestialBody";
 import OrbitingBody from "./OrbitingBody";
-// import { AppContext } from "../core";
-import { getAtmosphericGlowMat, getRingMat } from "../shaders";
 export default class Planet extends OrbitingBody<PlanetParameters> implements IMeshProvider {
-	private _geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>> = {};
-	private _celestialBodyGeometry!: BufferGeometry;
-	private _celestialBodyMaterial!: MeshPhongMaterial;
-	private _meshDetail: CelestialBodyDetail = CelestialBodyDetail.LOW;
-	private _textures: TextureParameters;
-	private _celestialBodyMesh!: Mesh;
-	private _glowMesh!: Mesh;
-	private _lightMesh?: Mesh;
-	private _cloudMesh?: Mesh;
+	public geometry!: BufferGeometry;
+	public material!: MeshPhongMaterial;
+	public mesh!: Mesh;
+	public meshDetail: CelestialBodyDetail = CelestialBodyDetail.LOW;
+	public textures: TextureFlags;
+	public glowMesh!: Mesh;
+	public lightMesh?: Mesh | undefined;
+	public cloudMesh?: Mesh | undefined;
+	public ringMesh?: Mesh | undefined;
 	private _lastDetailUpdateTime = 0;
 	private readonly DETAIL_COOLDOWN = 5;
 	constructor(planetParameters: PlanetParameters, primaryBody: CelestialBody) {
-		super(planetParameters, primaryBody, planetParameters.SecondaryBodyNames);
-		this._textures = planetParameters.Textures;
-		this.initialiseBaseMesh();
-		this.addGlowMesh();
-		this.addCloudMesh();
-		this.addLightingMesh();
-		this.initialiseRing();
+		super(planetParameters, primaryBody, planetParameters.SecondaryNames);
+		this.textures = planetParameters.Textures;
 		this.initialiseOrbitalPlane();
-		this.addToScene();
 	}
 
-	// Getters
-	get meshDetail(): CelestialBodyDetail {
-		return this._meshDetail;
-	}
-	get celestialBodyGeometry(): BufferGeometry {
-		return this._celestialBodyGeometry;
-	}
-	get celestialBodyMaterial(): MeshPhongMaterial {
-		return this._celestialBodyMaterial;
-	}
-	get celestialBodyMesh(): Mesh {
-		return this._celestialBodyMesh;
-	}
-	get glowMesh(): Mesh {
-		return this._glowMesh;
-	}
-	get lightMesh(): Mesh | undefined {
-		return this._lightMesh;
-	}
-	get cloudMesh(): Mesh | undefined {
-		return this._cloudMesh;
-	}
-	get textures(): TextureParameters {
-		return this._textures;
-	}
 	get physicalParameters(): PlanetPhysicalParameters {
 		return this._physicalParameters;
 	}
-	get geometryCache(): Partial<Record<CelestialBodyDetail, BufferGeometry>> {
-		return this._geometryCache;
-	}
-	public initialiseRing = async (): Promise<void> => {
-		if (!this._physicalParameters.RingSystem) return;
-		const inner = this._physicalParameters.InnerRingRadius! * KM_TO_M * SCALE;
-		const outer = this._physicalParameters.OuterRingRadius! * KM_TO_M * SCALE;
-		const [ringTexture, alphaTexture] = await Promise.all([
-			AppContext.instance.DataManager.getTexture(this.createTexturePath("ring")),
-			AppContext.instance.DataManager.getTexture(this.createTexturePath("ring_alpha")),
-		]);
-		const geometry = new RingGeometry(inner, outer, 64);
-		geometry.rotateX(-Math.PI / 2);
-		const material = getRingMat(ringTexture, alphaTexture, inner, outer);
-		const mesh = new Mesh(geometry, material);
-		this._celestialBodyGroup.add(mesh);
-	};
-
 	public rotateOnAxis = (dt: number): void => {
-		if (!this._celestialBodyMesh) return;
+		if (!this.mesh) return;
 		const rotationSpeed = (2 * Math.PI) / this._physicalParameters.SolarRotation;
 		// const rotationSpeed = (2 * Math.PI) / (this.celestialBodyParameters.RotationPeriod * TIME_SCALE);
 		const deltaRotation = rotationSpeed * dt;
 		const yAxis = new Vector3(0, 1, 0);
 		// this._celestialBodyGroup.rotateOnAxis(y, deltaRotation);
-		this._celestialBodyMesh?.rotateOnAxis(yAxis, deltaRotation);
-		this._glowMesh?.rotateOnAxis(yAxis, deltaRotation);
-		this._lightMesh?.rotateOnAxis(yAxis, deltaRotation);
-		this._cloudMesh?.rotateOnAxis(yAxis, deltaRotation * 1.1);
+		this.mesh?.rotateOnAxis(yAxis, deltaRotation);
+		this.glowMesh?.rotateOnAxis(yAxis, deltaRotation);
+		this.lightMesh?.rotateOnAxis(yAxis, deltaRotation);
+		this.cloudMesh?.rotateOnAxis(yAxis, deltaRotation * 1.1);
 	};
 	public initialiseOrbitalPlane = (): void => {
 		this._celestialBodyGroup.rotateOnWorldAxis(new Vector3(-1, 0, 0), this._physicalParameters.AxialTilt);
 	};
-	public initialiseBaseMesh = async (): Promise<void> => {
-		const colour = new Color(
-			CelestialBodyColour[this._metadata.EnglishName.toUpperCase()] ??
-				CelestialBodyColour[this._primaryBody.metadata.EnglishName.toUpperCase()],
-		);
-		const arrowHelper = new ArrowHelper(
-			new Vector3(0, 1, 0),
-			new Vector3(0, 0, 0),
-			this._physicalParameters.MeanRadius * 1.5,
-			colour,
-		);
-		this._celestialBodyGroup.add(arrowHelper);
-		this._celestialBodyGeometry = new IcosahedronGeometry(this._physicalParameters.MeanRadius, this._meshDetail);
-		this._celestialBodyMaterial = new MeshPhongMaterial({
-			map: await AppContext.instance.DataManager.getTexture(this.createTexturePath("color")),
-		});
-		if (this._textures.Specular)
-			this.celestialBodyMaterial.specularMap = await AppContext.instance.DataManager.getTexture(
-				this.createTexturePath("specular"),
-			);
-		this._celestialBodyMesh = new Mesh(this._celestialBodyGeometry, this._celestialBodyMaterial);
-		this._celestialBodyGroup.add(this._celestialBodyMesh);
-	};
-	public addGlowMesh = (): void => {
-		this._glowMesh = new Mesh(this._celestialBodyGeometry, getAtmosphericGlowMat());
-		this._glowMesh.scale.setScalar(1.01);
-		this._celestialBodyGroup.add(this._glowMesh);
-	};
-	public addLightingMesh = async (): Promise<void> => {
-		if (!this.textures.Light) return;
-		const lightMaterial = new MeshBasicMaterial({
-			map: await AppContext.instance.DataManager.getTexture(this.createTexturePath("lights")),
-			blending: AdditiveBlending,
-			transparent: true,
-			depthTest: true,
-			opacity: 0.6,
-		});
-		this._lightMesh = new Mesh(this.celestialBodyGeometry, lightMaterial);
-		this._celestialBodyGroup.add(this._lightMesh);
-	};
-	public addCloudMesh = async (): Promise<void> => {
-		if (!this.textures.Cloud) return;
-		const cloudMaterial = new MeshStandardMaterial({
-			map: await AppContext.instance.DataManager.getTexture(this.createTexturePath("clouds")),
-			transparent: true,
-			depthTest: false,
-			opacity: 0.5,
-			blending: AdditiveBlending,
-		});
-		this._cloudMesh = new Mesh(this.celestialBodyGeometry, cloudMaterial);
-		this._cloudMesh.scale.setScalar(1.005);
-		this._celestialBodyGroup.add(this._cloudMesh);
-	};
-
-	private getGeometryForDetail = (detail: CelestialBodyDetail): BufferGeometry => {
-		if (!this._geometryCache[detail]) {
-			this._geometryCache[detail] = new IcosahedronGeometry(this._physicalParameters.MeanRadius, detail);
-		}
-		return this._geometryCache[detail];
-	};
+	// getGeometryForDetail(detail: CelestialBodyDetail): BufferGeometry {
+	// 	if (!this.geometryCache[detail]) {
+	// 		this.geometryCache[detail] = new IcosahedronGeometry(this._physicalParameters.MeanRadius, detail);
+	// 	}
+	// 	return this.geometryCache[detail];
+	// }
 
 	public updateMeshDetailLevel = (): void => {
-		const baseGeometry = this.getGeometryForDetail(this._meshDetail);
-		this._celestialBodyMesh.geometry.dispose();
-		this._celestialBodyMesh.geometry = baseGeometry.clone();
-		this._glowMesh.geometry.dispose();
-		this._glowMesh.geometry = baseGeometry.clone();
-		if (this._lightMesh) {
-			this._lightMesh.geometry.dispose();
-			this._lightMesh.geometry = baseGeometry.clone();
-		}
-		if (this._cloudMesh) {
-			this._cloudMesh.geometry.dispose();
-			this._cloudMesh.geometry = baseGeometry.clone();
-		}
+		// const baseGeometry = this.getGeometryForDetail(this.meshDetail);
+		// this.mesh.geometry.dispose();
+		// this.mesh.geometry = baseGeometry.clone();
+		// this.glowMesh.geometry.dispose();
+		// this.glowMesh.geometry = baseGeometry.clone();
+		// if (this.lightMesh) {
+		// 	this.lightMesh.geometry.dispose();
+		// 	this.lightMesh.geometry = baseGeometry.clone();
+		// }
+		// if (this.cloudMesh) {
+		// 	this.cloudMesh.geometry.dispose();
+		// 	this.cloudMesh.geometry = baseGeometry.clone();
+		// }
 	};
 	public updateTextureDetail = async (): Promise<void> => {
-		(this._celestialBodyMesh.material as MeshBasicMaterial).map = await AppContext.instance.DataManager.getTexture(
-			this.createTexturePath("color"),
-		);
-		if (this._lightMesh) {
-			(this._lightMesh.material as MeshBasicMaterial).map!.dispose();
-			(this._lightMesh.material as MeshBasicMaterial).map = await AppContext.instance.DataManager.getTexture(
-				this.createTexturePath("lights"),
-			);
-		}
-		if (this._cloudMesh) {
-			(this._cloudMesh.material as MeshBasicMaterial).map!.dispose();
-			(this._cloudMesh.material as MeshBasicMaterial).map = await AppContext.instance.DataManager.getTexture(
-				this.createTexturePath("clouds"),
-			);
-		}
-	};
-	public createTexturePath = (texture: string): string => {
-		return `./static/src/assets/maps/${this._metadata.EnglishName.toLowerCase()}/${texture.toLowerCase()}_${this._meshDetail > 0 ? this._meshDetail : 2}.webp`;
+		// (this._celestialBodyMesh.material as MeshBasicMaterial).map = await AppContext.instance.DataManager.getTexture(
+		// 	this.createTexturePath("color"),
+		// );
+		// if (this._lightMesh) {
+		// 	(this._lightMesh.material as MeshBasicMaterial).map!.dispose();
+		// 	(this._lightMesh.material as MeshBasicMaterial).map = await AppContext.instance.DataManager.getTexture(
+		// 		this.createTexturePath("lights"),
+		// 	);
+		// }
+		// if (this._cloudMesh) {
+		// 	(this._cloudMesh.material as MeshBasicMaterial).map!.dispose();
+		// 	(this._cloudMesh.material as MeshBasicMaterial).map = await AppContext.instance.DataManager.getTexture(
+		// 		this.createTexturePath("clouds"),
+		// 	);
+		// }
 	};
 	public calculateDetailLevel = (distance: number): CelestialBodyDetail => {
 		if (distance < this._physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE)
@@ -219,9 +97,9 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
 		// 	this._container.visible = false;
 		// }
 		const orbitLine = this._primaryBody.orbits.get(this.metadata.EnglishName);
-		if (orbitLine) orbitLine.visible = this._meshDetail < CelestialBodyDetail.LOW;
+		if (orbitLine) orbitLine.visible = this.meshDetail < CelestialBodyDetail.LOW;
 
-		this._celestialBodyMesh.visible = Boolean(this._meshDetail);
+		this.mesh.visible = Boolean(this.meshDetail);
 	};
 	public updateDetail = (): void => {
 		// if (!this._celestialBodyMesh) return;
@@ -251,7 +129,7 @@ export default class Planet extends OrbitingBody<PlanetParameters> implements IM
 		// }
 	};
 	public preLoadDetail = (): void => {
-		this._meshDetail = CelestialBodyDetail.HIGH;
+		this.meshDetail = CelestialBodyDetail.HIGH;
 		this.updateTextureDetail();
 		this.updateMeshDetailLevel();
 	};

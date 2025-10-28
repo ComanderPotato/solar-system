@@ -1,14 +1,15 @@
-import { FetchedSummary } from "../loaders/DataLoader";
 import CelestialBody from "../models/CelestialBody";
 import OrbitingBody from "../models/OrbitingBody";
 import { fillDropdown } from "../utils/uiHelpers";
 import IUIManager from "../interfaces/managers/IUIManager";
 import Manager from "../core/Manager";
+import IInitializable from "../interfaces/IInitializable";
 export enum LoadScreenState {
 	Show,
 	Hide,
 }
-export default class UIManager extends Manager implements IUIManager {
+
+export default class UIManager extends Manager implements IUIManager, IInitializable {
 	// private static _instance: UIManager | null;
 	// Loading screen/spinner elements
 	private _initialLoadScreen!: HTMLElement;
@@ -20,13 +21,14 @@ export default class UIManager extends Manager implements IUIManager {
 	private _date!: HTMLElement;
 	private _timeRate!: HTMLElement;
 	private _decreaseTimeButton!: HTMLElement;
-	private _pauseTimeButton!: HTMLElement;
+	private _playbackButton!: HTMLElement;
 	private _increaseTimeButton!: HTMLElement;
 
 	// Celestial body information elements
-	private _infoPanel!: HTMLElement;
+	private _sidePanel!: HTMLElement;
 	private _summary!: HTMLElement;
-	private _toggleButton!: HTMLElement;
+	private _dropdownElements!: NodeListOf<HTMLElement>;
+	private _summaryButton!: HTMLElement;
 	private _collapseBtn!: HTMLElement;
 	private _physicalInfo!: HTMLElement;
 	private _orbitalInfo!: HTMLElement;
@@ -34,7 +36,6 @@ export default class UIManager extends Manager implements IUIManager {
 	private _loadScreenState: LoadScreenState = LoadScreenState.Show;
 	public constructor() {
 		super();
-		this.initialise();
 		// this.decreaseTimeButton = document.getElementById("decreaseBtn") as HTMLElement;
 		// this.pauseTimeButton = document.getElementById("pauseBtn") as HTMLElement;
 		// this.increaseTimeButton = document.getElementById("increaseBtn") as HTMLElement;
@@ -44,22 +45,32 @@ export default class UIManager extends Manager implements IUIManager {
 		//
 		// this.collapseButton = document.getElementById("collapseBtn") as HTMLElement;
 	}
+	updateParameterInformation(): void {
+		throw new Error("Method not implemented.");
+	}
+
+	get dropdownElements(): NodeListOf<HTMLElement> {
+		return this._dropdownElements;
+	}
 
 	get toggleButton(): HTMLElement {
-		return this._toggleButton;
+		return this._summaryButton;
 	}
 	// headerElements: NodeListOf<HTMLElement>; what the fuck was this for?
 	get decreaseTimeButton(): HTMLElement {
 		return this._decreaseTimeButton;
 	}
-	get pauseTimeButton(): HTMLElement {
-		return this._pauseTimeButton;
+	get playbackButton(): HTMLElement {
+		return this._playbackButton;
 	}
 	get increaseTimeButton(): HTMLElement {
 		return this._increaseTimeButton;
 	}
 	get collapseButton(): HTMLElement {
 		return this._collapseBtn;
+	}
+	init(): void {
+		this.initialiseElements();
 	}
 	private initialiseElements(): void {
 		// Loading screen/spinner elements
@@ -72,13 +83,15 @@ export default class UIManager extends Manager implements IUIManager {
 		this._date = document.getElementById("date") as HTMLElement;
 		this._timeRate = document.getElementById("timeRate") as HTMLElement;
 		this._decreaseTimeButton = document.getElementById("decreaseBtn") as HTMLElement;
-		this._pauseTimeButton = document.getElementById("pauseBtn") as HTMLElement;
+		// Fix pauseBtn
+		this._playbackButton = document.getElementById("pauseBtn") as HTMLElement;
 		this._increaseTimeButton = document.getElementById("increaseBtn") as HTMLElement;
 
 		// Celestial body information elements
-		this._infoPanel = document.getElementById("infoPanel") as HTMLElement;
+		this._sidePanel = document.getElementById("sidePanel") as HTMLElement;
+		this._dropdownElements = document.querySelectorAll(".dropdown") as NodeListOf<HTMLElement>;
 		this._summary = document.getElementById("summary") as HTMLElement;
-		this._toggleButton = document.getElementById("toggleSummary") as HTMLElement;
+		this._summaryButton = document.getElementById("summaryButton") as HTMLElement;
 
 		this._collapseBtn = document.getElementById("collapseBtn") as HTMLElement;
 		this._physicalInfo = document.getElementById("physicalInfo") as HTMLElement;
@@ -88,7 +101,7 @@ export default class UIManager extends Manager implements IUIManager {
 		this._loadScreenState = isLoading ? LoadScreenState.Show : LoadScreenState.Hide;
 		this.updateLoadScreen();
 	}
-	public updateRateChange(timeStep: number): void {
+	public updateTimeRateUI(timeStep: number = 0): void {
 		if (timeStep === 0) {
 			this._timeRate.textContent = "Paused";
 		} else {
@@ -104,81 +117,24 @@ export default class UIManager extends Manager implements IUIManager {
 			this._timeRate.textContent = ratePerSecond === 1 ? "Real Rate" : `${denominator}/s`;
 		}
 	}
-	public updateSummary(): void {
+	public toggleSummary(): void {
 		this._summary.classList.toggle("expanded");
-		this._toggleButton.textContent = this._summary.classList.contains("expanded") ? "Read less" : "Read more";
+		this._summaryButton.textContent = this._summary.classList.contains("expanded") ? "Read less" : "Read more";
 	}
-	public updateInfoPanel(): void {
-		this._infoPanel.classList.toggle("collapsed");
-		this._collapseBtn.textContent = this._infoPanel.classList.contains("collapsed") ? "⮞" : "⮜";
+	public toggleSidePanel(): void {
+		this._sidePanel.classList.toggle("collapsed");
+		this._collapseBtn.textContent = this._sidePanel.classList.contains("collapsed") ? "⮞" : "⮜";
 	}
-	public updateTimeButton(): void {
-		(this._pauseTimeButton.querySelector("span.icon") as HTMLSpanElement).classList.toggle("paused");
-	}
-
-	public initialise(): void {
-		this.initialiseElements();
-		// this.initialiseListeners();
+	public togglePlaybackButton(): void {
+		(this._playbackButton.querySelector("span.icon") as HTMLSpanElement).classList.toggle("paused");
 	}
 
-	// private initialiseListeners() {
-	// 	this._toggleButton.addEventListener("click", () => {
-	// 		// if (AppContext.instance.App.lerpDestination) return;
-	// 		this._summary.classList.toggle("expanded");
-	// 		this._toggleButton.textContent = this._summary.classList.contains("expanded") ? "Read less" : "Read more";
-	// 	});
-	// 	document.querySelectorAll(".dropdown-header").forEach((header) => {
-	// 		header.addEventListener("click", () => {
-	// 			// if (AppContext.instance.App.lerpDestination) return;
-	// 			(header.parentElement as HTMLElement).classList.toggle("active");
-	// 		});
-	// 	});
-	// 	this._collapseBtn.addEventListener("click", () => {
-	// 		// if (AppContext.instance.App.lerpDestination) return;
-	// 		this._infoPanel.classList.toggle("collapsed");
-	// 		this._collapseBtn.textContent = this._infoPanel.classList.contains("collapsed") ? "⮞" : "⮜";
-	// 	});
-	// 	this._decreaseTimeButton.addEventListener("click", () => {
-	// 		// if (AppContext.instance.App.lerpDestination) return;
-	// 		AppContext.instance.TimeManager.decrementTimeScale();
-	// 		this.updateRate();
-	// 	});
-	// 	this._pauseTimeButton.addEventListener("click", () => {
-	// 		// if (AppContext.instance.App.lerpDestination) return;
-	// 		AppContext.instance.TimeManager.togglePause();
-	// 		(this._pauseTimeButton.querySelector("span.icon") as HTMLSpanElement).classList.toggle("paused");
-	// 		this.updateRate();
-	// 	});
-	// 	this._increaseTimeButton.addEventListener("click", () => {
-	// 		// if (AppContext.instance.App.lerpDestination) return;
-	// 		AppContext.instance.TimeManager.incrementTimeScale();
-	// 		this.updateRate();
-	// 	});
-	// }
 	public resetSidePanel() {
 		this._physicalInfo.classList.remove("active");
 		this._orbitalInfo.classList.remove("active");
 		this._summary.classList.remove("expanded");
-		this._toggleButton.textContent = this._summary.classList.contains("expanded") ? "Read less" : "Read more";
+		this._summaryButton.textContent = this._summary.classList.contains("expanded") ? "Read less" : "Read more";
 	}
-	// public updateRate() {
-	// 	if (!AppContext.instance.TimeManager.isRunning()) {
-	// 		this._timeRate.textContent = "Paused";
-	// 		return;
-	// 	}
-	// 	const { scaledTimeStep } = AppContext.instance.TimeManager;
-	//
-	// 	const ratePerSecond = scaledTimeStep * 60;
-	// 	let denominator;
-	// 	if (Math.abs(ratePerSecond) < 60) {
-	// 		denominator = `${ratePerSecond} secs`;
-	// 	} else if (Math.abs(ratePerSecond) < 3600) {
-	// 		denominator = `${ratePerSecond / 60} mins`;
-	// 	} else {
-	// 		denominator = `${ratePerSecond / 3600} hrs`;
-	// 	}
-	// 	this._timeRate.textContent = ratePerSecond === 1 ? "Real Rate" : `${denominator}/s`;
-	// }
 
 	public hideLoadScreen() {
 		this._hasInitialLoaded
@@ -202,66 +158,49 @@ export default class UIManager extends Manager implements IUIManager {
 				break;
 		}
 	}
-	// Do i need this?
-	public setLoadScreenState(state: LoadScreenState) {
-		switch (state) {
-			case LoadScreenState.Show:
-				this.showLoadScreen();
-				break;
-			case LoadScreenState.Hide:
-				this.hideLoadScreen();
-				break;
-		}
-	}
 
-	public showBodyInformation() {
-		this._summary.classList.remove("hidden");
-	}
-
-	public hideBodyInformation() {
-		this._summary.classList.add("hidden");
-	}
-
-	public updateInformationPanel(celestialBody: CelestialBody, extract?: string) {
+	public updateInformationPanel(body: CelestialBody, extract?: string) {
 		if (!extract) return;
-		if (this._infoPanel.classList.contains("hidden")) {
-			this._infoPanel.classList.remove("hidden");
-			this._infoPanel.classList.remove("collapsed");
+		if (this._sidePanel.classList.contains("hidden")) {
+			this._sidePanel.classList.remove("hidden");
+			this._sidePanel.classList.remove("collapsed");
 		}
-		this.removeInformationListeners();
+		// this.removeInformationListeners();
 		this.resetSidePanel();
-		const content = this._infoPanel.querySelector(".information-content") as HTMLElement;
-		(content.querySelector(".title") as HTMLElement).textContent = celestialBody.metadata.EnglishName;
+		const content = this._sidePanel.querySelector(".information-content") as HTMLElement;
+		(content.querySelector(".title") as HTMLElement).textContent = body.metadata.EnglishName;
 		this._summary.textContent = extract;
-		if (celestialBody instanceof OrbitingBody) {
+		if (body instanceof OrbitingBody) {
 			this._orbitalInfo.classList.remove("hidden");
-			fillDropdown(this._orbitalInfo, celestialBody.orbitingParameters);
+			fillDropdown(this._orbitalInfo, body.orbitingParameters);
 		} else {
 			this._orbitalInfo.classList.add("hidden");
 		}
-		fillDropdown(this._physicalInfo, celestialBody.physicalParameters);
+		fillDropdown(this._physicalInfo, body.physicalParameters);
 
 		content.classList.remove("collapsed");
 		// updateInformationPanel(celestialBody, extract);
-		this.addInformationListeners();
+		// this.addInformationListeners();
 	}
-	private informationHoverHandler = async (event: Event): Promise<void> => {
-		const target = event.currentTarget as HTMLElement;
-		const key = target.getAttribute("data-key") ?? "";
+	updateInformationHover(target: HTMLElement, summary: string, eventType: keyof HTMLElementEventMap): void {
 		const tooltip = document.getElementById("global-tooltip") as HTMLDivElement;
-
 		if (!tooltip) return;
-
-		const summary: FetchedSummary = await AppContext.instance.DataManager.getParameterSummary(key);
-		tooltip.textContent = summary.summary;
-
+		if (eventType === "mouseenter") {
+		}
+		switch (eventType) {
+			case "mouseenter":
+				break;
+			case "mouseleave":
+				break;
+		}
+		tooltip.textContent = summary;
 		const rect = target.getBoundingClientRect();
 		const scrollY = window.scrollY;
 		const scrollX = window.scrollX;
 
 		tooltip.style.visibility = "hidden";
 		tooltip.classList.remove("hidden");
-		tooltip.classList.add("visible");
+		tooltip.classList.toggle("visible");
 
 		tooltip.style.top = "0px";
 		tooltip.style.left = "-9999px";
@@ -279,26 +218,26 @@ export default class UIManager extends Manager implements IUIManager {
 			tooltip.style.left = `${rect.right + scrollX + 10}px`;
 			tooltip.style.visibility = "visible";
 		});
-	};
+	}
 	private informationLeaveHandler() {
 		const tooltip = document.getElementById("global-tooltip") as HTMLDivElement;
 		tooltip.classList.remove("visible");
 		tooltip.classList.add("hidden");
 	}
 
-	private removeInformationListeners() {
-		document.querySelectorAll(".information-btn").forEach((informationButton) => {
-			informationButton.removeEventListener("mouseenter", this.informationHoverHandler);
-			informationButton.removeEventListener("mouseleave", this.informationLeaveHandler);
-		});
-	}
-
-	private addInformationListeners() {
-		document.querySelectorAll(".information-btn").forEach((informationButton) => {
-			informationButton.addEventListener("mouseenter", this.informationHoverHandler);
-			informationButton.addEventListener("mouseleave", this.informationLeaveHandler);
-		});
-	}
+	// private removeInformationListeners() {
+	// 	document.querySelectorAll(".information-btn").forEach((informationButton) => {
+	// 		informationButton.removeEventListener("mouseenter", this.updateInformationHover);
+	// 		informationButton.removeEventListener("mouseleave", this.updateInformationHover);
+	// 	});
+	// }
+	//
+	// private addInformationListeners() {
+	// 	document.querySelectorAll(".information-btn").forEach((informationButton) => {
+	// 		informationButton.addEventListener("mouseenter", this.updateInformationHover);
+	// 		informationButton.addEventListener("mouseleave", this.updateInformationHover);
+	// 	});
+	// }
 
 	// Functions that aren't referenced (currently). Might be due to refactor.
 	public isLoadScreenVisible() {

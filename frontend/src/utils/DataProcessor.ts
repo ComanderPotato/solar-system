@@ -1,27 +1,4 @@
 import { Vector3 } from "three";
-// import { FetchedOrbitalParameters, FetchedPhysicalParameters, PhysicalParametersResponse } from "../loaders/DataLoader";
-// import {
-// 	FetchedOrbitalParameters,
-// 	FetchedPhysicalParameters,
-// 	CelestialMetadata,
-// 	PhysicalParametersResponse,
-// 	BasePhysicalParameters,
-// 	StarPhysicalParameters,
-// 	Textures,
-// 	OptionalPhsyicalParametersJSON,
-// 	StarParameters,
-// 	OrbitalParametersResponse,
-// 	OrbitalParameters,
-// 	distanceParametersToProcess,
-// 	PlanetPhysicalParameters,
-// 	PlanetParameters,
-// 	MoonParameters,
-// 	CelestialBodyParameters,
-// 	PhysicalParameters,
-// 	MoonPhysicalParameters,
-// 	CelestialBodies,
-// 	BodyTypes,
-// } from "../types";
 import { FetchedOrbitalParameters } from "../types/OrbitalParameters";
 import { FetchedPhysicalParameters } from "../types/PhysicalParameters";
 import { CelestialMetadata } from "../types/CelestialBodyMetadata";
@@ -30,7 +7,7 @@ import {
 	BasePhysicalParameters,
 	StarPhysicalParameters,
 } from "../types/PhysicalParameters";
-import { Textures } from "../types/TextureParameters";
+import { CelestialTextures } from "../types/TextureParameters";
 import { OptionalPhsyicalParametersJSON } from "../types/PhysicalParameters";
 import { StarParameters } from "../types/CelestialBodyParameters";
 import { OrbitalParametersResponse, OrbitalParameters } from "../types/OrbitalParameters";
@@ -49,7 +26,7 @@ import optionalPhysicalData from "../data/optionalPhysicalData.json";
 import textures from "../data/textures.json";
 export default class DataProcessor {
 	private _optionalPhysicalParameters: OptionalPhsyicalParametersJSON = optionalPhysicalData;
-	private _textures: Textures = textures;
+	private _textures: CelestialTextures = textures;
 	private static _totalFactor: number = 0;
 	private static _totalDistance: number = 0;
 	private static _count: number = 0;
@@ -59,6 +36,7 @@ export default class DataProcessor {
 		requireOrbitalParameters: boolean = true,
 	): CelestialBodies => {
 		const processedParameters: CelestialBodies = {};
+
 		for (const secondaryName of Object.keys(fetchedPhysicalParameters)) {
 			const physicalParameters: PhysicalParametersResponse = fetchedPhysicalParameters[secondaryName];
 			const orbitalParameters: OrbitalParametersResponse | undefined = fetchedOrbitalParameters[secondaryName];
@@ -82,31 +60,36 @@ export default class DataProcessor {
 		secondary?: string[],
 	): CelestialBodyParameters => {
 		physical.SolarRotation = this.processSideralRotation(physical, orbital);
+
 		switch (metadata.BodyType) {
-			case "Star": {
+			case BodyTypes.Star: {
+				// case "Star": {
 				return {
 					MetaData: metadata,
 					Physical: physical as StarPhysicalParameters,
-					SecondaryBodyNames: secondary,
+					SecondaryNames: secondary,
 					Textures: this._textures[metadata.BodyType][metadata.EnglishName],
 				} as StarParameters;
 			}
-			case "Planet":
-			case "DwarfPlanet": {
+			case BodyTypes.Planet:
+			case BodyTypes.DwarfPlanet: {
+				// case "Planet":
+				// case "DwarfPlanet": {
 				return {
 					MetaData: metadata,
 					Physical: physical as PlanetPhysicalParameters,
 					Orbital: orbital,
-					SecondaryBodyNames: secondary,
+					SecondaryNames: secondary,
 					Textures: this._textures[metadata.BodyType][metadata.EnglishName],
 				} as PlanetParameters;
 			}
-			case "Moon": {
+			case BodyTypes.Moon: {
+				// case "Moon": {
 				return {
 					MetaData: metadata,
 					Physical: physical as BasePhysicalParameters,
 					Orbital: orbital,
-					SecondaryBodyNames: secondary,
+					SecondaryNames: secondary,
 					Textures: this._textures[metadata.BodyType]["Moon"],
 				} as MoonParameters;
 			}
@@ -125,20 +108,24 @@ export default class DataProcessor {
 		bodyType: BodyTypes,
 	): PhysicalParameters => {
 		switch (bodyType) {
-			case "Star": {
+			case BodyTypes.Star: {
+				// case "Star": {
 				return {
 					...this.processBasePhysical(fetchedPhysicalParameters),
 					...this._optionalPhysicalParameters[fetchedPhysicalParameters.englishName],
 				} as StarPhysicalParameters;
 			}
-			case "DwarfPlanet":
-			case "Planet": {
+			// case "DwarfPlanet":
+			// case "Planet": {
+			case BodyTypes.DwarfPlanet:
+			case BodyTypes.Planet: {
 				return {
 					...this.processBasePhysical(fetchedPhysicalParameters),
 					...this._optionalPhysicalParameters[fetchedPhysicalParameters.englishName],
 				} as PlanetPhysicalParameters;
 			}
-			case "Moon": {
+			// case "Moon": {
+			case BodyTypes.Moon: {
 				return {
 					...this.processBasePhysical(fetchedPhysicalParameters),
 				} as MoonPhysicalParameters;
@@ -146,16 +133,28 @@ export default class DataProcessor {
 		}
 	};
 
+	safeVectorScale(values: number[], scale: number): Vector3 {
+		const safe = values.map((v) => (Number.isFinite(v) ? v * scale : v));
+		return new Vector3(...safe);
+	}
 	private processOrbitalParameters = (
 		orbitalParameters?: OrbitalParametersResponse,
 	): OrbitalParameters | undefined => {
 		if (!orbitalParameters) return;
-		distanceParametersToProcess.map(
-			(distanceParameter) =>
-				(orbitalParameters[distanceParameter] = orbitalParameters[distanceParameter] * SCALE),
-		);
+		// distanceParametersToProcess.map(
+		// 	(distanceParameter) =>
+		// 		(orbitalParameters[distanceParameter] = orbitalParameters[distanceParameter] * SCALE),
+		distanceParametersToProcess.forEach((distanceParameter) => {
+			const value = orbitalParameters[distanceParameter];
+
+			if (Number.isFinite(value)) {
+				orbitalParameters[distanceParameter] = value * SCALE;
+			}
+		}); // );
 		return {
 			...orbitalParameters,
+			// Position: this.safeVectorScale(orbitalParameters.Position, SCALE),
+			// Velocity: this.safeVectorScale(orbitalParameters.Velocity, SCALE),
 			Position: new Vector3(...orbitalParameters.Position).multiplyScalar(SCALE),
 			Velocity: new Vector3(...orbitalParameters.Velocity).multiplyScalar(SCALE),
 		};

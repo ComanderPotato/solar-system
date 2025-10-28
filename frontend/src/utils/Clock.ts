@@ -67,18 +67,18 @@ export default class Clock {
 	public formattedSimISO = (): string => {
 		return this._simulatedDate.toISOString();
 	};
-	public formattedSimTime = (): string => {
+	public formattedSimTime(): string {
 		return this._simulatedDate.toLocaleTimeString("en-AU", {
 			hour: "2-digit",
 			minute: "2-digit",
 			second: "2-digit",
 		});
-	};
-	public formattedSimDate = (): string => {
+	}
+	public formattedSimDate(): string {
 		return this._simulatedDate.toLocaleDateString("en-AU", {
 			month: "short",
 			day: "2-digit",
 			year: "numeric",
 		});
-	};
+	}
 }

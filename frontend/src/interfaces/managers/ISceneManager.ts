@@ -4,7 +4,6 @@ import { CSS2DRenderer, OrbitControls } from "three/examples/jsm/Addons.js";
 import { FocusedBodyInformation } from "../controllers/ISolarSystemController";
 
 export default interface ISceneManager extends IManager {
-	initialiseScene(): void;
 	updateCameraPosition(focusedBodyInformation: FocusedBodyInformation, dt: number): void;
 	calculateLerpDestination(focusedBodyInformation: FocusedBodyInformation): void;
 	get scene(): Scene;

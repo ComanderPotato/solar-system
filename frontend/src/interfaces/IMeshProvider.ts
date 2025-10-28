@@ -1,28 +1,21 @@
-import { BufferGeometry, MeshPhongMaterial, Mesh } from "three";
+import { BufferGeometry, MeshPhongMaterial, Mesh, Group } from "three";
 import { CelestialBodyDetail } from "../utils/constants";
-import { TextureParameters } from "../types/TextureParameters";
+import { TextureFlags } from "../types/TextureParameters";
 export default interface IMeshProvider {
-	readonly textures: TextureParameters;
-	readonly meshDetail: CelestialBodyDetail;
-	readonly celestialBodyGeometry: BufferGeometry;
-	readonly celestialBodyMaterial: MeshPhongMaterial;
-	readonly celestialBodyMesh: Mesh;
-	readonly glowMesh?: Mesh;
-	readonly lightMesh?: Mesh;
-	readonly cloudMesh?: Mesh;
-	readonly geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>>;
+	textures: TextureFlags;
+	meshDetail: CelestialBodyDetail;
+	geometry: BufferGeometry;
+	material: MeshPhongMaterial;
+	mesh: Mesh;
+	glowMesh?: Mesh;
+	lightMesh?: Mesh;
+	cloudMesh?: Mesh;
+	ringMesh?: Mesh;
+	// geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>>;
+
 	rotateOnAxis(dt: number): void;
 
 	initialiseOrbitalPlane(): void;
-	// initialiseOrbit?(): void;
-
-	initialiseBaseMesh(): void;
-	addGlowMesh?(): void;
-
-	addLightingMesh?(): void;
-
-	addCloudMesh?(): void;
-
 	preLoadDetail(): void;
 	updateDetail(): void;
 	updateMeshDetailLevel(): void;

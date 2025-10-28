@@ -5,43 +5,37 @@ import CelestialBody from "../models/CelestialBody";
 import DataProcessor from "../utils/DataProcessor";
 import OrbitingBody from "../models/OrbitingBody";
 import { parametersToIgnore } from "../types/ParameterCategories";
-import IDataManager, { FilterBy, TaskName } from "../interfaces/managers/IDataManager";
+import IDataManager, { FetchedSummary, FilterBy, TaskName } from "../interfaces/managers/IDataManager";
 import Manager from "../core/Manager";
-import DataLoader, { FetchedSummary } from "../loaders/DataLoader";
+import DataLoader from "../loaders/DataLoader";
 import { BodyTypes } from "../types/CelestialBodyMetadata";
 
 export default class DataManager extends Manager implements IDataManager {
 	private _hasInitialDataLoaded: boolean = false;
 	private _loadingTasks: Set<TaskName> = new Set();
-	// private _tempLoadingTasks: Set<TaskName> = new Set();
 	private _isLoading: boolean = true;
 	private _dataProcessor: DataProcessor = new DataProcessor();
-	// private _assetLoader: AssetLoader = new AssetLoader(
-	// 	() => {},
-	// 	() => {},
-	// );
 	private _dataLoader: DataLoader = new DataLoader();
 	private _fetchedOrbitalParameters?: FetchedOrbitalParameters;
 	private _fetchedPhysicalParameters?: FetchedPhysicalParameters;
 	private _focusedSummary?: FetchedSummary;
 
-	// Don't need
-	private _focusedCelestialBody?: CelestialBody;
-	private _focusedSecondaries?: CelestialBodies | undefined;
-	// private _focusedSystem: FocusedSystem = {};
 	public constructor() {
 		super();
 		// this.onLoad();
 	}
 
+	viewTasks(): Set<TaskName> {
+		return this._loadingTasks;
+	}
 	addTask(taskName: TaskName): void {
 		this._loadingTasks.add(taskName);
 	}
 	removeTask(taskName: TaskName): void {
 		this._loadingTasks.delete(taskName);
 	}
-	fetchParamaterSummary(parameter: string): Promise<FetchedSummary> {
-		throw new Error("Method not implemented.");
+	async fetchParamaterSummary(parameter: string): Promise<FetchedSummary> {
+		return await this._dataLoader.fetchParameterSummary(parameter);
 	}
 	fetchFocusedSecondaries(body: CelestialBody, secondaryNames?: string[]): Promise<CelestialBodies> {
 		throw new Error("Method not implemented.");
@@ -49,9 +43,6 @@ export default class DataManager extends Manager implements IDataManager {
 
 	get hasInitialDataLoaded(): boolean {
 		return this._hasInitialDataLoaded;
-	}
-	get focusedSecondaries(): CelestialBodies | undefined {
-		return this._focusedSecondaries;
 	}
 
 	// SolarSystem should be in SolarSystemController -> SolarSystemManager
@@ -83,28 +74,28 @@ export default class DataManager extends Manager implements IDataManager {
 	// }
 
 	// /* FIX THIS
-	public async getFocusedElements(focusedBody: CelestialBody, secondaryNames?: string[]): Promise<void> {
-		return await this.trackLoading("focusedElements", async () => {
-			const temp = this.focusedBarycenter;
-			this.focusedBarycenter = focusedBody;
-			this._focusedCelestialBody = focusedBody;
-
-			if (temp && temp != this.focusedBarycenter && !(focusedBody instanceof Star)) {
-				temp.destroySecondaries();
-			}
-			if (secondaryNames && !this.focusedBarycenter.secondaryBodies) {
-				const newSecondaries = await this.getFocusedSecondaries(this._focusedCelestialBody, secondaryNames);
-				this._focusedSecondaries = newSecondaries;
-				this._focusedCelestialBody.initialiseSecondaryBodies(this._focusedSecondaries);
-				this._solarSystem.focusedSecondaries = this._focusedCelestialBody.secondaryBodies;
-			}
-			this._focusedSummary = await this.fetchFocusedSummary(focusedBody);
-			this._focusedCelestialBody.preLoadDetail();
-
-			await this.getParameterSummaries(focusedBody);
-			this.disposeOfFetched();
-		});
-	}
+	// public async getFocusedElements(focusedBody: CelestialBody, secondaryNames?: string[]): Promise<void> {
+	// 	return await this.trackLoading("focusedElements", async () => {
+	// 		const temp = this.focusedBarycenter;
+	// 		this.focusedBarycenter = focusedBody;
+	// 		this._focusedCelestialBody = focusedBody;
+	//
+	// 		if (temp && temp != this.focusedBarycenter && !(focusedBody instanceof Star)) {
+	// 			temp.destroySecondaries();
+	// 		}
+	// 		if (secondaryNames && !this.focusedBarycenter.secondaryBodies) {
+	// 			const newSecondaries = await this.getFocusedSecondaries(this._focusedCelestialBody, secondaryNames);
+	// 			this._focusedSecondaries = newSecondaries;
+	// 			this._focusedCelestialBody.initialiseSecondaryBodies(this._focusedSecondaries);
+	// 			this._solarSystem.focusedSecondaries = this._focusedCelestialBody.secondaryBodies;
+	// 		}
+	// 		this._focusedSummary = await this.fetchFocusedSummary(focusedBody);
+	// 		this._focusedCelestialBody.preLoadDetail();
+	//
+	// 		await this.getParameterSummaries(focusedBody);
+	// 		this.disposeOfFetched();
+	// 	});
+	// }
 	// */
 
 	public async getParameterSummary(parameter: string): Promise<FetchedSummary> {
@@ -137,24 +128,51 @@ export default class DataManager extends Manager implements IDataManager {
 		filterBy: FilterBy = FilterBy.ID,
 	): Promise<CelestialBodies> {
 		const bodyNames = requireOrbitalParameters ? secondaryNames : [primaryName, ...secondaryNames];
+
 		this._fetchedPhysicalParameters = await this._dataLoader.fetchPhysicalParameters(bodyNames, filterBy);
+
 		this._fetchedOrbitalParameters = await this._dataLoader.fetchOrbitalParameters(
 			primaryName,
-			Object.keys(this._fetchedPhysicalParameters),
+			Object.keys(this._fetchedPhysicalParameters).filter((key) => key != primaryName),
 		);
+
 		const processedBodies = await this.processBodies(requireOrbitalParameters);
+
 		this.disposeOfFetched();
 		return processedBodies;
 	}
+	// private async onLoad(): Promise<void> {
+	// 	// return await this.trackLoading("initialLoad", async () => {
+	// 	// 	this._fetchedPhysicalParameters = await this._dataLoader.fetchPhysicalParameters([
+	// 	// 		SOLAR_SYSTEM_PRIMARY,
+	// 	// 		...SOLAR_SYSTEM_SECONDARIES,
+	// 	// 	]);
+	// 	// 	this._fetchedOrbitalParameters = await this._dataLoader.fetchOrbitalParameters(
+	// 	// 		SOLAR_SYSTEM_PRIMARY,
+	// 	// 		SOLAR_SYSTEM_SECONDARIES,
+	// 	// 	);
+	// 	// 	const processedBodies = await this.processBodies(false);
+	// 	// 	this._solarSystem.initialiseSolarSystem(processedBodies);
+	// 	// 	this.disposeOfFetched();
+	// 	// });
+	// }
 	private async processBodies(requireOrbitalParameters: boolean = true): Promise<CelestialBodies> {
 		if (!(this._fetchedOrbitalParameters && this._fetchedPhysicalParameters)) {
 			throw new Error("Failed to process celestial body parameters.");
 		}
-		return this._dataProcessor.process(
+
+		const processedBodies = this._dataProcessor.process(
 			this._fetchedPhysicalParameters,
 			this._fetchedOrbitalParameters,
 			requireOrbitalParameters,
 		);
+
+		return processedBodies;
+		// return this._dataProcessor.process(
+		// 	this._fetchedPhysicalParameters,
+		// 	this._fetchedOrbitalParameters,
+		// 	requireOrbitalParameters,
+		// );
 	}
 
 	// private async getParameterSummaries(focusedCelestialBody: CelestialBody): Promise<void> {

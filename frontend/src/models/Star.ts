@@ -9,51 +9,39 @@ import {
 	Vector3,
 } from "three";
 import IMeshProvider from "../interfaces/IMeshProvider";
-// import { StarParameters, StarPhysicalParameters, TextureParameters } from "../types";
 import { StarParameters } from "../types/CelestialBodyParameters";
 import { StarPhysicalParameters } from "../types/PhysicalParameters";
-import { TextureParameters } from "../types/TextureParameters";
+import { TextureFlags } from "../types/TextureParameters";
 import CelestialBody from "./CelestialBody";
-// import { CelestialBodyDetail, CelestialBodyDistance } from "../utils";
 import { CelestialBodyDetail, CelestialBodyDistance } from "../utils/constants";
-// import { AppContext } from "../core";
 export default class Star extends CelestialBody<StarParameters> implements IMeshProvider {
-	private _celestialBodyGeometry!: BufferGeometry;
-	private _celestialBodyMaterial!: MeshPhongMaterial;
-	private _meshDetail: CelestialBodyDetail = CelestialBodyDetail.HIGH;
-	private _textures: TextureParameters;
+	public geometry!: BufferGeometry;
+	public material!: MeshPhongMaterial;
+	public meshDetail: CelestialBodyDetail = CelestialBodyDetail.HIGH;
+	public textures: TextureFlags;
 
-	private _celestialBodyMesh!: Mesh;
+	public mesh!: Mesh;
 
 	private _primaryLight!: PointLight;
+	public get primaryLight(): PointLight {
+		return this._primaryLight;
+	}
+	public set primaryLight(value: PointLight) {
+		this._primaryLight = value;
+	}
 	constructor(starParameters: StarParameters, secondaryBodyParameters?: string[]) {
 		super(starParameters, secondaryBodyParameters);
-		this._textures = starParameters.Textures;
-		this.initialiseBaseMesh();
+		this.textures = starParameters.Textures;
+		// this.initialiseBaseMesh();
 		this.initialiseOrbitalPlane();
-		this.addToScene();
+		// this.addToScene();
 	}
 
 	// Getters
 
-	get geometryCache(): Partial<Record<CelestialBodyDetail, BufferGeometry>> {
-		return this._geometryCache;
-	}
-	get meshDetail(): CelestialBodyDetail {
-		return this._meshDetail;
-	}
-	get celestialBodyGeometry(): BufferGeometry {
-		return this._celestialBodyGeometry;
-	}
-	get celestialBodyMaterial(): MeshPhongMaterial {
-		return this._celestialBodyMaterial;
-	}
-	get celestialBodyMesh(): Mesh {
-		return this._celestialBodyMesh;
-	}
-	get textures(): TextureParameters {
-		return this._textures;
-	}
+	// get geometryCache(): Partial<Record<CelestialBodyDetail, BufferGeometry>> {
+	// 	return this._geometryCache;
+	// }
 	get physicalParameters(): StarPhysicalParameters {
 		return this._physicalParameters;
 	}
@@ -74,31 +62,31 @@ export default class Star extends CelestialBody<StarParameters> implements IMesh
 
 		// this._celestialBodyGroup.rotation.x = this._physicalParameters.AxialTilt;
 	};
-	public initialiseBaseMesh = async (): Promise<void> => {
-		this._celestialBodyGeometry = new IcosahedronGeometry(this._physicalParameters.MeanRadius, this._meshDetail);
-		this._celestialBodyMaterial = new MeshPhongMaterial({
-			map: await AppContext.instance.DataManager.getTexture(this.createTexturePath("color")),
-			emissiveMap: await AppContext.instance.DataManager.getTexture(this.createTexturePath("color")),
-		});
-		// this.celestialBodyMaterial.specularMap = await appContext.DataManager.getTexture(this.createTexturePath("specular"));
-		this._celestialBodyMaterial.emissiveIntensity = this._physicalParameters.Emissivity;
-		this._celestialBodyMesh = new Mesh(this._celestialBodyGeometry, this._celestialBodyMaterial);
-		this._celestialBodyGroup.add(this._celestialBodyMesh);
-		await this.addLight();
-	};
+	// public initialiseBaseMesh = async (): Promise<void> => {
+	// 	this.geometry = new IcosahedronGeometry(this._physicalParameters.MeanRadius, this.meshDetail);
+	// 	this.material = new MeshPhongMaterial({
+	// 		map: await AppContext.instance.DataManager.getTexture(this.createTexturePath("color")),
+	// 		emissiveMap: await AppContext.instance.DataManager.getTexture(this.createTexturePath("color")),
+	// 	});
+	// 	// this.celestialBodyMaterial.specularMap = await appContext.DataManager.getTexture(this.createTexturePath("specular"));
+	// 	this.material.emissiveIntensity = this._physicalParameters.Emissivity;
+	// 	this.mesh = new Mesh(this.geometry, this.material);
+	// 	this._celestialBodyGroup.add(this.mesh);
+	// 	await this.addLight();
+	// };
 
-	private _geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>> = {};
-	private getGeometryForDetail(detail: CelestialBodyDetail) {
-		if (!this._geometryCache[detail]) {
-			this._geometryCache[detail] = new IcosahedronGeometry(this._physicalParameters.MeanRadius, detail);
-		}
-		return this._geometryCache[detail];
-	}
+	// private _geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>> = {};
+	// private getGeometryForDetail(detail: CelestialBodyDetail) {
+	// 	if (!this._geometryCache[detail]) {
+	// 		this._geometryCache[detail] = new IcosahedronGeometry(this._physicalParameters.MeanRadius, detail);
+	// 	}
+	// 	return this._geometryCache[detail];
+	// }
 
 	public updateMeshDetailLevel = (): void => {
-		const baseGeometry = this.getGeometryForDetail(this._meshDetail);
-		this._celestialBodyMesh.geometry.dispose();
-		this._celestialBodyMesh.geometry = baseGeometry.clone();
+		// const baseGeometry = this.getGeometryForDetail(this.meshDetail);
+		// this.mesh.geometry.dispose();
+		// this.mesh.geometry = baseGeometry.clone();
 	};
 	public calculateDetailLevel = (distance: number): CelestialBodyDetail => {
 		if (distance < this._physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE * 20)
@@ -162,41 +150,43 @@ export default class Star extends CelestialBody<StarParameters> implements IMesh
 	// 	}
 	// };
 
-	// Fix this
-	private addLight = async (): Promise<void> => {
-		if (!this._celestialBodyMaterial) return;
-		const surfaceEmission = this._physicalParameters.Emissivity ?? 1;
+	// // Fix this
+	// private addLight = async (): Promise<void> => {
+	// 	if (!this.material) return;
+	// 	const surfaceEmission = this._physicalParameters.Emissivity ?? 1;
 
-		// const rawLightRange = Math.cbrt(surfaceEmission) * SCALE;
-		// const scaledLightRange = rawLightRange;
+	// 	// const rawLightRange = Math.cbrt(surfaceEmission) * SCALE;
+	// 	// const scaledLightRange = rawLightRange;
 
-		this._primaryLight = new PointLight(0xffffff, 2, 1000000000, 0);
-		this._primaryLight.position.set(0, 0, 0);
-		this._celestialBodyGroup.add(this._primaryLight);
+	// 	this._primaryLight = new PointLight(0xffffff, 2, 1000000000, 0);
+	// 	this._primaryLight.position.set(0, 0, 0);
+	// 	this._celestialBodyGroup.add(this._primaryLight);
 
-		this._celestialBodyMaterial.emissive = new Color(0xffffcc);
-		this._celestialBodyMaterial.emissiveIntensity = 2;
+	// 	this.material.emissive = new Color(0xffffcc);
+	// 	this.material.emissiveIntensity = 2;
 
-		const emissiveMap = await AppContext.instance.DataManager.getTexture(this.createTexturePath("color"));
-		if (emissiveMap) {
-			this._celestialBodyMaterial.emissiveMap = emissiveMap;
-			this._celestialBodyMaterial.needsUpdate = true;
-		}
-	};
+	// 	const emissiveMap = await AppContext.instance.DataManager.getTexture(this.createTexturePath("color"));
+	// 	if (emissiveMap) {
+	// 		this.material.emissiveMap = emissiveMap;
+	// 		this.material.needsUpdate = true;
+	// 	}
+	// };
 
 	public updateTextureDetail = async (): Promise<void> => {
-		(this._celestialBodyMesh.material as MeshBasicMaterial).map = await AppContext.instance.DataManager.getTexture(
-			this.createTexturePath("color"),
-		);
+		// (this.mesh.material as MeshBasicMaterial).map = await AppContext.instance.DataManager.getTexture(
+		// 	this.createTexturePath("color")
+		// );
 	};
 
 	// Handle in data manager?
 	public createTexturePath = (texture: string): string => {
-		return `./static/src/assets/maps/${this._metadata.EnglishName.toLowerCase()}/${texture.toLowerCase()}_${this._meshDetail > 0 ? this._meshDetail : 2}.webp`;
+		return `./static/src/assets/maps/${this._metadata.EnglishName.toLowerCase()}/${texture.toLowerCase()}_${
+			this.meshDetail > 0 ? this.meshDetail : 2
+		}.webp`;
 	};
 	public preLoadDetail = (): void => {
-		if (!this._celestialBodyMesh) return;
-		this._meshDetail = CelestialBodyDetail.HIGH;
+		if (!this.mesh) return;
+		this.meshDetail = CelestialBodyDetail.HIGH;
 		this.updateTextureDetail();
 		this.updateMeshDetailLevel();
 	};

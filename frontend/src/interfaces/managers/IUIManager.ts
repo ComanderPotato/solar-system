@@ -1,22 +1,26 @@
 import CelestialBody from "../../models/CelestialBody";
 import IManager from "../IManager";
 
+export type EventType = "mouseenter" | "mouseleave";
+
 export default interface IUIManager extends IManager {
 	updateLoadScreenState(isLoading: boolean): void;
-	updateRateChange(timeStep: number): void;
+	updateTimeRateUI(timeStep?: number): void;
+	updateDateTime(date: string, time: string): void;
 
-	updateSummary(): void;
-	updateInfoPanel(): void;
-	updateTimeButton(): void;
+	toggleSummary(): void;
+	toggleSidePanel(): void;
+	togglePlaybackButton(): void;
 
-	updateInformationPanel(body: CelestialBody, extract: string): void;
+	updateInformationPanel(body: CelestialBody, summary: string): void;
+	updateInformationHover(target: HTMLElement, summary: string, eventType: keyof HTMLElementEventMap): void;
 
 	updateParameterInformation(): void;
 
 	get toggleButton(): HTMLElement;
-	get headerElements(): NodeListOf<HTMLElement>;
+	get dropdownElements(): NodeListOf<HTMLElement>;
 	get collapseButton(): HTMLElement;
 	get decreaseTimeButton(): HTMLElement;
-	get pauseTimeButton(): HTMLElement;
+	get playbackButton(): HTMLElement;
 	get increaseTimeButton(): HTMLElement;
 }

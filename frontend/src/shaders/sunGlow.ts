@@ -1,13 +1,13 @@
-import { AdditiveBlending, Color, FrontSide, ShaderMaterial, Texture } from "three";
-export const sunGlowMat = (): ShaderMaterial => {
-//   const uniforms = {
-//     ringTexture: { value: ringTexture },
-//     alphaTexture: { value: alphaTexture },
-//     useAlphaTexture: { value: useAlphaTexture },
-//     innerRadius: { value: innerRadius },
-//     outerRadius: { value: outerRadius },
-//   };
-  const vertexShader: string = `
+import { AdditiveBlending, Color, FrontSide, ShaderMaterial } from "three";
+export function sunGlowMat(): ShaderMaterial {
+	//   const uniforms = {
+	//     ringTexture: { value: ringTexture },
+	//     alphaTexture: { value: alphaTexture },
+	//     useAlphaTexture: { value: useAlphaTexture },
+	//     innerRadius: { value: innerRadius },
+	//     outerRadius: { value: outerRadius },
+	//   };
+	const vertexShader: string = `
         varying vec3 vNormal;
         varying vec3 vWorldPosition;
 
@@ -19,7 +19,7 @@ export const sunGlowMat = (): ShaderMaterial => {
             gl_Position = projectionMatrix * viewMatrix * worldPosition;
         }
     `;
-  const fragmentShader: string = `
+	const fragmentShader: string = `
     uniform vec3 glowColor;
     uniform float time;
     uniform float intensity;
@@ -38,20 +38,20 @@ export const sunGlowMat = (): ShaderMaterial => {
         gl_FragColor = vec4(glowColor * glow * intensity, 1.0);
     }
   `;
-  
-  const sunGlowMat = new ShaderMaterial({
-    vertexShader: vertexShader,
-    fragmentShader: fragmentShader,
-    uniforms: {
-    glowColor: { value: new Color(1.0, 0.8, 0.3) },
-    time: { value: 0 },
-    intensity: { value: 1.5 },
-    falloff: { value: 2.0 },
-  },
-  side: FrontSide,
-  transparent: true,
-  depthWrite: false,
-  blending: AdditiveBlending,
-  });
-  return sunGlowMat;
-};
+
+	const sunGlowMat = new ShaderMaterial({
+		vertexShader: vertexShader,
+		fragmentShader: fragmentShader,
+		uniforms: {
+			glowColor: { value: new Color(1.0, 0.8, 0.3) },
+			time: { value: 0 },
+			intensity: { value: 1.5 },
+			falloff: { value: 2.0 },
+		},
+		side: FrontSide,
+		transparent: true,
+		depthWrite: false,
+		blending: AdditiveBlending,
+	});
+	return sunGlowMat;
+}

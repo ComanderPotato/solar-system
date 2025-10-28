@@ -5,8 +5,10 @@ import Manager from "../core/Manager";
 export default class TimeManager extends Manager implements ITimeManager {
 	private _accumulator: number = 0.0;
 	private _timeStep: number = 1 / 60;
-	private _timeScales = [-3600, -1800, -1200, -600, -60, -30, -3, -1, 1, 3, 30, 60, 600, 1200, 1800, 3600];
-	private _timeScaleIndex = 8;
+	private _timeScales = [
+		-86400, -3600, -1800, -1200, -600, -60, -30, -3, -1, 1, 3, 30, 60, 600, 1200, 1800, 3600, 86400,
+	];
+	private _timeScaleIndex = Math.ceil(this._timeScales.length / 2);
 	private _clock: Clock = new Clock();
 	public constructor() {
 		super();
@@ -49,19 +51,19 @@ export default class TimeManager extends Manager implements ITimeManager {
 	public updateClock() {
 		this._clock.update();
 	}
-	public pause = (): void => {
+	public pause(): void {
 		this._clock.pause();
-	};
+	}
 
-	public resume = (): void => {
+	public resume(): void {
 		this._clock.resume();
-	};
-	public getSimISO = (): string => {
+	}
+	public getSimISO(): string {
 		return this._clock.formattedSimISO();
-	};
-	public togglePause = (): void => {
+	}
+	public togglePause(): void {
 		this._clock.togglePause();
-	};
+	}
 	public isRunning() {
 		return this._clock.isRunning;
 	}

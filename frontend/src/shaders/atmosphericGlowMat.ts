@@ -1,6 +1,6 @@
 import { AdditiveBlending, Color, ShaderMaterial } from "three";
 let atmosphericGlowInstance: ShaderMaterial | null = null;
-export const getAtmosphericGlowMat = (rimHex: number = 0x0088ff, facingHex: number = 0x000000): ShaderMaterial => {
+export function getAtmosphericGlowMat(rimHex: number = 0x0088ff, facingHex: number = 0x000000): ShaderMaterial {
 	if (atmosphericGlowInstance) return atmosphericGlowInstance;
 	const uniforms = {
 		color1: { value: new Color(rimHex) },
@@ -45,10 +45,10 @@ export const getAtmosphericGlowMat = (rimHex: number = 0x0088ff, facingHex: numb
 		vertexShader: vertexShader,
 		fragmentShader: fragmentShader,
 		// transparent: true,
-    depthTest: false,
+		depthTest: false,
 		blending: AdditiveBlending,
 		// side: DoubleSide maybe add?
 		// wireframe: true,
 	});
 	return atmosphericGlowInstance;
-};
+}

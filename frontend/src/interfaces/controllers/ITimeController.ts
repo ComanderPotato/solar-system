@@ -1,12 +1,10 @@
-import IController from "../IController";
-import ITimeManager from "../managers/ITimeManager";
 export enum TimeChange {
 	Decrease = -1,
-	Pause = 0,
+	TogglePlay = 0,
 	Increase = 1,
 }
 
-export default interface ITimeController extends IController<ITimeManager> {
+export default interface ITimeController {
 	resetTime(): void;
 	isClockRunning(): boolean;
 	updateClock(): void;
@@ -17,5 +15,6 @@ export default interface ITimeController extends IController<ITimeManager> {
 	get scaledTimeStep(): number;
 	advanceSimulatedDate(): void;
 
+	accumulateDelta(frameRate: number): void;
 	handleTimeChange(timeChange: TimeChange): void;
 }

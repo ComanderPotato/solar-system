@@ -18,7 +18,7 @@ export default class AppController extends Controller<any> implements IAppContro
 		super(manager);
 	}
 
-	protected injectControllers(appContext: IAppContext): void {
+	public injectControllers(appContext: IAppContext): void {
 		this.assetController = appContext.assetController;
 		this.sceneController = appContext.sceneController;
 	}
@@ -69,11 +69,5 @@ export default class AppController extends Controller<any> implements IAppContro
 		// 	this._sceneController.render();
 		// };
 		// animate();
-	}
-	public initialiseScene(): void {
-		// this._sceneController.init();
-		this.assetController
-			.getHDRI("./static/src/assets/HDR_multi_nebula.hdr")
-			.then((hdri) => this.sceneController.setHDRI(hdri));
 	}
 }

@@ -1,8 +1,13 @@
-import { FetchedSummary } from "../../loaders/DataLoader";
-import IController from "../IController";
-import IDataManager, { TaskName } from "../managers/IDataManager";
-export default interface IDataController extends IController<IDataManager> {
+// import IController from "../IController";
+import CelestialBody from "../../models/CelestialBody";
+import { FetchedSummary, TaskName } from "../managers/IDataManager";
+export default interface IDataController {
+	isLoading(): boolean;
+
+	onLoad(): Promise<void>;
 	handleTracking<T>(taskName: TaskName, callBack: () => Promise<T>): Promise<T>;
+
+	handleFocusedElements(newFocusedBody: CelestialBody): Promise<void>;
 
 	handleLoadingState(): void;
 
@@ -12,7 +17,10 @@ export default interface IDataController extends IController<IDataManager> {
 
 	getFocusedParamterSummary(): Promise<FetchedSummary>;
 
-	getParameterSummaries(parameters: string[]): Promise<void>; // Maybe fix return etc
+	getParameterSummaries(): Promise<void>; // Maybe fix return etc
 
+	viewTasks(): Set<TaskName>;
+
+	getFocusedSecondaries(): Promise<void>;
 	// getFocusedSecondaries()
 }

@@ -4,42 +4,61 @@ import IAppContext from "../interfaces/IAppContext";
 import IEngineManager from "../interfaces/managers/IEngineManager";
 
 export default class EngineController extends Controller<IEngineManager> implements IEngineController {
+	private _lastLogTime = 0;
 	public constructor(manager: IEngineManager) {
 		super(manager);
 	}
-	protected injectControllers(appContext: IAppContext): void {
+	public injectControllers(appContext: IAppContext): void {
 		this.timeController = appContext.timeController;
 		this.dataController = appContext.dataController;
 		this.sceneController = appContext.sceneController;
+		this.solarSystemController = appContext.solarSystemController;
+		this.rendererController = appContext.rendererController;
 	}
-	handleRenderLoop(): void {
-		requestAnimationFrame(this.manager.animate);
-		if (this.timeController.isClockRunning()) {
-			this.timeController.updateClock();
-			if (this.dataController.isLoading()) return;
-
-			// Can probably refactor to function inside TimeController
-			let delta = this.timeController.absoluteDelta;
-			if (delta > this.manager.FRAME_RATE) delta = this.manager.FRAME_RATE;
-			this.timeController.accumulator += delta;
-
-			while (this.timeController.accumulator >= this.timeController.timeStep) {
-				this.timeController.advanceSimulatedDate();
-				// this.sceneController.moveCameraWithFocused(
-				// 	this.solarSystemController.focusedCelestialBody,
-				// 	this.timeController.scaledTimeStep,
-				// );
-				this.sceneController.handleCameraMovement(this.timeController.scaledTimeStep);
-				// this.solarSystem.simulate(this.timeController.scaledTimeStep);
-				this.solarSystemController.simulate(this.timeController.scaledTimeStep);
-				this.timeController.accumulator -= this.timeController.timeStep;
-			}
-		} else {
-			this.sceneController.handleCameraMovement();
-			// this.solarSystem.updateDetail();
-			this.solarSystemController.updateDetail();
+	start(): void {
+		this.sceneController.setRenderLoop(() => {
+			this.handleRenderLoop();
+		});
+	}
+	stop(): void {
+		this.sceneController.setRenderLoop(null);
+	}
+	accumulateDelta(): void {
+		let delta = this.timeController.absoluteDelta;
+		if (delta > this.manager.FRAME_RATE) delta = this.manager.FRAME_RATE;
+		this.timeController.accumulator += delta;
+	}
+	private handleSimulationLoop(): void {
+		while (this.timeController.accumulator >= this.timeController.timeStep) {
+			this.timeController.advanceSimulatedDate();
+			this.sceneController.handleCameraMovement(this.timeController.scaledTimeStep);
+			this.solarSystemController.handleSimulation(this.timeController.scaledTimeStep);
+			this.timeController.accumulator -= this.timeController.timeStep;
 		}
+	}
+	private handleRenderLoop(): void {
 		this.sceneController.handleRender();
+		if (!this.timeController.isClockRunning()) {
+			this.sceneController.handleCameraMovement();
+			this.rendererController.updateRenderables();
+			return;
+		}
+		this.debugger(() => {
+			console.log(this.sceneController.sceneResources.scene);
+		});
+		this.timeController.updateClock();
+
+		if (this.dataController.isLoading()) return;
+
+		this.timeController.accumulateDelta(this.manager.FRAME_RATE);
+		this.handleSimulationLoop();
+	}
+	debugger(callback: () => void): void {
+		const now = performance.now();
+		if (now - this._lastLogTime >= 3000) {
+			callback();
+			this._lastLogTime = now;
+		}
 	}
 	destroy(): void {
 		throw new Error("Method not implemented.");

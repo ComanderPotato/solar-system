@@ -1,6 +1,6 @@
 import { DataTexture, Object3D, Vector3, PerspectiveCamera, Scene, WebGLRenderer, Frustum, Raycaster } from "three";
-import IController from "../IController";
-import ISceneManager from "../managers/ISceneManager";
+// import IController from "../IController";
+// import ISceneManager from "../managers/ISceneManager";
 import { CSS2DRenderer, OrbitControls } from "three/examples/jsm/Addons.js";
 export interface SceneResources {
 	scene: Scene;
@@ -12,7 +12,7 @@ export interface SceneResources {
 	frustum: Frustum;
 	raycaster: Raycaster;
 }
-export default interface ISceneController extends IController<ISceneManager> {
+export default interface ISceneController {
 	setHDRI(hdri: DataTexture | null): void;
 	handleCameraMovement(dt?: number): void;
 	handleLerp(): void;
@@ -20,5 +20,6 @@ export default interface ISceneController extends IController<ISceneManager> {
 	removeFromScene(...object: Object3D[]): void;
 	handleRender(): void;
 
+	setRenderLoop(renderLoop: any): void;
 	get sceneResources(): SceneResources;
 }

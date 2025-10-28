@@ -1,4 +1,6 @@
+import { GLTF } from "three/examples/jsm/Addons.js";
+
 export default interface IModelProvider {
-    
-    initaliseModel(): void;
+	model: GLTF;
+	initaliseModel(): void;
 }

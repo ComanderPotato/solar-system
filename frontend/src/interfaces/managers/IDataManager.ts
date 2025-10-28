@@ -1,7 +1,5 @@
-import { DataTexture } from "three";
 import IManager from "../IManager";
 import CelestialBody from "../../models/CelestialBody";
-import { FetchedSummary } from "../../loaders/DataLoader";
 import { BodyTypes } from "../../types/CelestialBodyMetadata";
 import { CelestialBodies } from "../../types/CelestialBodyParameters";
 import { FetchedOrbitalParameters } from "../../types/OrbitalParameters";
@@ -23,11 +21,13 @@ export enum TaskName {
 	FocusedSecondaries,
 	LoadTexture,
 	LoadHDRI,
+	TODO,
+}
+export interface FetchedSummary {
+	summary: string;
 }
 export default interface IDataManager extends IManager {
 	get hasInitialDataLoaded(): boolean;
-
-	get focusedSecondaries(): CelestialBodies | undefined;
 
 	get isLoading(): boolean;
 
@@ -56,9 +56,10 @@ export default interface IDataManager extends IManager {
 	fetchFocusedSecondaries(body: CelestialBody, secondaryNames?: string[]): Promise<CelestialBodies>;
 
 	fetchParameters(
-		primary: string,
-		secondary: string[],
-		requireOrbitalParameters: boolean,
-		filterBy: FilterBy,
+		primaryName: string,
+		secondaryNames: string[],
+		requireOrbitalParameters?: boolean,
+		filterBy?: FilterBy,
 	): Promise<CelestialBodies>;
+	viewTasks(): Set<TaskName>;
 }

@@ -1,88 +1,82 @@
-// import { FetchedPhysicalParameters, FetchedOrbitalParameters } from "../types";
-
+import { FetchedSummary, FilterBy } from "../interfaces/managers/IDataManager";
 import { FetchedOrbitalParameters } from "../types/OrbitalParameters";
 import { FetchedPhysicalParameters } from "../types/PhysicalParameters";
 import { preprocessParameter } from "../utils/uiHelpers";
 
-// import { preprocessParameter } from "../utils";
-export interface FetchedSummary {
-	summary: string;
+const BASE_API_ENDPOINT = "/api/rest";
+function endpointBuilder(...path: string[]) {
+	return [BASE_API_ENDPOINT, ...path].join("/");
 }
 
 export default class DataLoader {
-	private _extractCache: Map<string, Promise<FetchedSummary>> = new Map();
+	private _summaryCache: Map<string, FetchedSummary> = new Map();
 
-	public hasExtract = (key: string): boolean => {
-		return this._extractCache.has(key);
-	};
+	public hasSummary(key: string): boolean {
+		return this._summaryCache.has(key);
+	}
+	private async fetchData<T>(url: string, body: unknown): Promise<T> {
+		try {
+			const response = await fetch(url, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(body),
+			});
+			if (!response.ok) {
+				throw new Error(`HTTP error, status error: ${response.status}`);
+			}
+			return await response.json();
+		} catch (error) {
+			throw new Error("Fetched failed", { cause: error });
+		}
+	}
 	public async fetchPhysicalParameters(
 		bodyNames: string[],
-		filterBy: string = "englishName",
+		filterBy: FilterBy = FilterBy.EnglishName,
 	): Promise<FetchedPhysicalParameters> {
-		const response = await fetch("/api/rest/parameters/physical", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				bodyNames: bodyNames,
-				filterBy: filterBy,
-			}),
-		});
-		const data = await response.json();
-		return data;
+		// const response = await fetch("/api/rest/parameters/physical", {
+		// 	method: "POST",
+		// 	headers: {
+		// 		"Content-Type": "application/json",
+		// 	},
+		// 	body: JSON.stringify({
+		// 		bodyNames: bodyNames,
+		// 		filterBy: filterBy,
+		// 	}),
+		// });
+		// const data = await response.json();
+		// console.log("Balls");
+		// console.log(data);
+		// return data;
+		const url = endpointBuilder("parameters", "physical");
+		return await this.fetchData(url, { bodyNames, filterBy });
 	}
 	public async fetchOrbitalParameters(
 		primaryName: string,
 		secondaryNames: string[],
 	): Promise<FetchedOrbitalParameters> {
-		const response = await fetch("/api/rest/parameters/orbital", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				primaryName: primaryName,
-				secondaryNames: secondaryNames,
-			}),
-		});
-		const data = await response.json();
-		return data;
+		const url = endpointBuilder("parameters", "orbital");
+		return await this.fetchData(url, { primaryName, secondaryNames });
 	}
 
 	public async fetchFocusedSummary(planetName: string, bodyType: string): Promise<FetchedSummary> {
 		planetName = planetName.replaceAll(" ", "_");
-		if (this._extractCache.has(planetName)) return this._extractCache.get(planetName)!;
-		const response = await fetch("/api/rest/summary/celestial", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				planetName: planetName,
-				bodyType: bodyType,
-			}),
-		});
-		const data = await response.json();
-		this._extractCache.set(planetName, data);
+		if (this._summaryCache.has(planetName)) return this._summaryCache.get(planetName)!;
+
+		const url = endpointBuilder("summary", "celestial");
+		const data = await this.fetchData<FetchedSummary>(url, { planetName, bodyType });
+		this._summaryCache.set(planetName, data);
 		return data;
 	}
 
 	public async fetchParameterSummary(parameterName: string): Promise<FetchedSummary> {
-		if (this._extractCache.has(parameterName)) return this._extractCache.get(parameterName)!;
-		const processedParamaterName = preprocessParameter(parameterName).replaceAll(" ", "_").toLowerCase();
+		parameterName = preprocessParameter(parameterName).replaceAll(" ", "_").toLowerCase();
+		if (this._summaryCache.has(parameterName)) return this._summaryCache.get(parameterName)!;
 
-		const response = await fetch("/api/rest/summary/parameter", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				parameterName: processedParamaterName,
-			}),
-		});
-		const data = await response.json();
-		this._extractCache.set(parameterName, data);
+		const url = endpointBuilder("summary", "parameter");
+		const data = await this.fetchData<FetchedSummary>(url, { parameterName });
+		this._summaryCache.set(parameterName, data);
 		return data;
 	}
 }

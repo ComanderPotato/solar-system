@@ -1,63 +1,49 @@
 import { Line2 } from "three/examples/jsm/Addons.js";
 import { MoonCreator, PlanetCreator, StarCreator } from "../core/CelestialBodyFactory";
 import CelestialBody from "../models/CelestialBody";
-import { BufferGeometry, IcosahedronGeometry, Mesh } from "three";
-import { CelestialBodies, CelestialBodyParameters } from "../types/CelestialBodyParameters";
+import { BufferGeometry, Mesh, Vector3 } from "three";
+import { CelestialBodyParameters } from "../types/CelestialBodyParameters";
 import ICelestialBodyManager from "../interfaces/managers/ICelestialBodyManager";
 import Manager from "../core/Manager";
-import IMeshProvider from "../interfaces/IMeshProvider";
-import IModelProvider from "../interfaces/IModelProvider";
-import { CelestialBodyDetail } from "../utils/constants";
+import { BodyTypes } from "../types/CelestialBodyMetadata";
+import { CelestialBodyMesh } from "../models/types";
+import { isMeshProvider } from "../utils/CelestialHelpers";
 
 export default class CelestialBodyManager extends Manager implements ICelestialBodyManager {
-	private _geometryCache: Partial<Record<CelestialBodyDetail, BufferGeometry>> = {};
 	private _moonCreator: MoonCreator = new MoonCreator();
 	private _planetCreator: PlanetCreator = new PlanetCreator();
 	private _starCreator: StarCreator = new StarCreator();
 	public constructor() {
 		super();
 	}
-
-	private isMeshProvider(body: IMeshProvider | IModelProvider): body is IMeshProvider {
-		return (body as IMeshProvider).geometryCache !== undefined;
-	}
-	private getGeometryForDetail(detail: CelestialBodyDetail) {
-		if (!this._geometryCache[detail]) {
-			this._geometryCache[detail] = new IcosahedronGeometry(1, detail);
-		}
-		return this._geometryCache[detail];
-	}
-	public updateGeometryDetail(body: IMeshProvider | IModelProvider, detail: CelestialBodyDetail): void {
-		if (this.isMeshProvider(body)) {
-			const baseGeometry = this.getGeometryForDetail(detail);
-			body.celestialBodyMesh.geometry.dispose();
-			body.celestialBodyMesh.geometry = baseGeometry.clone();
-			// Scale instead, less duplication
-			// body.celestialBodyMesh.scale.setScalar(body.physicalParameters.MeanRadius);
-		}
+	public updateGeometryLOD(body: CelestialBodyMesh, geometry: BufferGeometry): void {
+		body.mesh.geometry.dispose();
+		body.geometry = geometry;
+		body.mesh.scale.setScalar(body.physicalParameters.MeanRadius);
 	}
 
 	public createBody(bodyParameters: CelestialBodyParameters, primary?: CelestialBody): CelestialBody {
 		let createdBody: CelestialBody;
 		switch (bodyParameters.MetaData.BodyType) {
-			case "Star":
+			case BodyTypes.Star:
 				createdBody = this._starCreator.createCelestialBody(bodyParameters);
 				break;
-			case "Planet":
-			case "DwarfPlanet":
+			case BodyTypes.Planet:
+			case BodyTypes.DwarfPlanet:
 				createdBody = this._planetCreator.createCelestialBody(bodyParameters, primary!);
 				break;
-			case "Moon":
+			case BodyTypes.Moon:
 				createdBody = this._moonCreator.createCelestialBody(bodyParameters, primary!);
 				break;
 		}
-		return createdBody;
+		return createdBody!;
 	}
 	public destroySecondaries(body: CelestialBody): void {
 		if (!body.secondaryBodies) return;
 		body.secondaryBodies.forEach((secondaryBody) => {
 			this.removeOrbit(body, secondaryBody.metadata.EnglishName);
-			secondaryBody.destroy();
+			// Change
+			// secondaryBody.destroy();
 		});
 		// body.secondaryBodies = undefined;
 	}
@@ -82,6 +68,19 @@ export default class CelestialBodyManager extends Manager implements ICelestialB
 			}
 		});
 		body.celestialBodyGroup.remove(body.container);
+	}
+
+	fetchUpdatedRotation(body: CelestialBody, dt: number): number {
+		if (body.physicalParameters.SolarRotation === 0) return 0;
+		const rotationSpeed = (2 * Math.PI) / body.physicalParameters.SolarRotation;
+		return rotationSpeed * dt;
+
+		// body.celestialBodyGroup.rotateOnAxis(yAxis, deltaRotation);
+
+		// body.mesh?.rotateOnAxis(yAxis, deltaRotation);
+		// body.glowMesh?.rotateOnAxis(yAxis, deltaRotation);
+		// body.lightMesh?.rotateOnAxis(yAxis, deltaRotation);
+		// body.cloudMesh?.rotateOnAxis(yAxis, deltaRotation * 1.1);
 	}
 
 	// Maybe in UI

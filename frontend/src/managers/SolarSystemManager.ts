@@ -2,7 +2,7 @@ import SolarSystem from "../models/Solarsystem";
 import ISolarSystemManager from "../interfaces/managers/ISolarSystemManager";
 import Manager from "../core/Manager";
 import CelestialBody from "../models/CelestialBody";
-import { CelestialBodies } from "../types/CelestialBodyParameters";
+import OrbitingBody from "../models/OrbitingBody";
 
 interface FocusedSystem {
 	Barycenter: CelestialBody;
@@ -11,13 +11,16 @@ interface FocusedSystem {
 export default class SolarSystemManager extends Manager implements ISolarSystemManager {
 	private _solarSystem!: SolarSystem;
 	private _focusedCelestialBody?: CelestialBody;
+	private _focusedSecondaries?: OrbitingBody[];
 	private _focusedSystem?: FocusedSystem;
 
 	public constructor() {
 		super();
+		this._solarSystem = new SolarSystem();
 	}
 	initialiseSolarSystem(primary: CelestialBody, secondaries: CelestialBody[]): void {
-		this._solarSystem = new SolarSystem(primary, secondaries);
+		this._solarSystem.initialisePrimary(primary);
+		this._solarSystem.initialiseSecondaries(secondaries);
 	}
 
 	get solarSystem(): SolarSystem {
@@ -29,6 +32,12 @@ export default class SolarSystemManager extends Manager implements ISolarSystemM
 	}
 	set focusedCelestialBody(body: CelestialBody | undefined) {
 		this._focusedCelestialBody = body;
+	}
+	get focusedSecondaries(): OrbitingBody[] | undefined {
+		return this._focusedSecondaries;
+	}
+	set focusedSecondaries(body: OrbitingBody[] | undefined) {
+		this._focusedSecondaries = body;
 	}
 	get focusedSystem(): FocusedSystem | undefined {
 		return this._focusedSystem;

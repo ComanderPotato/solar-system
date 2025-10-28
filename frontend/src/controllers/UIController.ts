@@ -3,14 +3,21 @@ import IUIController from "../interfaces/controllers/IUIController";
 import Controller from "../core/Controller";
 import { TimeChange } from "../interfaces/controllers/ITimeController";
 import CelestialBody from "../models/CelestialBody";
-import { CelestialBodyColour, CelestialBodyColourHover } from "../utils/constants";
 import IAppContext from "../interfaces/IAppContext";
 import IUIManager from "../interfaces/managers/IUIManager";
 import { BodyTypes } from "../types/CelestialBodyMetadata";
+import IInjectableController from "../interfaces/IInjectableController";
+import { getCelestialBodyColor } from "../utils/CelestialHelpers";
+import IInitializable from "../interfaces/IInitializable";
 
-export default class UIController extends Controller<IUIManager> implements IUIController {
+export default class UIController
+	extends Controller<IUIManager>
+	implements IUIController, IInjectableController, IInitializable
+{
 	public constructor(manager: IUIManager) {
 		super(manager);
+	}
+	init(): void {
 		this.handleListenerInitialisation();
 	}
 	updateParameterInformation(): void {
@@ -22,11 +29,10 @@ export default class UIController extends Controller<IUIManager> implements IUIC
 	injectControllers(appContext: IAppContext): void {
 		this.timeController = appContext.timeController;
 		this.sceneController = appContext.sceneController;
+		this.solarSystemController = appContext.solarSystemController;
+		this.rendererController = appContext.rendererController;
+		this.dataController = appContext.dataController;
 	}
-	initialiseScene?(): void {
-		throw new Error("Method not implemented.");
-	}
-
 	destroy(): void {
 		throw new Error("Method not implemented.");
 	}
@@ -34,16 +40,6 @@ export default class UIController extends Controller<IUIManager> implements IUIC
 	// IUIController Methods
 	public handleLoadScreenStateChange(isLoading: boolean): void {
 		this.manager.updateLoadScreenState(isLoading);
-	}
-	public handleRateChange(): void {
-		if (!this.timeController.isClockRunning()) {
-			this.manager.updateRateChange(0);
-		} else {
-			this.manager.updateRateChange(this.timeController.scaledTimeStep);
-		}
-	}
-	public handleInformationPanel(body: CelestialBody, extract: string): void {
-		throw new Error("Method not implemented.");
 	}
 	public updateUIPanel(body: CelestialBody, summary: string): void {
 		this.manager.updateInformationPanel(body, summary);
@@ -93,52 +89,101 @@ export default class UIController extends Controller<IUIManager> implements IUIC
 		return body;
 	}
 	private handleListenerInitialisation(): void {
-		const { toggleButton, collapseButton, decreaseTimeButton, pauseTimeButton, increaseTimeButton } = this.manager;
+		const {
+			toggleButton,
+			collapseButton,
+			decreaseTimeButton,
+			playbackButton,
+			increaseTimeButton,
+			dropdownElements,
+		} = this.manager;
 		const { lerpDestination: isLerping } = this.sceneController.sceneResources;
 
 		toggleButton.addEventListener("click", () => {
 			if (isLerping) return;
-			this.manager.updateSummary();
+			this.manager.toggleSummary();
 		});
 		collapseButton.addEventListener("click", () => {
 			if (isLerping) return;
-			this.manager.updateInfoPanel();
+			this.manager.toggleSidePanel();
 		});
 		decreaseTimeButton.addEventListener("click", () => {
 			if (isLerping) return;
-			this.timeController.handleTimeChange(TimeChange.Decrease);
-			this.handleRateChange();
+			this.handleUpdateTimeRateUI(TimeChange.Decrease);
 		});
-		pauseTimeButton.addEventListener("click", () => {
+		playbackButton.addEventListener("click", () => {
 			if (isLerping) return;
-			this.timeController.handleTimeChange(TimeChange.Pause);
-			this.manager.updateTimeButton();
+			this.handleUpdateTimeRateUI(TimeChange.TogglePlay);
+			this.manager.togglePlaybackButton();
 		});
 		increaseTimeButton.addEventListener("click", () => {
 			if (isLerping) return;
-			this.timeController.handleTimeChange(TimeChange.Increase);
-			this.handleRateChange();
+			this.handleUpdateTimeRateUI(TimeChange.Increase);
 		});
+		dropdownElements.forEach((dropdownElement) =>
+			dropdownElement.addEventListener("click", () => {
+				dropdownElement.classList.toggle("active");
+			}),
+		);
 	}
-
+	public handleUpdateTimeRateUI(timeChange: TimeChange): void {
+		this.timeController.handleTimeChange(timeChange);
+		const timeStep = this.timeController.isClockRunning() ? this.timeController.scaledTimeStep : 0;
+		this.manager.updateTimeRateUI(timeStep);
+	}
 	protected handleClick(body: CelestialBody): void {
 		if (this.sceneController.sceneResources.lerpDestination) return;
 		this.solarSystemController.focusedCelestialBody = body;
-		this.sceneController.sceneResources.controls.target = body.position;
+		this.sceneController.sceneResources.controls.target = body.celestialBodyGroup.position;
+		this.rendererController.preloadRenderable(body);
+		this.sceneController.handleLerp();
+		// this.dataController.handleFocusedElements(body);
+		// this.dataController.getParameterSummaries();
+		this.dataController.getFocusedSecondaries();
+		this.handleInformationPanel();
 	}
+	// Make into one
 	private handleHover(body: CelestialBody): void {
 		if (!body.primaryBody) return;
-		const colour =
-			CelestialBodyColourHover[body.metadata.EnglishName.toUpperCase()] ??
-			CelestialBodyColourHover[body.primaryBody.metadata.EnglishName.toUpperCase()];
-
-		(body.primaryBody.orbits.get(body.metadata.EnglishName)!.material as LineMaterial).color.set(colour);
+		const color = getCelestialBodyColor(body);
+		(body.primaryBody.orbits.get(body.metadata.EnglishName)!.material as LineMaterial).color.set(color);
 	}
 	private handleLeave(body: CelestialBody): void {
 		if (!body.primaryBody) return;
-		const colour =
-			CelestialBodyColour[body.metadata.EnglishName.toUpperCase()] ??
-			CelestialBodyColour[body.primaryBody.metadata.EnglishName.toUpperCase()];
-		(body.primaryBody.orbits.get(body.metadata.EnglishName)!.material as LineMaterial).color.set(colour);
+		const color = getCelestialBodyColor(body);
+		(body.primaryBody.orbits.get(body.metadata.EnglishName)!.material as LineMaterial).color.set(color);
+	}
+
+	public async handleInformationPanel(): Promise<void> {
+		const body = this.solarSystemController.focusedCelestialBody;
+		const summary = await this.dataController.getFocusedSummary();
+		if (!body || !summary) return;
+		this.removeInformationListeners();
+		this.manager.updateInformationPanel(body, summary.summary);
+		this.addInformationListeners();
+	}
+	private removeInformationListeners() {
+		document.querySelectorAll(".information-btn").forEach((informationButton) => {
+			informationButton.removeEventListener("mouseenter", (event) => this.handleInformationHover(event));
+			informationButton.removeEventListener("mouseleave", (event) => this.handleInformationHover(event));
+		});
+	}
+
+	public async handleInformationHover(event: Event): Promise<void> {
+		const target = event.currentTarget as HTMLElement;
+		const key = target.getAttribute("data-key") ?? "";
+		const summary = await this.dataController.getParameterSummary(key);
+		const eventType = event.type as keyof HTMLElementEventMap;
+
+		this.manager.updateInformationHover(target, summary.summary, eventType);
+	}
+	private addInformationListeners() {
+		document.querySelectorAll(".information-btn").forEach((informationButton) => {
+			informationButton.addEventListener("mouseenter", (event) => this.handleInformationHover(event));
+			informationButton.addEventListener("mouseleave", (event) => this.handleInformationHover(event));
+		});
+	}
+	handleDateTimeUpdate(date: string, time: string): void {
+		this.manager.updateDateTime(date, time);
 	}
 }

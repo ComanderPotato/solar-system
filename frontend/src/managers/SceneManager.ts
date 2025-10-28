@@ -9,6 +9,8 @@ import { CSS2DRenderer, OrbitControls } from "three/examples/jsm/Addons.js";
 import ISceneManager from "../interfaces/managers/ISceneManager";
 import Manager from "../core/Manager";
 import { FocusedBodyInformation } from "../interfaces/controllers/ISolarSystemController";
+import IInitializable from "../interfaces/IInitializable";
+import { BodyTypes } from "../types/CelestialBodyMetadata";
 interface CameraParameters {
 	fov: number;
 	aspectRatio: number;
@@ -21,7 +23,7 @@ const cameraParameters: CameraParameters = {
 	near: 0.000001,
 	far: Number.MAX_SAFE_INTEGER,
 };
-export default class SceneManager extends Manager implements ISceneManager {
+export default class SceneManager extends Manager implements ISceneManager, IInitializable {
 	private _scene!: Scene;
 	private _camera!: PerspectiveCamera;
 	private _renderer!: WebGLRenderer;
@@ -30,6 +32,10 @@ export default class SceneManager extends Manager implements ISceneManager {
 	private _lerpDestination: Vector3 | undefined = undefined;
 	private _frustum: Frustum = new Frustum();
 	private _raycaster: Raycaster = new Raycaster();
+
+	public constructor() {
+		super();
+	}
 	public get scene(): Scene {
 		return this._scene;
 	}
@@ -63,10 +69,8 @@ export default class SceneManager extends Manager implements ISceneManager {
 	set raycaster(value: Raycaster) {
 		this._raycaster = value;
 	}
-	public constructor() {
-		super();
-	}
-	initialiseScene() {
+
+	init() {
 		this._scene = new Scene();
 		this.initialiseCamera();
 		this.initialiseRenderer();
@@ -77,6 +81,7 @@ export default class SceneManager extends Manager implements ISceneManager {
 
 	private initialiseCamera(): this {
 		const { fov, aspectRatio, near, far } = cameraParameters;
+		// this._camera = new PerspectiveCamera(fov, aspectRatio);
 		this._camera = new PerspectiveCamera(fov, aspectRatio, near, far);
 		this._camera.position.z = 1000;
 		return this;
@@ -153,6 +158,7 @@ export default class SceneManager extends Manager implements ISceneManager {
 	// 		}
 	// 	}
 	// }
+	updateCamPosition(focusedBodyInformation: FocusedBodyInformation, dt: number): void {}
 	updateCameraPosition(focusedBodyInformation: FocusedBodyInformation, dt: number) {
 		const { velocity, radius } = focusedBodyInformation;
 		if (velocity) {
@@ -160,11 +166,20 @@ export default class SceneManager extends Manager implements ISceneManager {
 		}
 		if (this._lerpDestination) {
 			this.controls.disconnect();
+
 			if (velocity) {
 				this._lerpDestination.add(velocity.clone().multiplyScalar(dt));
 			}
 			this.camera.position.lerp(this._lerpDestination, 0.05);
-			if (this.camera.position.distanceTo(this._lerpDestination) <= radius * 0.01) {
+
+			const distance = this.camera.position.distanceTo(this._lerpDestination);
+			const distanceFromSurface = distance - radius;
+			const ratio = distanceFromSurface / radius;
+			// if (ratio < CelestialBodyDistance.CLOSE) {
+			// 	this._lerpDestination = undefined;
+			// 	this.controls.connect(this.renderer.domElement);
+			// }
+			if (this.camera.position.distanceTo(this._lerpDestination) <= radius * 0.1) {
 				this._lerpDestination = undefined;
 				this.controls.connect(this.renderer.domElement);
 			}
@@ -177,9 +192,11 @@ export default class SceneManager extends Manager implements ISceneManager {
 			lerpDestination = primaryPosition
 				.sub(position)
 				.normalize()
-				.multiplyScalar(radius * CelestialBodyDistance.CLOSE);
+				// .multiplyScalar(radius * CelestialBodyDistance.CLOSE);
+				.multiplyScalar(radius * 4);
 		} else {
-			lerpDestination = position.setZ(position.z + radius * CelestialBodyDistance.CLOSE);
+			// lerpDestination = position.setZ(position.z + radius * CelestialBodyDistance.CLOSE);
+			lerpDestination = position.setZ(position.z + radius * 4);
 		}
 		this._lerpDestination = position.add(lerpDestination);
 	}
@@ -210,7 +227,7 @@ export default class SceneManager extends Manager implements ISceneManager {
 				(body): body is Star | Planet | Moon =>
 					body instanceof Star || body instanceof Planet || body instanceof Moon,
 			)
-			.map((body) => body.celestialBodyMesh);
+			.map((body) => body.mesh);
 		// this.controller.camera.updateMatrixWorld();
 		// this._frustum.setFromProjectionMatrix(
 		// 	new Matrix4().multiplyMatrices(

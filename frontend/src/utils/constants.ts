@@ -15,14 +15,15 @@ export enum CelestialBodyDetail {
 	NONE = 0,
 	// LOW = 2,
 	LOW = 2,
+	MEDIUM = 8,
 	HIGH = 16,
 }
 export enum CelestialBodyDistance {
-	CLOSE = AU_CONSTANT * 0.01 * SCALE,
-	MEDIUM = AU_CONSTANT * 0.1 * SCALE,
-	FAR = AU_CONSTANT * 1 * SCALE,
+	CLOSE = AU_CONSTANT * 1 * SCALE,
+	MEDIUM = AU_CONSTANT * 10 * SCALE,
+	FAR = AU_CONSTANT * 100 * SCALE,
 }
-export const CelestialBodyColourHover: Record<string, string> = {
+export const CelestialBodyColorHover: Record<string, string> = {
 	MERCURY: "#9768ac",
 	VENUS: "#b07919",
 	EARTH: "#09c",
@@ -33,7 +34,7 @@ export const CelestialBodyColourHover: Record<string, string> = {
 	SATURN: "#d5c187",
 	PLUTO: "#929871",
 };
-export const CelestialBodyColour: Record<string, string> = {
+export const CelestialBodyColor: Record<string, string> = {
 	MERCURY: "#714e81",
 	VENUS: "#845b13",
 	EARTH: "#007399",
@@ -45,3 +46,8 @@ export const CelestialBodyColour: Record<string, string> = {
 	PLUTO: "#929871",
 };
 
+// Mesh constants
+export const GLOW_MESH_SCALE_FACTOR = 1.01;
+export const OPTIONAL_MESH_SCALE_FACTOR = 1.005;
+export const LIGHT_OPACITY = 0.6;
+export const CLOUD_OPACITY = 0.5;

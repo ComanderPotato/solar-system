@@ -2,28 +2,29 @@ import ITimeController, { TimeChange } from "../interfaces/controllers/ITimeCont
 import Clock from "../utils/Clock";
 import Controller from "../core/Controller";
 import ITimeManager from "../interfaces/managers/ITimeManager";
-export default class TimeController extends Controller<ITimeManager> implements ITimeController {
+import IInjectableController from "../interfaces/IInjectableController";
+import IAppContext from "../interfaces/IAppContext";
+export default class TimeController extends Controller<ITimeManager> implements ITimeController, IInjectableController {
 	public constructor(manager: ITimeManager) {
 		super(manager);
+	}
+
+	injectControllers(appContext: IAppContext): void {
+		this.uiController = appContext.uiController;
 	}
 	handleTimeChange(timeChange: TimeChange): void {
 		switch (timeChange) {
 			case TimeChange.Decrease:
 				this.manager.decrementTimeScale();
 				break;
-			case TimeChange.Pause:
-				this.manager.pause();
+			case TimeChange.TogglePlay:
+				this.clock.isRunning ? this.manager.pause() : this.manager.resume();
 				break;
 			case TimeChange.Increase:
 				this.manager.incrementTimeScale();
 				break;
 		}
 	}
-
-	initialiseScene?(): void {
-		throw new Error("Method not implemented.");
-	}
-	// init(controllers: Map<Function, IController>): void {}
 	destroy(): void {
 		throw new Error("Method not implemented.");
 	}
@@ -53,8 +54,18 @@ export default class TimeController extends Controller<ITimeManager> implements 
 	}
 	updateClock(): void {
 		this.manager.updateClock();
+		this.uiController.handleDateTimeUpdate(
+			this.manager.clock.formattedSimDate(),
+			this.manager.clock.formattedSimTime(),
+		);
 	}
 	get clock(): Clock {
 		return this.manager.clock;
+	}
+	accumulateDelta(frameRate: number): void {
+		// let delta = this.timeController.absoluteDelta;
+		// if (delta > this.manager.FRAME_RATE) delta = this.manager.FRAME_RATE;
+		// this.timeController.accumulator += delta;
+		this.accumulator += Math.min(frameRate, this.absoluteDelta);
 	}
 }
