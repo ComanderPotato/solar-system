@@ -6,7 +6,8 @@ export default class TimeManager extends Manager implements ITimeManager {
 	private _accumulator: number = 0.0;
 	private _timeStep: number = 1 / 60;
 	private _timeScales = [
-		-86400, -3600, -1800, -1200, -600, -60, -30, -3, -1, 1, 3, 30, 60, 600, 1200, 1800, 3600, 86400,
+		-604800, -86400, -3600, -1800, -1200, -600, -60, -30, -3, -1, 1, 3, 30, 60, 600, 1200, 1800, 3600, 86400,
+		604800,
 	];
 	private _timeScaleIndex = Math.ceil(this._timeScales.length / 2);
 	private _clock: Clock = new Clock();

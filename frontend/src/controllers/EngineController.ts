@@ -2,7 +2,6 @@ import Controller from "../core/Controller";
 import IEngineController from "../interfaces/controllers/IEngineController";
 import IAppContext from "../interfaces/IAppContext";
 import IEngineManager from "../interfaces/managers/IEngineManager";
-
 export default class EngineController extends Controller<IEngineManager> implements IEngineController {
 	private _lastLogTime = 0;
 	public constructor(manager: IEngineManager) {
@@ -43,9 +42,6 @@ export default class EngineController extends Controller<IEngineManager> impleme
 			this.rendererController.updateRenderables();
 			return;
 		}
-		this.debugger(() => {
-			console.log(this.sceneController.sceneResources.scene);
-		});
 		this.timeController.updateClock();
 
 		if (this.dataController.isLoading()) return;

@@ -62,7 +62,8 @@ export default class SceneController extends Controller<ISceneManager> implement
 	}
 	handleLerp(): void {
 		if (!this.solarSystemController.focusedBodyInformation) return;
-
+		this.manager.controls.minDistance =
+			this.solarSystemController.focusedCelestialBody!.physicalParameters.MeanRadius * 1.05;
 		this.manager.calculateLerpDestination(this.solarSystemController.focusedBodyInformation);
 	}
 	public addToScene(...object: Object3D[]): void {

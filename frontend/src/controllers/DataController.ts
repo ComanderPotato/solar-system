@@ -119,6 +119,7 @@ export default class DataController extends Controller<IDataManager> implements 
 		return await this.handleTracking(TaskName.TODO, async () => {
 			const { EnglishName: name } = this.focusedCelestialBody.metadata;
 			const { secondaryBodyNames: secondaryNames } = this.focusedCelestialBody;
+
 			if (!secondaryNames) return;
 
 			const secondaryParameters = await this.manager.fetchParameters(name, secondaryNames, true, FilterBy.ID);
@@ -128,6 +129,7 @@ export default class DataController extends Controller<IDataManager> implements 
 
 				Object.values(secondaryParameters),
 			);
+			this.focusedCelestialBody.secondaryBodies = secondaryBodies;
 			// this.engineController.debugger(() => {
 			// 	console.log(secondaryParameters);
 			// 	console.log(secondaryBodies);

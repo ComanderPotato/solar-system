@@ -56,7 +56,7 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
 	}
 	get position(): Vector3 {
 		// return this._celestialBodyGroup.position;
-		return this._position;
+		return this._position.clone();
 	}
 	get metadata(): CelestialMetadata {
 		return this._metadata;
@@ -85,111 +85,13 @@ export default abstract class CelestialBody<T extends CelestialBodyParameters = 
 	get secondaryBodies(): CelestialBody[] | undefined {
 		return this._secondaryBodies;
 	}
-
+	set secondaryBodies(secondaryBodies: CelestialBody[]) {
+		this._secondaryBodies = secondaryBodies;
+	}
 	public addSecondary(secondary: CelestialBody): void {
 		if (!this._secondaryBodies) this._secondaryBodies = [];
 		this._secondaryBodies.push(secondary);
 	}
 
 	abstract get physicalParameters(): T["Physical"];
-
-	// protected addToScene = (): void => {
-	// 	// AppContext.instance.App.scene.add(this._orbitGroup);
-	// 	// AppContext.instance.App.scene.add(this._celestialBodyGroup);
-	// };
-
-	// public destroySecondaries = (): void => {
-	// 	if (!this._secondaryBodies) return;
-	// 	this._secondaryBodies.forEach((secondaryBody) => {
-	// 		this.removeOrbit(secondaryBody._metadata.EnglishName);
-	// 		secondaryBody.destroy();
-	// 	});
-	// 	this._secondaryBodies = undefined;
-	// };
-	// public destroy(): void {
-	// 	this._celestialBodyGroup.traverse((child) => {
-	// 		if ((child as Mesh).geometry) {
-	// 			(child as Mesh).geometry.dispose();
-	// 		}
-	// 		if ((child as Mesh).material) {
-	// 			const material = (child as Mesh).material;
-	// 			if (Array.isArray(material)) {
-	// 				material.forEach((mat) => mat.dispose());
-	// 			} else {
-	// 				material.dispose();
-	// 			}
-	// 		}
-	// 	});
-	// 	this._container.element.removeEventListener("click", this.handleClick);
-	//
-	// 	this._celestialBodyGroup.remove(this._container);
-	//
-	// 	if (this._container.element.parentElement) {
-	// 		this._container.element.parentElement.removeChild(this._container.element);
-	// 	}
-	// 	// AppContext.instance.App.scene.remove(this._container);
-	// 	// AppContext.instance.App.scene.remove(this._celestialBodyGroup);
-	// }
-
-	// protected initialiseCSS = (): void => {
-	// 	const containerElement = document.createElement("div");
-	// 	containerElement.style.pointerEvents = "auto";
-	// 	// containerElement.className = `pioneer-label-div ${this._metadata.BodyType.toLowerCase()} clickable selection`;
-	// 	containerElement.className = `celestial-body--label ${this._metadata.BodyType.toLowerCase()} clickable selection`;
-	// 	containerElement.append(this.initialiseIcon(), this.initialiseLabel());
-	// 	this._container = new CSS2DObject(containerElement);
-	// 	this._container.element.addEventListener("click", this.handleClick);
-	// 	this._container.element.addEventListener("mouseover", this.handleHover);
-	// 	this._container.element.addEventListener("mouseleave", this.handleLeave);
-	// 	this._container.visible;
-	// 	// this._container.position.copy(this._position)
-	// 	this._celestialBodyGroup.add(this._container);
-	// 	// this.updateContainerPosition()
-	// };
-	// protected initialiseLabel = (): HTMLSpanElement => {
-	// 	const labelElement = document.createElement("span");
-	// 	labelElement.textContent = this._metadata.EnglishName;
-	// 	labelElement.className = `text`;
-	// 	return labelElement;
-	// };
-	// protected initialiseIcon = (): HTMLSpanElement => {
-	// 	const iconElement = document.createElement("span");
-	// 	// const suffix = this instanceof Moon ? "white" : this._metadata.EnglishName.toLowerCase();
-	// 	iconElement.className = `icon icon-circle--${suffix}`;
-	// 	return iconElement;
-	// };
-	// protected handleClick = (): void => {
-	// 	// if (AppContext.instance.App.lerpDestination) return;
-	// 	// AppContext.instance.App.focusedCelestialBody = this;
-	// 	// AppContext.instance.App.controls.target = this._position;
-	// };
-	// private handleHover = (): void => {
-	// 	if (!this._primaryBody) return;
-	// 	const colour =
-	// 		CelestialBodyColourHover[this._metadata.EnglishName.toUpperCase()] ??
-	// 		CelestialBodyColourHover[this._primaryBody.metadata.EnglishName.toUpperCase()];
-	//
-	// 	(this._primaryBody.orbits.get(this._metadata.EnglishName)!.material as LineMaterial).color.set(colour);
-	// };
-	// private handleLeave = (): void => {
-	// 	if (!this._primaryBody) return;
-	// 	const colour =
-	// 		CelestialBodyColour[this._metadata.EnglishName.toUpperCase()] ??
-	// 		CelestialBodyColour[this._primaryBody.metadata.EnglishName.toUpperCase()];
-	// 	(this._primaryBody.orbits.get(this._metadata.EnglishName)!.material as LineMaterial).color.set(colour);
-	// };
-	//
-	// public updateMeshDetail = () => {
-	// 	this.updateDetail();
-	// 	if (this._secondaryBodies) {
-	// 		this._secondaryBodies.forEach((secondaryBody) => {
-	// 			secondaryBody.updateMeshDetail();
-	// 		});
-	// 	}
-	// };
-
-	// Preload for focusedObject
-	abstract preLoadDetail(): void;
-	abstract updateDetail(): void;
-	abstract rotateOnAxis(dt: number): void;
 }

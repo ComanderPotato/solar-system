@@ -8,6 +8,9 @@ import { CelestialBodies } from "../types/CelestialBodyParameters";
 import IInjectableController from "../interfaces/IInjectableController";
 import IAppContext from "../interfaces/IAppContext";
 import { velocity } from "three/src/nodes/TSL.js";
+import { isOrbitingBody } from "../utils/CelestialHelpers";
+import { BodyTypes } from "../types/CelestialBodyMetadata";
+import Debugger from "../core/Debugger";
 export default class SolarSystemController
 	extends Controller<ISolarSystemManager>
 	implements ISolarSystemController, IInjectableController
@@ -61,31 +64,27 @@ export default class SolarSystemController
 	handleSimulation(dt: number): void {
 		const solarCenter = this.manager.solarSystem.primaryBody;
 		if (!solarCenter) return;
-		const queue: CelestialBody[] = [solarCenter];
 		const velocityQueue: CelestialBody[] = [solarCenter];
 		const positionQueue: CelestialBody[] = [];
 		while (velocityQueue.length > 0) {
-			const current = velocityQueue.shift()!;
-			// Update velocity
-			positionQueue.push(current);
+			const body = velocityQueue.shift()!;
+			this.celestialBodyController.handleRotation(body, dt);
+			/* updateVelocity */
+			if (isOrbitingBody(body)) {
+				this.celestialBodyController.handleVelocityUpdate(body, dt);
+			}
+			positionQueue.push(body);
 
-			for (const secondary of current.secondaryBodies ?? []) {
+			for (const secondary of body.secondaryBodies ?? []) {
 				velocityQueue.push(secondary);
 			}
 		}
+		/* updatePosition separately */
 		positionQueue.forEach((body) => {
-			/* updatePosition */
-		});
-		while (queue.length > 0) {
-			const current = queue.shift()!;
-			// this.rendererController.updateRenderable(current);
-			this.celestialBodyController.handleOrbitalStep(current, dt);
-
-			this.rendererController.updateRenderable(current);
-			for (const secondary of current.secondaryBodies ?? []) {
-				queue.push(secondary);
+			if (isOrbitingBody(body)) {
+				this.celestialBodyController.handlePositionUpdate(body, dt);
 			}
-		}
+		});
 	}
 
 	get initialSolarSystemData(): InitialSolarSystem {
@@ -101,9 +100,6 @@ export default class SolarSystemController
 		return this.manager.focusedCelestialBody;
 	}
 
-	updateDetail(): void {
-		this.manager.solarSystem.updateDetail();
-	}
 	destroy(): void {
 		throw new Error("Method not implemented.");
 	}

@@ -76,21 +76,19 @@ export default class CelestialBodyController
 			body.celestialBodyGroup.position.copy(body.position);
 		}
 	}
-	handleOrbitalStep(body: CelestialBody, dt: number): void {
-		// if (isMeshProvider(body)) this.handleRotation(body, dt);
-		this.handleRotation(body, dt);
-		if (!isOrbitingBody(body)) return;
-		this.handleVelocityUpdate(body, dt);
-		this.handlePositionUpdate(body, dt);
-	}
-	private handleVelocityUpdate(body: OrbitingBody, dt: number): void {
+
+	handleVelocityUpdate(body: OrbitingBody, dt: number): void {
 		const acceleration = this.calculateAcceleration(body);
 		body.currentVelocity.add(acceleration.multiplyScalar(dt));
 	}
-	private handlePositionUpdate(body: OrbitingBody, dt: number): void {
+	handlePositionUpdate(body: OrbitingBody, dt: number): void {
 		const newVelocity = body.currentVelocity.clone().multiplyScalar(dt);
-
-		body.position.add(newVelocity);
+		body.position = body.position.add(newVelocity);
+		// body.position.add(newVelocity);
+	}
+	handleRotation(body: CelestialBody, dt: number): void {
+		const deltaRotation = this.manager.fetchUpdatedRotation(body, dt);
+		this.rendererController.applyRotation(body, deltaRotation);
 	}
 	calculateAcceleration(body: OrbitingBody): Vector3 {
 		// let acceleration = new Vector3();
@@ -103,10 +101,6 @@ export default class CelestialBodyController
 		return acceleration;
 	}
 
-	handleRotation(body: CelestialBody, dt: number): void {
-		const deltaRotation = this.manager.fetchUpdatedRotation(body, dt);
-		this.rendererController.applyRotation(body, deltaRotation);
-	}
 	private attachUI(body: CelestialBody): void {
 		body.container = this.uiController.initialiseCelestialBodyUI(body);
 		body.container.visible = true;
@@ -116,7 +110,6 @@ export default class CelestialBodyController
 		return secondaries.map((secondaryParamters) => {
 			const secondary = this.handleCreation(secondaryParamters, primary) as OrbitingBody;
 			primary.addSecondary(secondary);
-
 			return secondary;
 		});
 	}

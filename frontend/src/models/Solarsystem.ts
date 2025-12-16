@@ -25,10 +25,6 @@ export default class SolarSystem {
 	private _primaryBody!: Star;
 	private _secondaryBodies!: OrbitingBody[];
 	private _focusedSecondaries?: OrbitingBody[];
-	// constructor(primary: CelestialBody, secondaries: CelestialBody[]) {
-	// 	this.initialisePrimary(primary);
-	// 	this.initialiseSecondaries(secondaries);
-	// }
 
 	constructor() {}
 	get allBodies(): CelestialBody[] {
@@ -58,35 +54,6 @@ export default class SolarSystem {
 		if (!secondaries.every((secondary) => secondary instanceof OrbitingBody)) throw new Error();
 		this._secondaryBodies = secondaries;
 	}
-	public updateDetail = (): void => {
-		if (!this._primaryBody || !this._primaryBody.secondaryBodies) return;
-		this._primaryBody.updateDetail();
-		this._primaryBody.secondaryBodies.forEach((secondaryBody) => {
-			// secondaryBody.updateMeshDetail();
-		});
-	};
-	// public simulate = (elaspedTime: number): void => {
-	// 	if (!this._primaryBody || !this._primaryBody.secondaryBodies) return;
-	// 	const bodies: OrbitingBody[] = [...this._primaryBody.secondaryBodies, ...(this.focusedSecondaries ?? [])];
-	// 	for (let body of bodies) {
-	// 		body.updateVelocity(elaspedTime);
-	// 	}
-	// 	for (let body of bodies) {
-	// 		body.updatePosition(elaspedTime);
-	// 	}
-	// };
-	public simulate = (elapsedTime: number): void => {
-		if (!this._primaryBody || !this._primaryBody.secondaryBodies) return;
-
-		this._primaryBody.rotateOnAxis(elapsedTime);
-		this._primaryBody.updateDetail();
-		this._primaryBody.secondaryBodies.forEach((secondaryBody) => {
-			secondaryBody instanceof OrbitingBody && secondaryBody.updateVelocity(elapsedTime);
-		});
-		this._primaryBody.secondaryBodies.forEach((secondaryBody) => {
-			secondaryBody instanceof OrbitingBody && secondaryBody.updatePosition(elapsedTime);
-		});
-	};
 	// public nBodySimulate(elapsedTime: number) {
 	//   if (!this.secondaryBodies) return
 	//     for(let current of this.secondaryBodies) {

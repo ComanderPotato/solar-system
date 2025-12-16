@@ -15,7 +15,6 @@ import {
 } from "three";
 import { getAtmosphericGlowMat, getRingMat } from "../shaders";
 import {
-	CelestialBodyDetail,
 	CLOUD_OPACITY,
 	GLOW_MESH_SCALE_FACTOR,
 	KM_TO_M,
@@ -31,6 +30,8 @@ import { Curves, Line2, LineGeometry, LineMaterial } from "three/examples/jsm/Ad
 import OrbitingBody from "../models/OrbitingBody";
 import { getCelestialBodyColor } from "../utils/CelestialHelpers";
 import { TextureFlags } from "../types/AssetParameters";
+import { PlanetUniforms } from "../types/Materials";
+import { getPlanetMaterial } from "../shaders/planetShader";
 
 export default abstract class CelestialBodyRenderer {
 	abstract _currentBody?: CelestialBodyMesh | CelestialBodyModel | undefined;
@@ -136,15 +137,17 @@ export abstract class MeshRenderer extends CelestialBodyRenderer {
 	}
 
 	update(geometry: BufferGeometry): void {
+		const radius = this.currentBody.physicalParameters.MeanRadius;
+		geometry.scale(radius, radius, radius);
 		this.updateOptionalGeometry(geometry, this.currentBody.mesh);
 		this.updateOptionalGeometry(geometry, this.currentBody.glowMesh);
 		this.updateOptionalGeometry(geometry, this.currentBody.lightMesh);
 		this.updateOptionalGeometry(geometry, this.currentBody.cloudMesh);
-		const radius = this.currentBody.physicalParameters.MeanRadius;
-		this.currentBody.celestialBodyGroup.scale.multiplyScalar(radius);
+		// this.currentBody.celestialBodyGroup.scale.multiplyScalar(radius);
 	}
 	rotate(deltaRotation: number): void {
 		const yAxis = new Vector3(0, 1, 0);
+		// this.currentBody.shaderMaterial.uniforms.uTime.value = deltaRotation;
 		this.currentBody.celestialBodyGroup.rotateOnAxis(yAxis, deltaRotation);
 		this.rotateOptionalMesh(deltaRotation * 0.1, this.currentBody.cloudMesh);
 	}
@@ -165,12 +168,33 @@ export abstract class MeshRenderer extends CelestialBodyRenderer {
 		const radius = this.currentBody.physicalParameters.MeanRadius;
 		this.currentBody.celestialBodyGroup.scale.multiplyScalar(radius);
 	}
+	initialiseShader(): this {
+		const uniforms: PlanetUniforms = {
+			uColor: { value: null },
+			uNight: { value: null },
+			uSpecular: { value: null },
+			uClouds: { value: null },
+			uNormal: { value: null },
+			uBump: { value: null },
+			uSunPosition: { value: new Vector3(0, 0, 0) },
+			uRotation: { value: this.currentBody.physicalParameters.SolarRotation },
+			uTime: { value: 0.0 },
+			uAtmospherePrimary: { value: new Vector3(0, 0, 0) },
+			uAtmosphereSecondary: { value: new Vector3(0, 0, 0) },
+			uResolution: { value: new Vector2(0, 0) },
+			uHasAtmosphere: { value: true },
+		};
+
+		this.currentBody.shaderMaterial = getPlanetMaterial(uniforms);
+		return this;
+	}
 	initialiseBaseMesh(): this {
 		this.currentBody.celestialBodyGroup.add(this.initialiseArrow());
 		this.currentBody.geometry = this.initialiseGeometry();
-		this.currentBody.material = new MeshPhongMaterial();
+		this.initialiseShader();
+		// this.currentBody.material = new MeshPhongMaterial();
 
-		this.currentBody.mesh = new Mesh(this.currentBody.geometry, this.currentBody.material);
+		this.currentBody.mesh = new Mesh(this.currentBody.geometry, this.currentBody.shaderMaterial);
 		this.currentBody.celestialBodyGroup.add(this.currentBody.mesh);
 		return this;
 	}
@@ -201,6 +225,18 @@ export abstract class MeshRenderer extends CelestialBodyRenderer {
 	reset(body: CelestialBodyMesh): void {
 		this._currentBody = body;
 	}
+	initialiseOrbitalPlane(): this {
+		// Re-look at
+		this.currentBody.celestialBodyGroup.rotateOnWorldAxis(
+			new Vector3(-1, 0, 0),
+			this.currentBody.physicalParameters.AxialTilt,
+		);
+		return this;
+	}
+	buildCommon(): this {
+		this.initialiseBaseMesh().initialiseOrbitLine().initialiseOrbitalPlane();
+		return this;
+	}
 }
 export class PlanetRenderer extends MeshRenderer {
 	_currentBody?: Planet | undefined;
@@ -209,12 +245,7 @@ export class PlanetRenderer extends MeshRenderer {
 		return this._currentBody;
 	}
 	build(): void {
-		this.initialiseBaseMesh()
-			.initialiseGlowMesh()
-			.initialiseCloudMesh()
-			.initialiseLightMesh()
-			.initialiseRing()
-			.initialiseOrbitLine();
+		this.buildCommon().initialiseGlowMesh().initialiseCloudMesh().initialiseLightMesh().initialiseRing();
 	}
 	initialiseGlowMesh(): this {
 		const mesh = new Mesh(this.currentBody.geometry, getAtmosphericGlowMat());
@@ -268,7 +299,7 @@ export class MoonRenderer extends MeshRenderer {
 		return this._currentBody;
 	}
 	build(): void {
-		this.initialiseBaseMesh().initialiseOrbitLine();
+		this.buildCommon();
 	}
 	public override getAssetPath(texture: string): string {
 		const { isGeneric, randomNumber, meshDetail } = this.currentBody;
@@ -285,7 +316,7 @@ export class StarRenderer extends MeshRenderer {
 		return this._currentBody;
 	}
 	build(): void {
-		this.initialiseBaseMesh().initialiseLight();
+		this.buildCommon().initialiseLight();
 	}
 	initialiseLight(): this {
 		if (!this.currentBody.material) return this;
@@ -302,6 +333,8 @@ export class StarRenderer extends MeshRenderer {
 		this.currentBody.material.emissiveIntensity = 2;
 
 		// const emissiveMap = this.lazyLoader[this.getAssetPath(TextureType.Color)];
+		this.currentBody.material.emissiveMap = this.currentBody.material.map;
+		this.currentBody.material.needsUpdate = true;
 		// if (emissiveMap) {
 		// 	this.currentBody.material.emissiveMap = emissiveMap;
 		// 	this.currentBody.material.needsUpdate = true;

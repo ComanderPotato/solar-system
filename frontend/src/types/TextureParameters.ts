@@ -20,7 +20,7 @@ export enum TextureType {
 	Color = "color",
 	Specular = "specular",
 	Bump = "bump",
-	Light = "light",
+	Night = "light",
 	Cloud = "cloud",
 	Ring = "ring",
 	RingAlpha = "ring_alpha",
@@ -29,7 +29,7 @@ const TextureFlagsToMap: Record<keyof TextureFlags, TextureType> = {
 	Color: TextureType.Color,
 	Specular: TextureType.Specular,
 	Bump: TextureType.Bump,
-	Light: TextureType.Light,
+	Light: TextureType.Night,
 	Cloud: TextureType.Cloud,
 	Ring: TextureType.Ring,
 	RingAlpha: TextureType.RingAlpha,
@@ -37,9 +37,20 @@ const TextureFlagsToMap: Record<keyof TextureFlags, TextureType> = {
 
 export type MaterialMapType = "map" | "bumpMap" | "specularMap" | "alphaMap";
 
+export type UniformMapTypes = "uColor" | "uNight" | "uClouds" | "uSpecular" | "uNormal" | "uBump" | "uAlpha";
+
+const TextureTypeToUniform: Record<TextureType, UniformMapTypes> = {
+	[TextureType.Color]: "uColor",
+	[TextureType.Specular]: "uSpecular",
+	[TextureType.Bump]: "uBump",
+	[TextureType.Night]: "uNight",
+	[TextureType.Cloud]: "uClouds",
+	[TextureType.Ring]: "uColor",
+	[TextureType.RingAlpha]: "uAlpha",
+};
 const TextureTypeToMaterialMap: Record<TextureType, MaterialMapType> = {
 	[TextureType.Color]: "map",
-	[TextureType.Light]: "map",
+	[TextureType.Night]: "map",
 	[TextureType.Cloud]: "map",
 	[TextureType.Ring]: "map",
 	[TextureType.Specular]: "specularMap",
@@ -57,4 +68,7 @@ export function getEnabledTextures(params: TextureFlags): TextureType[] {
 }
 export function getTextureMapping(textureType: TextureType): MaterialMapType {
 	return TextureTypeToMaterialMap[textureType];
+}
+export function getUniformMapping(textureType: TextureType): UniformMapTypes {
+	return TextureTypeToUniform[textureType];
 }

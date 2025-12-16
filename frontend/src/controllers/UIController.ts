@@ -132,12 +132,15 @@ export default class UIController
 		this.manager.updateTimeRateUI(timeStep);
 	}
 	protected handleClick(body: CelestialBody): void {
+		console.log(body);
+
 		if (this.sceneController.sceneResources.lerpDestination) return;
 		this.solarSystemController.focusedCelestialBody = body;
 		this.sceneController.sceneResources.controls.target = body.celestialBodyGroup.position;
 		this.rendererController.preloadRenderable(body);
 		this.sceneController.handleLerp();
-		// this.dataController.handleFocusedElements(body);
+
+		this.dataController.handleFocusedElements(body);
 		// this.dataController.getParameterSummaries();
 		this.dataController.getFocusedSecondaries();
 		this.handleInformationPanel();

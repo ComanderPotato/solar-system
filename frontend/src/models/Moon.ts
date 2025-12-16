@@ -1,14 +1,16 @@
-import { BufferGeometry, IcosahedronGeometry, Mesh, MeshBasicMaterial, MeshPhongMaterial, Vector3 } from "three";
+import { BufferGeometry, Mesh, MeshPhongMaterial, Vector3 } from "three";
 import IMeshProvider from "../interfaces/IMeshProvider";
 import { MoonParameters } from "../types/CelestialBodyParameters";
 import { MoonPhysicalParameters } from "../types/PhysicalParameters";
 import { TextureFlags } from "../types/TextureParameters";
 import CelestialBody from "./CelestialBody";
 import OrbitingBody from "./OrbitingBody";
-import { CelestialBodyDetail, CelestialBodyDistance } from "../utils/constants";
+import { CelestialBodyDetail } from "../utils/constants";
+import { PlanetMaterial } from "../types/Materials";
 
 export default class Moon extends OrbitingBody<MoonParameters> implements IMeshProvider {
 	public geometry!: BufferGeometry;
+	public shaderMaterial!: PlanetMaterial;
 	public material!: MeshPhongMaterial;
 	public mesh!: Mesh;
 	public meshDetail: CelestialBodyDetail = CelestialBodyDetail.LOW;
@@ -30,12 +32,6 @@ export default class Moon extends OrbitingBody<MoonParameters> implements IMeshP
 	// get geometryCache(): Partial<Record<CelestialBodyDetail, BufferGeometry>> {
 	// 	return this._geometryCache;
 	// }
-	public rotateOnAxis = (dt: number): void => {
-		if (!this.mesh) return;
-		const rotationSpeed = (2 * Math.PI) / this._physicalParameters.SolarRotation;
-		const deltaRotation = rotationSpeed * dt;
-		this.mesh.rotateOnAxis(new Vector3(0, 1, 0), deltaRotation);
-	};
 	initialiseOrbitalPlane(): void {
 		this._celestialBodyGroup.rotateOnAxis(new Vector3(1, 0, 0), this._physicalParameters.AxialTilt);
 	}
@@ -60,66 +56,6 @@ export default class Moon extends OrbitingBody<MoonParameters> implements IMeshP
 	// 	}
 	// 	return this._geometryCache[detail];
 	// }
-	public updateMeshDetailLevel = (): void => {
-		// const baseGeometry = this.getGeometryForDetail(this.meshDetail);
-		// this.mesh.geometry.dispose();
-		// this.mesh.geometry = baseGeometry.clone();
-	};
-	public calculateDetailLevel = (distance: number): CelestialBodyDetail => {
-		if (distance < this._physicalParameters.MeanRadius * CelestialBodyDistance.CLOSE)
-			return CelestialBodyDetail.HIGH;
-		// if (distance < this._physicalParameters.MeanRadius * CelestialBodyDistance.MEDIUM) return CelestialBodyDetail.MEDIUM;
-		if (distance < this._physicalParameters.MeanRadius * CelestialBodyDistance.FAR) return CelestialBodyDetail.LOW;
-		return CelestialBodyDetail.NONE;
-	};
-	public updateVisibilityDetail = (): void => {
-		// if (AppContext.instance.App.canSeeBody(this._celestialBodyMesh)) {
-		// 	this._container.visible = this._meshDetail < CelestialBodyDetail.LOW;
-		// } else {
-		// 	this._container.visible = false;
-		// }
-		const orbitLine = this._primaryBody.orbits.get(this.metadata.EnglishName);
-		if (orbitLine) orbitLine.visible = this.meshDetail < CelestialBodyDetail.LOW;
-
-		this.mesh.visible = Boolean(this.meshDetail);
-	};
-	public updateDetail = (): void => {
-		// if (!this._celestialBodyMesh) return;
-		// const distance = AppContext.instance.App.camera.position.distanceTo(this._position);
-		//
-		// const newDetail = this.calculateDetailLevel(distance);
-		// const oldDetail = this._meshDetail;
-		// this._meshDetail = newDetail;
-		// this.updateVisibilityDetail();
-		// this._meshDetail =
-		// 	AppContext.instance.App.focusedCelestialBody == this ? CelestialBodyDetail.HIGH : this._meshDetail;
-		// const currentTime = AppContext.instance.TimeManager.elapsedTime;
-		// if (currentTime - this._lastDetailUpdateTime < this.DETAIL_COOLDOWN) {
-		// 	this._lastDetailUpdateTime = oldDetail == this._meshDetail ? currentTime : this._lastDetailUpdateTime;
-		// 	return;
-		// }
-		// if (oldDetail != this._meshDetail) {
-		// 	if (
-		// 		this._meshDetail == CelestialBodyDetail.NONE ||
-		// 		AppContext.instance.App.lerpDestination ||
-		// 		AppContext.instance.App.focusedCelestialBody != this
-		// 	)
-		// 		return;
-		// 	this.updateTextureDetail();
-		// 	this.updateMeshDetailLevel();
-		// 	this._lastDetailUpdateTime = currentTime;
-		// }
-	};
-	public updateTextureDetail = async (): Promise<void> => {
-		// (this.mesh.material as MeshBasicMaterial).map = await AppContext.instance.DataManager.getTexture(
-		// 	this.createTexturePath("color"),
-		// );
-	};
-	public preLoadDetail = (): void => {
-		this.meshDetail = CelestialBodyDetail.HIGH;
-		this.updateTextureDetail();
-		this.updateMeshDetailLevel();
-	};
 }
 
 // public updateDetail = (): void => {

@@ -1,4 +1,4 @@
-import { BufferGeometry, Mesh, ShaderMaterial, Texture } from "three";
+import { Texture } from "three";
 import CelestialBodyRenderer, {
 	MoonRenderer,
 	PlanetRenderer,
@@ -7,14 +7,13 @@ import CelestialBodyRenderer, {
 } from "../core/CelestialBodyRenderer";
 import Manager from "../core/Manager";
 import IRendererManager from "../interfaces/managers/IRendererManager";
-import { getTextureMapping, MaterialMapType, TextureType } from "../types/TextureParameters";
-import { CelestialBodyMesh, CelestialBodyModel, CelestialBodyProvider } from "../models/types";
-import { IMaterial } from "../types/Materials";
+import { getUniformMapping, TextureType } from "../types/TextureParameters";
+import { CelestialBodyMesh, CelestialBodyProvider } from "../models/types";
 import CelestialBody from "../models/CelestialBody";
-import { getBodyMaterial, isMeshProvider, isModelProvider } from "../utils/CelestialHelpers";
+import { getBodyMaterial, getShader, isMeshProvider, isModelProvider } from "../utils/CelestialHelpers";
 import { BodyTypes } from "../types/CelestialBodyMetadata";
 import { IAssetLoaderType } from "../interfaces/IAssetLoader";
-import { hasTexture, isRingMaterial, isStandardMaterial } from "../utils/MaterialHelpers";
+import { hasTexture, isPlanetMaterial, isRingMaterial } from "../utils/MaterialHelpers";
 import { AssetType } from "../interfaces/managers/IAssetManager";
 
 export default class RendererManager extends Manager implements IRendererManager {
@@ -53,14 +52,26 @@ export default class RendererManager extends Manager implements IRendererManager
 	disposeAsset(body: CelestialBody, asset: AssetType): void {}
 
 	disposeTexture(body: CelestialBodyMesh, type: TextureType): void {
-		const textureMapping = getTextureMapping(type);
+		// const textureMapping = getTextureMapping(type);
+		const uniformMapping = getUniformMapping(type);
 		const material = getBodyMaterial(body, type);
 
-		if (isStandardMaterial(material, textureMapping) && hasTexture(material[textureMapping])) {
-			material[textureMapping].dispose();
-		} else if (isRingMaterial(material) && hasTexture(material.uniforms[textureMapping].value)) {
-			material.uniforms[textureMapping].value.dispose();
+		if (body.shaderMaterial) {
+			// console.log(material);
+			// console.log(material.uniforms);
+			// console.log(material.uniforms[uniformMapping])
+			body.shaderMaterial.uniforms[uniformMapping].value.dispose();
 		}
+		// if (isPlanetMaterial(material, uniformMapping) && hasTexture(material.uniforms[uniformMapping].value)) {
+		// 	material.uniforms[uniformMapping].value.dispose();
+		// } else if (isRingMaterial(material, uniformMapping) && hasTexture(material.uniforms[uniformMapping].value)) {
+		// 	material.uniforms[uniformMapping].value.dispose();
+		// }
+		// if (isStandardMaterial(material, textureMapping) && hasTexture(material[textureMapping])) {
+		// 	material[textureMapping].dispose();
+		// } else if (isRingMaterial(material) && hasTexture(material.uniforms[textureMapping].value)) {
+		// 	material.uniforms[textureMapping].value.dispose();
+		// }
 	}
 	applyAsset(body: CelestialBody, asset: IAssetLoaderType, assetType: TextureType): void {
 		if (isMeshProvider(body) && asset instanceof Texture) {
@@ -68,15 +79,30 @@ export default class RendererManager extends Manager implements IRendererManager
 		} else if (isModelProvider(body)) {
 		}
 	}
+
+	// Shader uniform texture application test
 	applyTexture(body: CelestialBodyMesh, type: TextureType, texture: Texture): void {
-		const textureMapping = getTextureMapping(type);
-		const material = getBodyMaterial(body, type);
-		if (!material) return;
-		if (isStandardMaterial(material, textureMapping)) {
-			material[textureMapping] = texture;
-		} else if (isRingMaterial(material)) {
-			material.uniforms[textureMapping].value = texture;
-		}
-		material.needsUpdate = true;
+		const uniformMapping = getUniformMapping(type);
+		const shader = getShader(body, type);
+		if (!shader) return;
+		shader.uniforms[uniformMapping].value = texture;
+
+		shader.needsUpdate = true;
 	}
+	// applyTexture(body: CelestialBodyMesh, type: TextureType, texture: Texture): void {
+	// 	const textureMapping = getTextureMapping(type);
+	// 	const material = getBodyMaterial(body, type);
+	// 	if (!material) return;
+	// 	if (isStandardMaterial(material, textureMapping)) {
+	// 		material[textureMapping] = texture;
+	// 		// Fix
+	// 		if (body instanceof Star) {
+	// 			body.material.emissiveMap = texture;
+	// 			body.material.needsUpdate = true;
+	// 		}
+	// 	} else if (isRingMaterial(material)) {
+	// 		material.uniforms[textureMapping].value = texture;
+	// 	}
+	// 	material.needsUpdate = true;
+	// }
 }

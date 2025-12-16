@@ -9,5 +9,6 @@ export default interface ICelestialBodyController {
 	handleSecondaryDisposal(body: CelestialBody): void;
 
 	handleRotation(body: CelestialBody, dt: number): void;
-	handleOrbitalStep(body: CelestialBody, dt: number): void;
+	handleVelocityUpdate(body: OrbitingBody, dt: number): void;
+	handlePositionUpdate(body: OrbitingBody, dt: number): void;
 }

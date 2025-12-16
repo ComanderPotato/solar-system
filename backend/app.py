@@ -6,7 +6,7 @@ import urllib.parse
 
 app = Flask(__name__, static_folder="../frontend/dist/", static_url_path="/")
 
-YOUR_API_TOKEN = "10fdf93f-65c0-49bc-83d4-c8725c9e0ea7"
+YOUR_API_TOKEN = "b09527f7-d52f-4d9c-8d83-ba33c1ba58ce"
 auth = {"Authorization": f"Bearer {YOUR_API_TOKEN}"}
 API_INCLUDE_DATA: list[str] = [
     "id",
@@ -62,6 +62,7 @@ def orbital():
     if not primary_name or not secondary_names:
         return jsonify({"error": "No primary name or secondary names provided"}), 400
     json = get_orbitals(primary_name, secondary_names)
+    __import__("pprint").pprint(json)
     return jsonify(json)
 
 
@@ -103,6 +104,7 @@ def temp_celestial_summary():
 
     planet_name = urllib.parse.quote(planet_name)
     base_url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
+
     headers = {
         "User-Agent": "CelestialSummaryBot/1.0 (https://github.com/tomgolding/celestial)"
     }
@@ -118,6 +120,7 @@ def temp_celestial_summary():
         response = session.get(fallback_url, headers=headers)
     if response.ok:
 
+        print(response)
         data = response.json()
         summary = data.get("extract", "No summary available.")
         return jsonify({"summary": summary}), response.status_code
