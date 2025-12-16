@@ -9,12 +9,13 @@ export function getRingMat(
 ): RingMaterial {
 	const useAlphaTexture = !!alphaTexture;
 	const uniforms: RingUniforms = {
-		map: { value: ringTexture },
-		alphaMap: { value: alphaTexture },
-		useAlphaTexture: { value: useAlphaTexture },
-		innerRadius: { value: innerRadius },
-		outerRadius: { value: outerRadius },
+		uColor: { value: ringTexture },
+		uAlpha: { value: alphaTexture },
+		uHasAlpha: { value: useAlphaTexture },
+		uInnerRadius: { value: innerRadius },
+		uOuterRadius: { value: outerRadius },
 	};
+
 	const vertexShader: string = `
         varying vec3 vPos;
         
@@ -25,22 +26,22 @@ export function getRingMat(
         }
     `;
 	const fragmentShader: string = `
-    uniform sampler2D map;
-    uniform sampler2D alphaMap;
-    uniform float innerRadius;
-    uniform float outerRadius;
+    uniform sampler2D uColor;
+    uniform sampler2D uAlpha;
+    uniform float uInnerRadius;
+    uniform float uOuterRadius;
 
     varying vec3 vPos;
 
     vec4 color() {
       vec2 uv = vec2(0);
-      uv.x = (length(vPos) - innerRadius) / (outerRadius - innerRadius);
+      uv.x = (length(vPos) - uInnerRadius) / (uOuterRadius - uInnerRadius);
       if (uv.x < 0.0 || uv.x > 1.0) {
         discard;
       }
       
-      vec4 colorPixel = texture2D(map, uv);
-      float alpha = texture2D(alphaMap, uv).r;
+      vec4 colorPixel = texture2D(uColor, uv);
+      float alpha = texture2D(uAlpha, uv).r;
       return vec4(colorPixel.rgb, colorPixel.a * alpha);
     }
 
