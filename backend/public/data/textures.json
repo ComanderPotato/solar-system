@@ -1,0 +1,51 @@
+{
+	"Star": {
+		"Sun": {
+			"Color": true
+		}
+	},
+	"Planet": {
+		"Mercury": {
+			"Color": true
+		},
+		"Venus": {
+			"Color": true
+		},
+		"Earth": {
+			"Color": true,
+			"Specular": true,
+			"Bump": true,
+			"Light": true,
+			"Cloud": true
+		},
+		"Mars": {
+			"Color": true
+		},
+		"Jupiter": {
+			"Color": true
+		},
+		"Saturn": {
+			"Color": true,
+			"Ring": true,
+			"Ring_Alpha": true
+		},
+		"Uranus": {
+			"Color": true,
+			"Ring": true,
+			"Ring_Alpha": true
+		},
+		"Neptune": {
+			"Color": true
+		}
+	},
+	"DwarfPlanet": {
+		"Pluto": {
+			"Color": true
+		}
+	},
+	"Moon": {
+		"Moon": {
+			"Color": true
+		}
+	}
+}
