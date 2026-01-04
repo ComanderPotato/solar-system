@@ -6,7 +6,8 @@ const CopyPlugin = require("copy-webpack-plugin");
 module.exports = {
 	entry: "./src/index.ts",
 	mode: "development",
-	devtool: "inline-source-map",
+	// devtool: "inline-source-map",
+	devtool: "eval-cheap-module-source-map",
 	output: {
 		filename: "bundle.js",
 		path: path.resolve(__dirname, "dist"),
@@ -21,6 +22,9 @@ module.exports = {
 				test: /\.ts$/,
 				use: "ts-loader",
 				exclude: /node_modules/,
+				// options: {
+				// 	cacheDirectory: true,
+				// },
 			},
 			{
 				test: /\.css$/i,

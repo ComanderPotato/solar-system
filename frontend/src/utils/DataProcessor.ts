@@ -30,6 +30,7 @@ export default class DataProcessor {
 	private static _totalFactor: number = 0;
 	private static _totalDistance: number = 0;
 	private static _count: number = 0;
+
 	public process = (
 		fetchedPhysicalParameters: FetchedPhysicalParameters,
 		fetchedOrbitalParameters: FetchedOrbitalParameters,

@@ -8,8 +8,12 @@ import { CelestialBodyDetail, CelestialBodyDistance } from "../utils/constants";
 import CelestialBody from "../models/CelestialBody";
 import { isMeshProvider, isModelProvider } from "../utils/CelestialHelpers";
 import { AssetOperation } from "../interfaces/managers/IAssetManager";
+import IInjectableController from "../interfaces/IInjectableController";
 
-export default class RendererController extends Controller<IRendererManager> implements IRendererController {
+export default class RendererController
+	extends Controller<IRendererManager>
+	implements IRendererController, IInjectableController
+{
 	public constructor(manager: IRendererManager) {
 		super(manager);
 	}

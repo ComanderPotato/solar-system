@@ -121,6 +121,24 @@ export default class DataManager extends Manager implements IDataManager {
 		this._fetchedOrbitalParameters = undefined;
 		this._fetchedPhysicalParameters = undefined;
 	}
+	public async fetchMoonParameters(
+		primaryBody: CelestialBody,
+		filterBy: FilterBy = FilterBy.ID,
+	): Promise<CelestialBodies | undefined> {
+		this._fetchedPhysicalParameters = await this._dataLoader.fetchMoonPhysical(primaryBody.metadata.Id, filterBy);
+
+		const keys = Object.keys(this._fetchedPhysicalParameters);
+		if (keys.length == 0) return;
+		this._fetchedOrbitalParameters = await this._dataLoader.fetchOrbitalParameters(
+			primaryBody.metadata.EnglishName,
+			keys,
+			// Object.keys(this._fetchedPhysicalParameters).filter((key) => key != primaryName),
+		);
+		const processedBodies = await this.processBodies();
+
+		this.disposeOfFetched();
+		return processedBodies;
+	}
 	public async fetchParameters(
 		primaryName: string,
 		secondaryNames: string[],
@@ -135,6 +153,9 @@ export default class DataManager extends Manager implements IDataManager {
 			primaryName,
 			Object.keys(this._fetchedPhysicalParameters).filter((key) => key != primaryName),
 		);
+
+		// console.log(this._fetchedPhysicalParameters);
+		// console.log(this._fetchedOrbitalParameters);
 
 		const processedBodies = await this.processBodies(requireOrbitalParameters);
 

@@ -1,8 +1,13 @@
 import Controller from "../core/Controller";
+import Debugger from "../core/Debugger";
 import IEngineController from "../interfaces/controllers/IEngineController";
 import IAppContext from "../interfaces/IAppContext";
+import IInjectableController from "../interfaces/IInjectableController";
 import IEngineManager from "../interfaces/managers/IEngineManager";
-export default class EngineController extends Controller<IEngineManager> implements IEngineController {
+export default class EngineController
+	extends Controller<IEngineManager>
+	implements IEngineController, IInjectableController
+{
 	private _lastLogTime = 0;
 	public constructor(manager: IEngineManager) {
 		super(manager);
@@ -37,6 +42,7 @@ export default class EngineController extends Controller<IEngineManager> impleme
 	}
 	private handleRenderLoop(): void {
 		this.sceneController.handleRender();
+		Debugger.run();
 		if (!this.timeController.isClockRunning()) {
 			this.sceneController.handleCameraMovement();
 			this.rendererController.updateRenderables();

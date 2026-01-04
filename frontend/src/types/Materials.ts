@@ -1,4 +1,4 @@
-import { IUniform, Material, ShaderMaterial, Texture } from "three";
+import { Color, IUniform, Material, ShaderMaterial, Texture } from "three";
 import { Vector2, Vector3 } from "three";
 
 export interface StandardMaterial extends Material {
@@ -12,21 +12,23 @@ interface CommonUniforms {
 	uColor: IUniform<Texture | null>;
 	[uniform: string]: IUniform<any>;
 }
-interface CelestialBodyUniforms extends CommonUniforms {
+export interface CelestialBodyUniforms extends CommonUniforms {
 	uHasAtmosphere: IUniform<boolean>;
+	uRotation: IUniform<number>;
 }
 export interface PlanetUniforms extends CelestialBodyUniforms {
 	uTime: IUniform<number>;
-	uResolution: IUniform<Vector2>;
 	uSunPosition: IUniform<Vector3>;
 	uNight: IUniform<Texture | null>;
 	uClouds: IUniform<Texture | null>;
 	uSpecular: IUniform<Texture | null>;
 	uNormal: IUniform<Texture | null>;
 	uBump: IUniform<Texture | null>;
-	uAtmospherePrimary: IUniform<Vector3>;
-	uAtmosphereSecondary: IUniform<Vector3>;
-	uRotation: IUniform<number>;
+	uAtmosphericPrimary: IUniform<Color>;
+	uAtmosphericSecondary: IUniform<Color>;
+}
+export interface MoonUniforms extends CelestialBodyUniforms {
+	uSunPosition: IUniform<Vector3>;
 }
 export interface StarUniforms extends CelestialBodyUniforms {
 	uEmissive: IUniform<Texture | null>;
@@ -45,7 +47,7 @@ export interface RingUniforms extends CommonUniforms {
 	uInnerRadius: IUniform<number>;
 	uOuterRadius: IUniform<number>;
 }
-export type PlanetMaterial = ShaderMaterial & { uniforms: PlanetUniforms };
-export type RingMaterial = ShaderMaterial & { uniforms: RingUniforms; isRingMaterial: true };
+export type CelestialShader = ShaderMaterial & { uniforms: PlanetUniforms };
+export type RingShader = ShaderMaterial & { uniforms: RingUniforms; isRingMaterial: true };
 // export type IMaterial = StandardMaterial | RingMaterial;
-export type IMaterial = PlanetMaterial | RingMaterial;
+export type IMaterial = CelestialShader | RingShader;

@@ -1,15 +1,17 @@
-import { BufferGeometry, DataTexture, Loader, Texture } from "three";
+import { BufferGeometry, DataTexture, Texture } from "three";
 import IAssetController from "../interfaces/controllers/IAssetController";
 import Controller from "../core/Controller";
-import IAssetManager, { AssetType, LoaderType } from "../interfaces/managers/IAssetManager";
+import IAssetManager, { LoaderType } from "../interfaces/managers/IAssetManager";
 import IAppContext from "../interfaces/IAppContext";
 import { TaskName } from "../interfaces/managers/IDataManager";
 import { CelestialBodyDetail } from "../utils/constants";
 import { GLTF } from "three/examples/jsm/Addons.js";
-import CelestialBody from "../models/CelestialBody";
-import { isMeshProvider } from "../utils/CelestialHelpers";
+import IInjectableController from "../interfaces/IInjectableController";
 
-export default class AssetController extends Controller<IAssetManager> implements IAssetController {
+export default class AssetController
+	extends Controller<IAssetManager>
+	implements IAssetController, IInjectableController
+{
 	public constructor(manager: IAssetManager) {
 		super(manager);
 	}

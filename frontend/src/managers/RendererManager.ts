@@ -52,26 +52,12 @@ export default class RendererManager extends Manager implements IRendererManager
 	disposeAsset(body: CelestialBody, asset: AssetType): void {}
 
 	disposeTexture(body: CelestialBodyMesh, type: TextureType): void {
-		// const textureMapping = getTextureMapping(type);
 		const uniformMapping = getUniformMapping(type);
 		const material = getBodyMaterial(body, type);
 
-		if (body.shaderMaterial) {
-			// console.log(material);
-			// console.log(material.uniforms);
-			// console.log(material.uniforms[uniformMapping])
-			body.shaderMaterial.uniforms[uniformMapping].value.dispose();
+		if (material) {
+			material.uniforms[uniformMapping].value.dispose();
 		}
-		// if (isPlanetMaterial(material, uniformMapping) && hasTexture(material.uniforms[uniformMapping].value)) {
-		// 	material.uniforms[uniformMapping].value.dispose();
-		// } else if (isRingMaterial(material, uniformMapping) && hasTexture(material.uniforms[uniformMapping].value)) {
-		// 	material.uniforms[uniformMapping].value.dispose();
-		// }
-		// if (isStandardMaterial(material, textureMapping) && hasTexture(material[textureMapping])) {
-		// 	material[textureMapping].dispose();
-		// } else if (isRingMaterial(material) && hasTexture(material.uniforms[textureMapping].value)) {
-		// 	material.uniforms[textureMapping].value.dispose();
-		// }
 	}
 	applyAsset(body: CelestialBody, asset: IAssetLoaderType, assetType: TextureType): void {
 		if (isMeshProvider(body) && asset instanceof Texture) {
@@ -82,9 +68,11 @@ export default class RendererManager extends Manager implements IRendererManager
 
 	// Shader uniform texture application test
 	applyTexture(body: CelestialBodyMesh, type: TextureType, texture: Texture): void {
+		// console.log(body.metadata.EnglishName);
 		const uniformMapping = getUniformMapping(type);
 		const shader = getShader(body, type);
 		if (!shader) return;
+		// console.log(uniformMapping);
 		shader.uniforms[uniformMapping].value = texture;
 
 		shader.needsUpdate = true;

@@ -7,6 +7,7 @@ import ISceneController from "./controllers/ISceneController";
 import ISolarSystemController from "./controllers/ISolarSystemController";
 import ITimeController from "./controllers/ITimeController";
 import IUIController from "./controllers/IUIController";
+import IViewController from "./controllers/IViewController";
 import IAssetManager from "./managers/IAssetManager";
 import ICelestialBodyManager from "./managers/ICelestialBodyManager";
 import IDataManager from "./managers/IDataManager";
@@ -16,6 +17,7 @@ import ISceneManager from "./managers/ISceneManager";
 import ISolarSystemManager from "./managers/ISolarSystemManager";
 import ITimeManager from "./managers/ITimeManager";
 import IUIManager from "./managers/IUIManager";
+import IViewManager from "./managers/IViewManager";
 
 export default interface IAppContext {
 	// eventBus: EventBus;
@@ -83,6 +85,7 @@ export default interface IAppContext {
 	 */
 	uiManager: IUIManager;
 
+	viewManager: IViewManager;
 	// ==================== Controllers ====================
 	/*
 	 * On-demand access and preparation
@@ -146,6 +149,8 @@ export default interface IAppContext {
 	 * delegates state management to UIManager
 	 */
 	uiController: IUIController;
+
+	viewController: IViewController;
 
 	initialiseContext(): void;
 }

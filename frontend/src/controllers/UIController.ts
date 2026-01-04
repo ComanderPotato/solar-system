@@ -23,9 +23,10 @@ export default class UIController
 	updateParameterInformation(): void {
 		throw new Error("Method not implemented.");
 	}
-	injectManager(manager: IUIManager): void {
-		this._manager = manager;
-	}
+	// // Why?
+	// injectManager(manager: IUIManager): void {
+	// 	this._manager = manager;
+	// }
 	injectControllers(appContext: IAppContext): void {
 		this.timeController = appContext.timeController;
 		this.sceneController = appContext.sceneController;
@@ -126,24 +127,27 @@ export default class UIController
 			}),
 		);
 	}
+	public toggleCelestialUIVisibility(body: CelestialBody, isVisible: boolean): void {
+		body.container.visible = isVisible;
+		if (body.primaryBody) {
+			body.primaryBody.orbits.get(body.metadata.EnglishName)!.visible = isVisible;
+		}
+	}
 	public handleUpdateTimeRateUI(timeChange: TimeChange): void {
 		this.timeController.handleTimeChange(timeChange);
 		const timeStep = this.timeController.isClockRunning() ? this.timeController.scaledTimeStep : 0;
 		this.manager.updateTimeRateUI(timeStep);
 	}
 	protected handleClick(body: CelestialBody): void {
-		console.log(body);
-
 		if (this.sceneController.sceneResources.lerpDestination) return;
+
 		this.solarSystemController.focusedCelestialBody = body;
-		this.sceneController.sceneResources.controls.target = body.celestialBodyGroup.position;
+		this.sceneController.handleControlsTarget();
 		this.rendererController.preloadRenderable(body);
 		this.sceneController.handleLerp();
-
 		this.dataController.handleFocusedElements(body);
-		// this.dataController.getParameterSummaries();
 		this.dataController.getFocusedSecondaries();
-		this.handleInformationPanel();
+		this.handleInformationPanel(body);
 	}
 	// Make into one
 	private handleHover(body: CelestialBody): void {
@@ -157,12 +161,11 @@ export default class UIController
 		(body.primaryBody.orbits.get(body.metadata.EnglishName)!.material as LineMaterial).color.set(color);
 	}
 
-	public async handleInformationPanel(): Promise<void> {
-		const body = this.solarSystemController.focusedCelestialBody;
+	public async handleInformationPanel(body: CelestialBody): Promise<void> {
 		const summary = await this.dataController.getFocusedSummary();
 		if (!body || !summary) return;
 		this.removeInformationListeners();
-		this.manager.updateInformationPanel(body, summary.summary);
+		this.manager.updateInformationPanel(body, summary.extract);
 		this.addInformationListeners();
 	}
 	private removeInformationListeners() {
@@ -178,7 +181,7 @@ export default class UIController
 		const summary = await this.dataController.getParameterSummary(key);
 		const eventType = event.type as keyof HTMLElementEventMap;
 
-		this.manager.updateInformationHover(target, summary.summary, eventType);
+		this.manager.updateInformationHover(target, summary.extract, eventType);
 	}
 	private addInformationListeners() {
 		document.querySelectorAll(".information-btn").forEach((informationButton) => {

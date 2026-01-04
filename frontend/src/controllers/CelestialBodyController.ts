@@ -7,19 +7,17 @@ import ICelestialBodyManager from "../interfaces/managers/ICelestialBodyManager"
 import IAppContext from "../interfaces/IAppContext";
 import OrbitingBody from "../models/OrbitingBody";
 import { Vector3 } from "three";
-import { isMeshProvider, isOrbitingBody } from "../utils/CelestialHelpers";
-import { CelestialBodyMesh } from "../models/types";
 import {
 	calculateAcceleration,
 	calculateAttractiveForce,
 	calculateForceDirection,
 	calculateSquaredDistance,
 } from "../utils/formulas";
-import { getEnabledTextures } from "../types/TextureParameters";
+import IInjectableController from "../interfaces/IInjectableController";
 
 export default class CelestialBodyController
 	extends Controller<ICelestialBodyManager>
-	implements ICelestialBodyController, IOrbitingBodyController
+	implements ICelestialBodyController, IOrbitingBodyController, IInjectableController
 {
 	public constructor(manager: ICelestialBodyManager) {
 		super(manager);
@@ -49,7 +47,6 @@ export default class CelestialBodyController
 	}
 	public handleCreation(parameters: CelestialBodyParameters, primary?: CelestialBody): CelestialBody {
 		const body = this.manager.createBody(parameters, primary);
-
 		const assetPaths = this.rendererController.getAssetPaths(body);
 		this.assetController.loadAssetsForBody(assetPaths);
 		this.rendererController.buildRenderable(body);
@@ -57,7 +54,6 @@ export default class CelestialBodyController
 		this.attachUI(body);
 		this.uiController.attachCelestialBodyListeners(body);
 		this.sceneController.addToScene(body.orbitGroup, body.celestialBodyGroup);
-
 		return body;
 	}
 

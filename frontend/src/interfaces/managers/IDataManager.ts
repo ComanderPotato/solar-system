@@ -6,8 +6,8 @@ import { FetchedOrbitalParameters } from "../../types/OrbitalParameters";
 import { FetchedPhysicalParameters } from "../../types/PhysicalParameters";
 
 export enum FilterBy {
-	ID = "id",
-	EnglishName = "englishName",
+	ID = "Id",
+	EnglishName = "EnglishName",
 }
 export enum TaskName {
 	InitialiseSolarSystem,
@@ -24,9 +24,10 @@ export enum TaskName {
 	TODO,
 }
 export interface FetchedSummary {
-	summary: string;
+	extract: string;
 }
 export default interface IDataManager extends IManager {
+	fetchMoonParameters(primaryName: CelestialBody, filterBy: FilterBy): Promise<CelestialBodies | undefined>;
 	get hasInitialDataLoaded(): boolean;
 
 	get isLoading(): boolean;

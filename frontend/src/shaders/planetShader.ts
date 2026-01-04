@@ -1,14 +1,11 @@
-import { ShaderMaterial } from "three";
-import { PlanetMaterial, PlanetUniforms } from "../types/Materials";
+import { ShaderMaterial, UniformsUtils } from "three";
+import { CelestialBodyUniforms, CelestialShader } from "../types/Materials";
 import planetFragment from "./planetFragment.glsl";
 import planetVertex from "./planetVertex.glsl";
-// import planetFragment from "./planetFragment.glsl";
-// import planetVertex from "./planetVertex.glsl";
-export function getPlanetMaterial(planetUniforms: PlanetUniforms): PlanetMaterial {
+export function getCelestialShader(celestialUniforms: CelestialBodyUniforms): CelestialShader {
 	return new ShaderMaterial({
-		uniforms: planetUniforms,
+		uniforms: UniformsUtils.clone(celestialUniforms),
 		vertexShader: planetVertex,
 		fragmentShader: planetFragment,
-		transparent: true,
-	}) as PlanetMaterial;
+	}) as CelestialShader;
 }

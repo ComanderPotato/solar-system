@@ -11,6 +11,7 @@ import Manager from "../core/Manager";
 import { FocusedBodyInformation } from "../interfaces/controllers/ISolarSystemController";
 import IInitializable from "../interfaces/IInitializable";
 import { BodyTypes } from "../types/CelestialBodyMetadata";
+import Debugger from "../core/Debugger";
 interface CameraParameters {
 	fov: number;
 	aspectRatio: number;
@@ -108,6 +109,13 @@ export default class SceneManager extends Manager implements ISceneManager, IIni
 		this._controls.enableDamping = true;
 		this._controls.update();
 		this._controls.target.set(0, 0, 0);
+		Debugger.add(
+			"Focused",
+			() => {
+				console.log(this._controls.target);
+			},
+			5000,
+		);
 		return this;
 	}
 	private resize = () => {
@@ -161,11 +169,16 @@ export default class SceneManager extends Manager implements ISceneManager, IIni
 	updateCamPosition(focusedBodyInformation: FocusedBodyInformation, dt: number): void {}
 	updateCameraPosition(focusedBodyInformation: FocusedBodyInformation, dt: number) {
 		const { velocity, radius } = focusedBodyInformation;
+
+		Debugger.add("Focused1", () => {
+			console.log(focusedBodyInformation.position);
+		});
 		if (velocity) {
 			this.camera.position.add(velocity.clone().multiplyScalar(dt));
 		}
 		if (this._lerpDestination) {
 			this.controls.disconnect();
+			this.controls.enableZoom = false;
 
 			if (velocity) {
 				this._lerpDestination.add(velocity.clone().multiplyScalar(dt));
@@ -181,6 +194,7 @@ export default class SceneManager extends Manager implements ISceneManager, IIni
 			// }
 			if (this.camera.position.distanceTo(this._lerpDestination) <= radius * 0.1) {
 				this._lerpDestination = undefined;
+				this.controls.enableZoom = true;
 				this.controls.connect(this.renderer.domElement);
 			}
 		}

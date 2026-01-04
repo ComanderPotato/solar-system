@@ -6,11 +6,11 @@ import { TextureFlags } from "../types/TextureParameters";
 import CelestialBody from "./CelestialBody";
 import OrbitingBody from "./OrbitingBody";
 import { CelestialBodyDetail } from "../utils/constants";
-import { PlanetMaterial } from "../types/Materials";
+import { CelestialShader } from "../types/Materials";
 
 export default class Moon extends OrbitingBody<MoonParameters> implements IMeshProvider {
 	public geometry!: BufferGeometry;
-	public shaderMaterial!: PlanetMaterial;
+	public shaderMaterial!: CelestialShader;
 	public material!: MeshPhongMaterial;
 	public mesh!: Mesh;
 	public meshDetail: CelestialBodyDetail = CelestialBodyDetail.LOW;

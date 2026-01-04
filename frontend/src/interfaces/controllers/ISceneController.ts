@@ -21,5 +21,6 @@ export default interface ISceneController {
 	handleRender(): void;
 
 	setRenderLoop(renderLoop: any): void;
+	handleControlsTarget(): void;
 	get sceneResources(): SceneResources;
 }

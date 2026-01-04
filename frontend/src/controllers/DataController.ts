@@ -4,8 +4,9 @@ import IDataManager, { FetchedSummary, FilterBy, TaskName } from "../interfaces/
 import IAppContext from "../interfaces/IAppContext";
 import CelestialBody from "../models/CelestialBody";
 import Star from "../models/Star";
+import IInjectableController from "../interfaces/IInjectableController";
 
-export default class DataController extends Controller<IDataManager> implements IDataController {
+export default class DataController extends Controller<IDataManager> implements IDataController, IInjectableController {
 	public constructor(manager: IDataManager) {
 		super(manager);
 	}
@@ -21,7 +22,7 @@ export default class DataController extends Controller<IDataManager> implements 
 	// Don't need
 	async getFocusedParamterSummary(): Promise<FetchedSummary> {
 		return await this.handleTracking(TaskName.GetFocusedParameterSummary, async () => {
-			return { summary: "" };
+			return { extract: "" };
 		});
 	}
 	async getParameterSummaries(): Promise<void> {
@@ -33,7 +34,7 @@ export default class DataController extends Controller<IDataManager> implements 
 	async getFocusedElements(): Promise<void> {
 		return await this.handleTracking(TaskName.FocusedElements, async () => {
 			this.getFocusedSummary().then((summary) =>
-				this.uiController.updateUIPanel(this.focusedCelestialBody, summary.summary),
+				this.uiController.updateUIPanel(this.focusedCelestialBody, summary.extract),
 			);
 			// const summary = await this.getFocusedSummary();
 			// this.uiController.updateUIPanel(this.focusedCelestialBody, summary.summary);
@@ -66,14 +67,13 @@ export default class DataController extends Controller<IDataManager> implements 
 	// 	});
 	// }
 	async handleFocusedElements(newFocusedBody: CelestialBody): Promise<void> {
-		const body = this.focusedCelestialBody;
-		// const body = this.solarSystemController.focusedCelestialBody;
+		const body = this.solarSystemController.focusedCelestialBody;
 		return await this.handleTracking(TaskName.FocusedElements, async () => {
 			let temp: CelestialBody | undefined = newFocusedBody;
 			if (!temp.primaryBody && !(temp instanceof Star)) {
 				while (temp) {
 					if (temp == body || temp instanceof Star) {
-						this.celestialBodyController.handleSecondaryDisposal(body);
+						this.celestialBodyController.handleSecondaryDisposal(temp);
 						break;
 					}
 					temp = temp.primaryBody;
@@ -86,20 +86,21 @@ export default class DataController extends Controller<IDataManager> implements 
 			// Destroy secondaries if needed
 			// Load secondaries if needed
 
-			if (newFocusedBody.secondaryBodyNames && !body.secondaryBodyNames) {
-				const focusedSecondaries = await this.manager.fetchFocusedSecondaries(
-					newFocusedBody,
-					newFocusedBody.secondaryBodyNames,
-				);
-				this.celestialBodyController.handleSecondaryCreation(newFocusedBody, Object.values(focusedSecondaries));
+			// if (newFocusedBody.secondaryBodyNames && !body.secondaryBodyNames) {
+			if (newFocusedBody.secondaryBodyNames) {
+				// const focusedSecondaries = await this.manager.fetchFocusedSecondaries(
+				// 	newFocusedBody,
+				// 	newFocusedBody.secondaryBodyNames,
+				// );
+				// this.celestialBodyController.handleSecondaryCreation(newFocusedBody, Object.values(focusedSecondaries));
 			}
 			// get focused summary and pre load detail and parameter summaries
-			const { Name: name, BodyType: bodyType } = body.metadata;
+			const { Name: name, BodyType: bodyType } = newFocusedBody.metadata;
 			this.manager.fetchFocusedSummary(name, bodyType);
 
 			// this.focusedCelestialBody.preLoadDetail();
 
-			await this.manager.fetchParameterSummaries(body);
+			await this.manager.fetchParameterSummaries(newFocusedBody);
 		});
 	}
 
@@ -117,16 +118,17 @@ export default class DataController extends Controller<IDataManager> implements 
 	}
 	async getFocusedSecondaries(): Promise<void> {
 		return await this.handleTracking(TaskName.TODO, async () => {
-			const { EnglishName: name } = this.focusedCelestialBody.metadata;
-			const { secondaryBodyNames: secondaryNames } = this.focusedCelestialBody;
+			// const { EnglishName: name } = this.focusedCelestialBody.metadata;
+			// const { secondaryBodyNames: secondaryNames } = this.focusedCelestialBody;
+			//
+			// if (!secondaryNames) return;
 
-			if (!secondaryNames) return;
-
-			const secondaryParameters = await this.manager.fetchParameters(name, secondaryNames, true, FilterBy.ID);
+			// const secondaryParameters = await this.manager.fetchParameters(name, secondaryNames, true, FilterBy.ID);
+			const secondaryParameters = await this.manager.fetchMoonParameters(this.focusedCelestialBody, FilterBy.ID);
+			if (!secondaryParameters) return;
 
 			const secondaryBodies = this.celestialBodyController.handleSecondaryCreation(
 				this.focusedCelestialBody,
-
 				Object.values(secondaryParameters),
 			);
 			this.focusedCelestialBody.secondaryBodies = secondaryBodies;
@@ -201,7 +203,7 @@ export default class DataController extends Controller<IDataManager> implements 
 			const focusedBody = this.solarSystemController.focusedCelestialBody;
 			if (focusedBody && this.manager.focusedSummary) {
 				// Fix summary
-				this.uiController.updateUIPanel(focusedBody, this.manager.focusedSummary.summary);
+				this.uiController.updateUIPanel(focusedBody, this.manager.focusedSummary.extract);
 			}
 			if (this.manager.hasInitialDataLoaded) {
 				this.timeController.resetTime();
@@ -231,5 +233,4 @@ export default class DataController extends Controller<IDataManager> implements 
 	//            }
 	// 	});
 	// }
-	//
 }

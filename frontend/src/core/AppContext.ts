@@ -29,6 +29,8 @@ import IInjectableController from "../interfaces/IInjectableController";
 import EventBus from "./EventBus";
 import RequestBus from "./RequestBus";
 import IInitializable from "../interfaces/IInitializable";
+import ViewController from "../controllers/ViewController";
+import ViewManager from "../managers/ViewManager";
 
 type RequestMap = {
 	"planet:getInfo": { request: { id: string }; response: { name: string; mass: number } };
@@ -46,7 +48,8 @@ type ControllerKey =
 	| "sceneController"
 	| "solarSystemController"
 	| "timeController"
-	| "uiController";
+	| "uiController"
+	| "viewController";
 
 type ManagerKey =
 	| "assetManager"
@@ -57,7 +60,8 @@ type ManagerKey =
 	| "sceneManager"
 	| "solarSystemManager"
 	| "timeManager"
-	| "uiManager";
+	| "uiManager"
+	| "viewManager";
 interface ControllerConfig<M extends IManager> {
 	Controller: new (...args: any[]) => IController<M>;
 	manager: () => M;
@@ -83,6 +87,7 @@ export default class AppContext extends Singleton implements IAppContext {
 		{ Controller: SolarSystemController, manager: () => this.solarSystemManager, key: "solarSystemController" },
 		{ Controller: TimeController, manager: () => this.timeManager, key: "timeController" },
 		{ Controller: UIController, manager: () => this.uiManager, key: "uiController" },
+		{ Controller: ViewController, manager: () => this.viewController, key: "viewController" },
 	];
 	private managerConfigs: ManagerConfig[] = [
 		{ Manager: AssetManager, key: "assetManager" },
@@ -97,6 +102,7 @@ export default class AppContext extends Singleton implements IAppContext {
 		{ Manager: SolarSystemManager, key: "solarSystemManager" },
 		{ Manager: TimeManager, key: "timeManager" },
 		{ Manager: UIManager, key: "uiManager" },
+		{ Manager: ViewManager, key: "viewManager" },
 	];
 	eventBus: EventBus<EventMap> = new EventBus<EventMap>();
 	requestBus: RequestBus<RequestMap> = new RequestBus<RequestMap>();
@@ -111,6 +117,7 @@ export default class AppContext extends Singleton implements IAppContext {
 	solarSystemController!: SolarSystemController;
 	timeController!: TimeController;
 	uiController!: UIController;
+	viewController!: ViewController;
 
 	// =================== Managers ===================
 	assetManager!: AssetManager;
@@ -122,6 +129,7 @@ export default class AppContext extends Singleton implements IAppContext {
 	solarSystemManager!: SolarSystemManager;
 	timeManager!: TimeManager;
 	uiManager!: UIManager;
+	viewManager!: ViewManager;
 	private constructor() {
 		super();
 	}

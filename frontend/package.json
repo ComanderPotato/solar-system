@@ -6,7 +6,7 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"compile": "tsc",
-		"build": "webpack && cpy dist/**/* ../backend/static/src --parents",
+		"build": "webpack && cpy dist/**/* ../backend/public --parents",
 		"circular": "npx madge --circular ./src/index.ts --image circular.svg && start circular.svg",
 		"full": "npx madge ./src/index.ts --image full.svg && start full.svg",
 		"uml": "tsuml2 -g ./src/**/*.ts --outFile uml.svg && start uml.svg"

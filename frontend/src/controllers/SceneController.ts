@@ -1,9 +1,10 @@
-import { DataTexture, EquirectangularReflectionMapping, Object3D, Texture } from "three";
+import { DataTexture, EquirectangularReflectionMapping, Object3D } from "three";
 import ISceneController, { SceneResources } from "../interfaces/controllers/ISceneController";
 import Controller from "../core/Controller";
 import ISceneManager from "../interfaces/managers/ISceneManager";
 import IAppContext from "../interfaces/IAppContext";
 import IInitializable from "../interfaces/IInitializable";
+import IInjectableController from "../interfaces/IInjectableController";
 // interface CameraParameters {
 // 	fov: number;
 // 	aspectRatio: number;
@@ -16,7 +17,10 @@ import IInitializable from "../interfaces/IInitializable";
 // 	near: 0.000001,
 // 	far: Number.MAX_SAFE_INTEGER,
 // };
-export default class SceneController extends Controller<ISceneManager> implements ISceneController, IInitializable {
+export default class SceneController
+	extends Controller<ISceneManager>
+	implements ISceneController, IInjectableController, IInitializable
+{
 	public constructor(manager: ISceneManager) {
 		super(manager);
 	}
@@ -60,10 +64,14 @@ export default class SceneController extends Controller<ISceneManager> implement
 		if (!this.solarSystemController.focusedBodyInformation) return;
 		this.manager.updateCameraPosition(this.solarSystemController.focusedBodyInformation, dt);
 	}
+	handleControlsTarget(): void {
+		if (!this.solarSystemController.focusedCelestialBody) return;
+		this.manager.controls.minDistance =
+			this.solarSystemController.focusedCelestialBody.physicalParameters.MeanRadius * 1.05;
+		this.sceneResources.controls.target = this.solarSystemController.focusedCelestialBody.position;
+	}
 	handleLerp(): void {
 		if (!this.solarSystemController.focusedBodyInformation) return;
-		this.manager.controls.minDistance =
-			this.solarSystemController.focusedCelestialBody!.physicalParameters.MeanRadius * 1.05;
 		this.manager.calculateLerpDestination(this.solarSystemController.focusedBodyInformation);
 	}
 	public addToScene(...object: Object3D[]): void {

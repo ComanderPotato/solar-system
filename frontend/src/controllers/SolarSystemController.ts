@@ -7,9 +7,7 @@ import OrbitingBody from "../models/OrbitingBody";
 import { CelestialBodies } from "../types/CelestialBodyParameters";
 import IInjectableController from "../interfaces/IInjectableController";
 import IAppContext from "../interfaces/IAppContext";
-import { velocity } from "three/src/nodes/TSL.js";
 import { isOrbitingBody } from "../utils/CelestialHelpers";
-import { BodyTypes } from "../types/CelestialBodyMetadata";
 import Debugger from "../core/Debugger";
 export default class SolarSystemController
 	extends Controller<ISolarSystemManager>
@@ -22,6 +20,8 @@ export default class SolarSystemController
 	injectControllers(appContext: IAppContext): void {
 		this.celestialBodyController = appContext.celestialBodyController;
 		this.rendererController = appContext.rendererController;
+		this.viewController = appContext.viewController;
+		this.uiController = appContext.uiController;
 	}
 	public handleSolarSystemInitialisation(initialBodies: CelestialBodies): void {
 		this.initialiseSolarSystem(initialBodies);
@@ -36,6 +36,7 @@ export default class SolarSystemController
 			primaryPosition = this.focusedCelestialBody.primaryBody!.position;
 		}
 		return {
+			name: this.focusedCelestialBody.metadata.EnglishName,
 			body: this.focusedCelestialBody,
 			position: this.focusedCelestialBody.position,
 			radius: this.focusedCelestialBody.physicalParameters.MeanRadius,
@@ -68,6 +69,8 @@ export default class SolarSystemController
 		const positionQueue: CelestialBody[] = [];
 		while (velocityQueue.length > 0) {
 			const body = velocityQueue.shift()!;
+			const isVisible = this.viewController.canSeeBody(body.celestialBodyGroup);
+			this.uiController.toggleCelestialUIVisibility(body, isVisible);
 			this.celestialBodyController.handleRotation(body, dt);
 			/* updateVelocity */
 			if (isOrbitingBody(body)) {

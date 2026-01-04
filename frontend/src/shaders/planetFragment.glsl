@@ -1,5 +1,5 @@
 uniform float uTime;
-uniform bool hasAtmosphere;
+uniform bool uHasAtmosphere;
 uniform vec3 uSunPosition;
 
 uniform vec3 uAtmosphericPrimary;
@@ -66,31 +66,36 @@ vec3 computeAtmosphere(float specularMask) {
 
     // Control softness
     float scatter = pow(rim, ATMOSPHERIC_FALLOFF);
-    // vec3 ray = normalize(uSunPosition - vWorldPos);
-    // vec3 ray2 = normalize(vWorldPos - uCameraPosition);
-    // float d = clamp(dot(ray, ray2), 0.0, 1.0) / 3.;
-    vec3 atmosphereColor = mix(uAtmosphericPrimary, uAtmosphericSecondary, specularMask);
+    vec3 ray = normalize(uSunPosition - vWorldPos);
+    vec3 ray2 = normalize(vWorldPos - vCameraPosition);
+    float d = clamp(dot(ray, ray2), 0.0, 1.0) / 3.;
+    vec3 atmosphereColor = mix(uAtmosphericPrimary, uAtmosphericSecondary, d);
     return atmosphereColor * (scatter * ATMOSPHERIC_INTENSITY);
 }
 vec3 computeNight(vec3 color) {
     vec3 emission = texture(uNight, vUv).rgb;
-    if (emission == vec3(0.0)) return color / 2.;
+    if (emission == vec3(0.0)) return color / 4.;
     return emission;
 }
 void main() {
-    // float sunOrientation = (smoothstep(-1.0, 0.5, dot(normalize(uSunPosition - vWorldPos), -vWorldPos)));
-    float sunOrientation = dot(normalize(uSunPosition - vWorldPos), -vWorldPos);
-    float dayMix = smoothstep(0.75, 1., sunOrientation);
+    // float sunOrientation = (smoothstep(-2., 0.5, dot(normalize(uSunPosition - vWorldPos), -vWorldPos)));
+    // // float sunOrientation = dot(normalize(uSunPosition - vWorldPos), -vWorldPos);
+    // float dayMix = smoothstep(0.5, 1., sunOrientation);
+    vec3 lightDir = normalize(uSunPosition - vWorldPos);
+
+    float sunOrientation = -dot(vWorldNormal, lightDir);
+
+    float dayMix = smoothstep(0.0, 0.2, sunOrientation);
 
     vec3 normalizedLight = normalize(uSunPosition);
 
-    vec3 baseColor = texture(uColor, vUv).rgb;
+    vec3 day = texture(uColor, vUv).rgb;
 
-    vec3 night = computeNight(baseColor);
-    baseColor = mix(baseColor, night, dayMix);
+    vec3 night = computeNight(day);
+    vec3 baseColor = mix(day, night, dayMix);
     baseColor += computeCloudsDensity();
     float specular = computeSpecular();
     baseColor += specular;
-    if (hasAtmosphere) baseColor += computeAtmosphere(specular);
+    if (uHasAtmosphere) baseColor += computeAtmosphere(specular);
     gl_FragColor = vec4(baseColor, 1.0);
 }

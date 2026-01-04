@@ -1,18 +1,18 @@
-import { execSync } from 'child_process';
-import { existsSync, mkdirSync } from 'fs';
-import { platform } from 'os';
-import path from 'path';
+import { execSync } from "child_process";
+import { existsSync, mkdirSync } from "fs";
+import { platform } from "os";
+import path from "path";
 
 console.log("Installing root dependencies...");
-execSync('npm install', { stdio: 'inherit' });
+execSync("npm install", { stdio: "inherit" });
 
 console.log("Installing frontend dependencies...");
-execSync('npm install', { cwd: 'frontend', stdio: 'inherit' });
+execSync("npm install", { cwd: "frontend", stdio: "inherit" });
 
-const backendStaticSrc = path.join('backend', 'static', 'src');
+const backendStaticSrc = path.join("backend", "public", "src");
 if (!existsSync(backendStaticSrc)) {
-	console.log(`Creating directory: ${backendStaticSrc}`);
-	mkdirSync(backendStaticSrc, { recursive: true });
+  console.log(`Creating directory: ${backendStaticSrc}`);
+  mkdirSync(backendStaticSrc, { recursive: true });
 }
 
 console.log("Creating Python virtual environment...");

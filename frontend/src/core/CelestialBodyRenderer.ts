@@ -1,37 +1,27 @@
 import {
-	AdditiveBlending,
 	ArrowHelper,
 	BufferGeometry,
 	Color,
 	EllipseCurve,
 	IcosahedronGeometry,
 	Mesh,
-	MeshPhongMaterial,
-	MeshStandardMaterial,
 	PointLight,
 	RingGeometry,
 	Vector2,
 	Vector3,
 } from "three";
-import { getAtmosphericGlowMat, getRingMat } from "../shaders";
-import {
-	CLOUD_OPACITY,
-	GLOW_MESH_SCALE_FACTOR,
-	KM_TO_M,
-	LIGHT_OPACITY,
-	OPTIONAL_MESH_SCALE_FACTOR,
-	SCALE,
-} from "../utils/constants";
+import { getRingMat } from "../shaders";
+import { KM_TO_M, SCALE } from "../utils/constants";
 import Planet from "../models/Planet";
 import Moon from "../models/Moon";
 import Star from "../models/Star";
 import { CelestialBodyMesh, CelestialBodyModel, CelestialBodyProvider } from "../models/types";
-import { Curves, Line2, LineGeometry, LineMaterial } from "three/examples/jsm/Addons.js";
+import { Line2, LineGeometry, LineMaterial } from "three/examples/jsm/Addons.js";
 import OrbitingBody from "../models/OrbitingBody";
 import { getCelestialBodyColor } from "../utils/CelestialHelpers";
 import { TextureFlags } from "../types/AssetParameters";
-import { PlanetUniforms } from "../types/Materials";
-import { getPlanetMaterial } from "../shaders/planetShader";
+import { CelestialBodyUniforms, CelestialShader, MoonUniforms, PlanetUniforms, StarUniforms } from "../types/Materials";
+import { getCelestialShader } from "../shaders/planetShader";
 
 export default abstract class CelestialBodyRenderer {
 	abstract _currentBody?: CelestialBodyMesh | CelestialBodyModel | undefined;
@@ -46,6 +36,9 @@ export default abstract class CelestialBodyRenderer {
 	abstract build(): void;
 	abstract reset(body: CelestialBodyProvider): void;
 	abstract rotate(deltaRotation: number): void;
+	raiseError(type: string): never {
+		throw new Error(`${type} not initialized. Call reset() first.`);
+	}
 }
 
 export abstract class ModelRenderer extends CelestialBodyRenderer {
@@ -81,7 +74,7 @@ export class SpaceshipRenderer extends ModelRenderer {
 
 export abstract class MeshRenderer extends CelestialBodyRenderer {
 	abstract get currentBody(): CelestialBodyMesh;
-
+	abstract get uniforms(): CelestialBodyUniforms;
 	private initialiseArrow(): ArrowHelper {
 		const color = getCelestialBodyColor(this.currentBody);
 		return new ArrowHelper(
@@ -127,7 +120,7 @@ export abstract class MeshRenderer extends CelestialBodyRenderer {
 			this.getAssetPath(baseTexture),
 		);
 	}
-	private initialiseGeometry() {
+	private initialiseGeometry(): IcosahedronGeometry {
 		const {
 			physicalParameters: { MeanRadius: radius },
 			meshDetail,
@@ -140,16 +133,16 @@ export abstract class MeshRenderer extends CelestialBodyRenderer {
 		const radius = this.currentBody.physicalParameters.MeanRadius;
 		geometry.scale(radius, radius, radius);
 		this.updateOptionalGeometry(geometry, this.currentBody.mesh);
-		this.updateOptionalGeometry(geometry, this.currentBody.glowMesh);
-		this.updateOptionalGeometry(geometry, this.currentBody.lightMesh);
-		this.updateOptionalGeometry(geometry, this.currentBody.cloudMesh);
+		// this.updateOptionalGeometry(geometry, this.currentBody.glowMesh);
+		// this.updateOptionalGeometry(geometry, this.currentBody.lightMesh);
+		// this.updateOptionalGeometry(geometry, this.currentBody.cloudMesh);
 		// this.currentBody.celestialBodyGroup.scale.multiplyScalar(radius);
 	}
 	rotate(deltaRotation: number): void {
 		const yAxis = new Vector3(0, 1, 0);
 		// this.currentBody.shaderMaterial.uniforms.uTime.value = deltaRotation;
 		this.currentBody.celestialBodyGroup.rotateOnAxis(yAxis, deltaRotation);
-		this.rotateOptionalMesh(deltaRotation * 0.1, this.currentBody.cloudMesh);
+		// this.rotateOptionalMesh(deltaRotation * 0.1, this.currentBody.cloudMesh);
 	}
 	private rotateOptionalMesh(dt: number, mesh?: Mesh): void {
 		if (!mesh) return;
@@ -162,37 +155,21 @@ export abstract class MeshRenderer extends CelestialBodyRenderer {
 	}
 	updateGeometryDetail(geometry: BufferGeometry): void {
 		this.updateOptionalGeometry(geometry, this.currentBody.mesh);
-		this.updateOptionalGeometry(geometry, this.currentBody.glowMesh);
-		this.updateOptionalGeometry(geometry, this.currentBody.lightMesh);
-		this.updateOptionalGeometry(geometry, this.currentBody.cloudMesh);
+		// this.updateOptionalGeometry(geometry, this.currentBody.glowMesh);
+		// this.updateOptionalGeometry(geometry, this.currentBody.lightMesh);
+		// this.updateOptionalGeometry(geometry, this.currentBody.cloudMesh);
 		const radius = this.currentBody.physicalParameters.MeanRadius;
 		this.currentBody.celestialBodyGroup.scale.multiplyScalar(radius);
 	}
-	initialiseShader(): this {
-		const uniforms: PlanetUniforms = {
-			uColor: { value: null },
-			uNight: { value: null },
-			uSpecular: { value: null },
-			uClouds: { value: null },
-			uNormal: { value: null },
-			uBump: { value: null },
-			uSunPosition: { value: new Vector3(0, 0, 0) },
-			uRotation: { value: this.currentBody.physicalParameters.SolarRotation },
-			uTime: { value: 0.0 },
-			uAtmospherePrimary: { value: new Vector3(0, 0, 0) },
-			uAtmosphereSecondary: { value: new Vector3(0, 0, 0) },
-			uResolution: { value: new Vector2(0, 0) },
-			uHasAtmosphere: { value: true },
-		};
-
-		this.currentBody.shaderMaterial = getPlanetMaterial(uniforms);
-		return this;
+	initialiseShader(): CelestialShader {
+		const uniforms = this.uniforms;
+		const shader = getCelestialShader(uniforms);
+		return shader;
 	}
 	initialiseBaseMesh(): this {
 		this.currentBody.celestialBodyGroup.add(this.initialiseArrow());
 		this.currentBody.geometry = this.initialiseGeometry();
-		this.initialiseShader();
-		// this.currentBody.material = new MeshPhongMaterial();
+		this.currentBody.shaderMaterial = this.initialiseShader();
 
 		this.currentBody.mesh = new Mesh(this.currentBody.geometry, this.currentBody.shaderMaterial);
 		this.currentBody.celestialBodyGroup.add(this.currentBody.mesh);
@@ -239,35 +216,56 @@ export abstract class MeshRenderer extends CelestialBodyRenderer {
 	}
 }
 export class PlanetRenderer extends MeshRenderer {
+	private static TYPE = "Planet";
 	_currentBody?: Planet | undefined;
+
+	get uniforms(): PlanetUniforms {
+		if (!this._currentBody) this.raiseError(PlanetRenderer.TYPE);
+		return {
+			uColor: { value: null },
+			uNight: { value: null },
+			uSpecular: { value: null },
+			uClouds: { value: null },
+			uNormal: { value: null },
+			uBump: { value: null },
+			uSunPosition: { value: new Vector3(0, 0, 0) },
+			uRotation: { value: this.currentBody.physicalParameters.SolarRotation },
+			uTime: { value: 0.0 },
+			uAtmosphericPrimary: { value: new Color(0x0d4de6) },
+			uAtmosphericSecondary: { value: new Color(0xff0000) },
+			uResolution: { value: new Vector2(0, 0) },
+			uHasAtmosphere: { value: true },
+		};
+	}
 	get currentBody(): Planet {
 		if (!this._currentBody) throw new Error("Planet not initialized. Call reset() first.");
 		return this._currentBody;
 	}
 	build(): void {
-		this.buildCommon().initialiseGlowMesh().initialiseCloudMesh().initialiseLightMesh().initialiseRing();
+		this.buildCommon().initialiseRing();
+		// this.buildCommon().initialiseGlowMesh().initialiseCloudMesh().initialiseLightMesh().initialiseRing();
 	}
-	initialiseGlowMesh(): this {
-		const mesh = new Mesh(this.currentBody.geometry, getAtmosphericGlowMat());
-		mesh.scale.setScalar(GLOW_MESH_SCALE_FACTOR);
-		this.currentBody.glowMesh = mesh;
-		this.currentBody.celestialBodyGroup.add(mesh);
-		return this;
-	}
-	initialiseCloudMesh(): this {
-		if (!this.currentBody.textures.Cloud) return this;
-		const cloudMesh = this.initialiseOptional(CLOUD_OPACITY);
-		this.currentBody.cloudMesh = cloudMesh;
-		this.currentBody.celestialBodyGroup.add(cloudMesh);
-		return this;
-	}
-	initialiseLightMesh(): this {
-		if (!this.currentBody.textures.Light) return this;
-		const lightMesh = this.initialiseOptional(LIGHT_OPACITY);
-		this.currentBody.lightMesh = lightMesh;
-		this.currentBody.celestialBodyGroup.add(lightMesh);
-		return this;
-	}
+	// initialiseGlowMesh(): this {
+	// 	const mesh = new Mesh(this.currentBody.geometry, getAtmosphericGlowMat());
+	// 	mesh.scale.setScalar(GLOW_MESH_SCALE_FACTOR);
+	// 	this.currentBody.glowMesh = mesh;
+	// 	this.currentBody.celestialBodyGroup.add(mesh);
+	// 	return this;
+	// }
+	// initialiseCloudMesh(): this {
+	// 	if (!this.currentBody.textures.Cloud) return this;
+	// 	const cloudMesh = this.initialiseOptional(CLOUD_OPACITY);
+	// 	this.currentBody.cloudMesh = cloudMesh;
+	// 	this.currentBody.celestialBodyGroup.add(cloudMesh);
+	// 	return this;
+	// }
+	// initialiseLightMesh(): this {
+	// 	if (!this.currentBody.textures.Light) return this;
+	// 	const lightMesh = this.initialiseOptional(LIGHT_OPACITY);
+	// 	this.currentBody.lightMesh = lightMesh;
+	// 	this.currentBody.celestialBodyGroup.add(lightMesh);
+	// 	return this;
+	// }
 	initialiseRing(): this {
 		if (!this.currentBody.physicalParameters.RingSystem) return this;
 		let { InnerRingRadius: innerRadius, OuterRingRadius: outerRadius } = this.currentBody.physicalParameters;
@@ -280,22 +278,35 @@ export class PlanetRenderer extends MeshRenderer {
 		this.currentBody.celestialBodyGroup.add(this.currentBody.ringMesh);
 		return this;
 	}
-	initialiseOptional(opacity: number) {
-		const material = new MeshStandardMaterial({
-			transparent: true,
-			depthTest: true,
-			opacity: opacity,
-			blending: AdditiveBlending,
-		});
-		const mesh = new Mesh(this.currentBody.geometry, material);
-		mesh.scale.setScalar(OPTIONAL_MESH_SCALE_FACTOR);
-		return mesh;
-	}
+	// initialiseOptional(opacity: number) {
+	// 	const material = new MeshStandardMaterial({
+	// 		transparent: true,
+	// 		depthTest: true,
+	// 		opacity: opacity,
+	// 		blending: AdditiveBlending,
+	// 	});
+	// 	const mesh = new Mesh(this.currentBody.geometry, material);
+	// 	mesh.scale.setScalar(OPTIONAL_MESH_SCALE_FACTOR);
+	// 	return mesh;
+	// }
 }
 export class MoonRenderer extends MeshRenderer {
+	private static TYPE = "Moon";
 	_currentBody?: Moon | undefined;
+
+	get uniforms(): MoonUniforms {
+		if (!this._currentBody) this.raiseError(MoonRenderer.TYPE);
+		return {
+			uColor: { value: null },
+			uSunPosition: { value: new Vector3(0, 0, 0) },
+			uHasAtmosphere: { value: false },
+			// uRotation: { value: this.currentBody.physicalParameters.SolarRotation },
+			uRotation: { value: 0.0 },
+		};
+	}
+
 	get currentBody(): Moon {
-		if (!this._currentBody) throw new Error("Moon not initialized. Call reset() first.");
+		if (!this._currentBody) this.raiseError(MoonRenderer.TYPE);
 		return this._currentBody;
 	}
 	build(): void {
@@ -310,9 +321,20 @@ export class MoonRenderer extends MeshRenderer {
 	}
 }
 export class StarRenderer extends MeshRenderer {
+	private static TYPE = "Star";
 	_currentBody?: Star | undefined;
+
+	get uniforms(): StarUniforms {
+		if (!this._currentBody) this.raiseError(StarRenderer.TYPE);
+		return {
+			uColor: { value: null },
+			uEmissive: { value: null },
+			uHasAtmosphere: { value: false },
+			uRotation: { value: this.currentBody.physicalParameters.SolarRotation },
+		};
+	}
 	get currentBody(): Star {
-		if (!this._currentBody) throw new Error("Star not initialized. Call reset() first.");
+		if (!this._currentBody) this.raiseError(StarRenderer.TYPE);
 		return this._currentBody;
 	}
 	build(): void {

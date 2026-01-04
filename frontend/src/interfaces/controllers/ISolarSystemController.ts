@@ -4,6 +4,7 @@ import SolarSystem, { InitialSolarSystem } from "../../models/Solarsystem";
 import { CelestialBodies } from "../../types/CelestialBodyParameters";
 
 export interface FocusedBodyInformation {
+	name: string;
 	body: CelestialBody;
 	position: Vector3;
 	radius: number;

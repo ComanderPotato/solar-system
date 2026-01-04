@@ -15,7 +15,6 @@ export default abstract class OrbitingBody<
 	) {
 		super(orbitingBodyParameters, secondaryBodyNames);
 		this._primaryBody = primaryBody;
-		console.log(orbitingBodyParameters);
 		this._currentVelocity = orbitingBodyParameters.Orbital.Velocity;
 		this._orbitingBodyParameters = orbitingBodyParameters.Orbital;
 	}

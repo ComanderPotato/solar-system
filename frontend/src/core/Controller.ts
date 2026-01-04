@@ -10,6 +10,7 @@ import IUIController from "../interfaces/controllers/IUIController";
 import IController from "../interfaces/IController";
 import IManager from "../interfaces/IManager";
 import IAppContext from "../interfaces/IAppContext";
+import IViewController from "../interfaces/controllers/IViewController";
 export default abstract class Controller<T extends IManager = IManager> implements IController<T> {
 	// protected _context: IAppContext;
 	protected _manager: T;
@@ -22,6 +23,7 @@ export default abstract class Controller<T extends IManager = IManager> implemen
 	private _solarSystemController?: ISolarSystemController;
 	private _timeController?: ITimeController;
 	private _uiController?: IUIController;
+	private _viewController?: IViewController;
 
 	// get context(): IAppContext {
 	// 	return this._context;
@@ -47,6 +49,12 @@ export default abstract class Controller<T extends IManager = IManager> implemen
 	// }
 	// public injectControllers?(appContext: IAppContext): void;
 
+	protected get viewController(): IViewController {
+		return this.require(this._viewController, "View controller");
+	}
+	protected set viewController(controller: IViewController) {
+		this._viewController = controller;
+	}
 	protected get rendererController(): IRendererController {
 		return this.require(this._rendererController, "Renderer controller");
 	}

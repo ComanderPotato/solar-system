@@ -5,10 +5,10 @@ import { StarPhysicalParameters } from "../types/PhysicalParameters";
 import { TextureFlags } from "../types/TextureParameters";
 import CelestialBody from "./CelestialBody";
 import { CelestialBodyDetail } from "../utils/constants";
-import { PlanetMaterial } from "../types/Materials";
+import { CelestialShader } from "../types/Materials";
 export default class Star extends CelestialBody<StarParameters> implements IMeshProvider {
 	public geometry!: BufferGeometry;
-	public shaderMaterial!: PlanetMaterial;
+	public shaderMaterial!: CelestialShader;
 	public material!: MeshPhongMaterial;
 	public meshDetail: CelestialBodyDetail = CelestialBodyDetail.HIGH;
 	public textures: TextureFlags;

@@ -19,5 +19,6 @@ export default interface IUIController {
 	attachCelestialBodyListeners(body: CelestialBody): void;
 	removeCelestialBodyListeners(body: CelestialBody): void;
 	handleCelestialBodyUI(body: CelestialBody): void;
+	toggleCelestialUIVisibility(body: CelestialBody, isVisible: boolean): void;
 	// destroyCelestialBodyUI(body: CelestialBody): void;
 }

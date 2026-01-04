@@ -1,4 +1,4 @@
-// import OrbitingBody from "../../models/OrbitingBody";
+import OrbitingBody from "../../models/OrbitingBody";
 
 export default interface IOrbitingBodyController {
 	// updateVelocity(body: OrbitingBody, dt: number, other?: OrbitingBody): void;

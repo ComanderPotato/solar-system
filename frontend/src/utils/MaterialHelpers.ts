@@ -1,5 +1,5 @@
 import { ShaderMaterial, Texture } from "three";
-import { IMaterial, PlanetMaterial, RingMaterial, StandardMaterial } from "../types/Materials";
+import { IMaterial, CelestialShader, RingShader, StandardMaterial } from "../types/Materials";
 import { MaterialMapType, UniformMapTypes } from "../types/TextureParameters";
 
 // export function isStandardMaterial(
@@ -11,15 +11,11 @@ import { MaterialMapType, UniformMapTypes } from "../types/TextureParameters";
 export function isPlanetMaterial(
 	material: IMaterial | undefined,
 	uniformType: UniformMapTypes,
-): material is PlanetMaterial {
-	console.log(uniformType);
-	return !!material && typeof (material as PlanetMaterial).uniforms[uniformType] === "object";
+): material is CelestialShader {
+	return !!material && typeof (material as CelestialShader).uniforms[uniformType] === "object";
 }
-export function isRingMaterial(
-	material: IMaterial | undefined,
-	uniformType: UniformMapTypes,
-): material is RingMaterial {
-	return !!material && typeof (material as RingMaterial).uniforms[uniformType] === "object";
+export function isRingMaterial(material: IMaterial | undefined, uniformType: UniformMapTypes): material is RingShader {
+	return !!material && typeof (material as RingShader).uniforms[uniformType] === "object";
 }
 // export function isRingMaterial(material: IMaterial | undefined): material is RingMaterial {
 // 	return !!material && (material as ShaderMaterial).isShaderMaterial === true;

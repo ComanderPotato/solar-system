@@ -1,12 +1,12 @@
 import { DoubleSide, ShaderMaterial, Texture } from "three";
-import { RingMaterial, RingUniforms } from "../types/Materials";
+import { RingShader, RingUniforms } from "../types/Materials";
 
 export function getRingMat(
 	ringTexture: Texture | null,
 	alphaTexture: Texture | null,
 	innerRadius: number,
 	outerRadius: number,
-): RingMaterial {
+): RingShader {
 	const useAlphaTexture = !!alphaTexture;
 	const uniforms: RingUniforms = {
 		uColor: { value: ringTexture },
@@ -55,5 +55,5 @@ export function getRingMat(
 		fragmentShader: fragmentShader,
 		transparent: true,
 		side: DoubleSide,
-	}) as RingMaterial;
+	}) as RingShader;
 }

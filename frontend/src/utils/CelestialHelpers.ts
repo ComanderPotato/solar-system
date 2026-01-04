@@ -4,7 +4,7 @@ import { CelestialBodyColor } from "./constants";
 import { CelestialBodyMesh, CelestialBodyModel, CelestialBodyProvider } from "../models/types";
 import OrbitingBody from "../models/OrbitingBody";
 import { TextureType } from "../types/TextureParameters";
-import { IMaterial, PlanetMaterial, RingMaterial } from "../types/Materials";
+import { IMaterial, CelestialShader, RingShader } from "../types/Materials";
 
 export function getCelestialBodyColor(body: CelestialBody): Color {
 	const name = body.metadata.EnglishName.toUpperCase();
@@ -14,18 +14,16 @@ export function getCelestialBodyColor(body: CelestialBody): Color {
 
 export function getShader(body: CelestialBodyMesh, type: TextureType): IMaterial | undefined {
 	if ([TextureType.Ring, TextureType.RingAlpha].includes(type)) {
-		return body.ringMesh?.material as RingMaterial | undefined;
+		return body.ringMesh?.material as RingShader | undefined;
 	}
 	return body.shaderMaterial;
 }
 export function getBodyMaterial(body: CelestialBodyMesh, type: TextureType): IMaterial | undefined {
 	let material = undefined;
-	if ([TextureType.Color, TextureType.Specular, TextureType.Bump].includes(type)) {
-		material = body.material;
-	} else if ([TextureType.Night, TextureType.Cloud].includes(type)) {
-		material = TextureType.Night == type ? body.lightMesh?.material : body.cloudMesh?.material;
-	} else {
+	if ([TextureType.Ring, TextureType.RingAlpha].includes(type)) {
 		material = body.ringMesh?.material;
+	} else {
+		material = body.shaderMaterial;
 	}
 
 	return material as IMaterial;
