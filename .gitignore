@@ -4,5 +4,6 @@ static/
 .env
 .svg
 dist/
+public/
 __pycache__
 maps_old

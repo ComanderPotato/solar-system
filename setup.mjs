@@ -9,7 +9,7 @@ execSync("npm install", { stdio: "inherit" });
 console.log("Installing frontend dependencies...");
 execSync("npm install", { cwd: "frontend", stdio: "inherit" });
 
-const backendStaticSrc = path.join("backend", "public", "src");
+const backendStaticSrc = path.join("backend", "public");
 if (!existsSync(backendStaticSrc)) {
   console.log(`Creating directory: ${backendStaticSrc}`);
   mkdirSync(backendStaticSrc, { recursive: true });
