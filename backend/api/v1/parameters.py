@@ -43,7 +43,6 @@ def retrieve_orbital_parameters(
 
 async def get_authorisation():
     token = os.environ.get("API_KEY")
-    print(token)
     if not token:
         raise RuntimeError("API_TOKEN missing")
     return {"Authorization": f"Bearer {token}"}

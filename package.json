@@ -2,11 +2,11 @@
   "name": "solar-system",
   "version": "1.0.0",
   "scripts": {
-    "deploy": "uvicorn backend.main:app --host 0.0.0.0 --port 8000",
+    "deploy": "uvicorn backend.main:app --host 0.0.0.0 --port $PORT",
     "build": "cd frontend && npm run build",
     "start": "npm run build && cd backend && fastapi dev main.py",
     "dev": "concurrently \"cd frontend && npm run build\" \"cd backend && fastapi dev main.py\"",
-    "server": "uvicorn backend.main:app --reload --port 8000",
+    "server": "uvicorn backend.main:app --reload --port $DEVELOPMENT_PORT",
     "setup": "node setup.mjs"
   },
   "devDependencies": {
