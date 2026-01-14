@@ -1,14 +1,20 @@
 from datetime import datetime
 import os
-from pprint import pprint
-from .time import CURRENT_TIME, CURRENT_TIME_SCALE
+
+from ..utils.orbital_pkg import Ephemeris
+
 from .orbital_information import get_orbital_parameters
 
-from skyfield.jpllib import SpiceKernel
 
 # from .constants import LOAD, PLANETS_LIST, INITIAL_EPHEMERIS
-from ..db.session import LOAD, INITIAL_EPHEMERIS
+# from ..db.session import LOAD, INITIAL_EPHEMERIS
+from ..db import LOAD, INITIAL_EPHEMERIS, orbital_mapping
 from .naif_code import find_naif_code
+from typing import cast
+
+
+def load_ephemeris(path: str) -> Ephemeris:
+    return cast(Ephemeris, LOAD(path))
 
 
 def get_orbitals(primary_name: str, secondary_names: list[str], time: datetime):
@@ -34,7 +40,8 @@ def get_orbitals(primary_name: str, secondary_names: list[str], time: datetime):
     primary_code = None
     for ephemeris_file in ephemeris_files:
 
-        ephemeris = LOAD(ephemeris_file)
+        # ephemeris = LOAD(ephemeris_file)
+        ephemeris = cast(Ephemeris, LOAD(ephemeris_file))
         # with open(ephemeris_file.__str__(), "w") as f:
         #     f.write(ephemeris.comments())
         # except:
@@ -64,6 +71,11 @@ def get_orbitals(primary_name: str, secondary_names: list[str], time: datetime):
                         .at(time)
                         .observe(ephemeris[secondary_code])
                     )
+
+                    orbital_mapping[secondary_code] = {
+                        "primary_code": int(primary_code),
+                        "path": ephemeris_file,
+                    }
                     unresolved_secondaries.remove(secondary_name)
                 except:
                     continue

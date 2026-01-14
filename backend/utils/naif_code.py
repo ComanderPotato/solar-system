@@ -19,7 +19,7 @@ def normalise_name(body_name: str) -> list[str]:
     return [body_name.capitalize()]
 
 
-def find_naif_code(text: str, input_name: str):
+def find_naif_code(text: str, input_name: str) -> int | None:
     if input_name.lower() == "megaclite":
         input_name = "Magaclite"
     normalized_names = normalise_name(input_name)
