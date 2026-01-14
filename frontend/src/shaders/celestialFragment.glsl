@@ -19,6 +19,7 @@ varying vec3 vViewPos; // Vertex position in VIEW space
 varying vec3 vWorldPos; // Vertex position in WORLD space
 varying vec3 vLocalPos; // Vertex position in LOCAL/OBJECT space
 varying vec3 vCameraPosition;
+varying vec3 vViewDir;
 
 #define CLOUDS_DENSITY 1.
 #define ATMOSPHERIC_INTENSITY 5.
@@ -76,6 +77,15 @@ vec3 computeNight(vec3 color) {
     vec3 emission = texture(uNight, vUv).rgb;
     if (emission == vec3(0.0)) return color / 4.;
     return emission;
+}
+void planetShader() {}
+void moonShader() {}
+void starShader() {
+    vec3 baseColor = texture(uColor, vUv).rgb;
+    float fresnel = pow(1.0 - dot(vNormal, vViewDir), 1.5);
+    vec3 glow = baseColor * fresnel;
+    vec3 emissive = vec3(2.0, 1.0, 0.4); // >1.0 = glow
+    gl_FragColor = vec4(baseColor, 1.0) + vec4(glow, fresnel);
 }
 void main() {
     // float sunOrientation = (smoothstep(-2., 0.5, dot(normalize(uSunPosition - vWorldPos), -vWorldPos)));
