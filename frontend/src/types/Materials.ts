@@ -1,5 +1,6 @@
 import { Color, IUniform, Material, ShaderMaterial, Texture } from "three";
 import { Vector2, Vector3 } from "three";
+import { BodyTypes } from "./CelestialBodyMetadata";
 
 export interface StandardMaterial extends Material {
 	map: Texture | null;

@@ -2,8 +2,7 @@ node_modules/
 static/
 .venv/
 .env
-.svg
+frontend/*.svg
 dist/
 public/
 __pycache__
-maps_old

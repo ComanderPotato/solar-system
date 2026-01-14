@@ -2,11 +2,12 @@ import Controller from "../core/Controller";
 import Debugger from "../core/Debugger";
 import IEngineController from "../interfaces/controllers/IEngineController";
 import IAppContext from "../interfaces/IAppContext";
+import IInitializable from "../interfaces/IInitializable";
 import IInjectableController from "../interfaces/IInjectableController";
 import IEngineManager from "../interfaces/managers/IEngineManager";
 export default class EngineController
 	extends Controller<IEngineManager>
-	implements IEngineController, IInjectableController
+	implements IEngineController, IInjectableController, IInitializable
 {
 	private _lastLogTime = 0;
 	public constructor(manager: IEngineManager) {
@@ -18,6 +19,12 @@ export default class EngineController
 		this.sceneController = appContext.sceneController;
 		this.solarSystemController = appContext.solarSystemController;
 		this.rendererController = appContext.rendererController;
+	}
+
+	init(): void {
+		window.addEventListener("focus", () => {
+			console.log("Hello");
+		});
 	}
 	start(): void {
 		this.sceneController.setRenderLoop(() => {

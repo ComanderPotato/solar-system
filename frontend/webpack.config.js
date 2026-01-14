@@ -6,8 +6,10 @@ const CopyPlugin = require("copy-webpack-plugin");
 module.exports = {
 	entry: "./src/index.ts",
 	mode: "development",
+	// mode: "production",
 	// devtool: "inline-source-map",
 	devtool: "eval-cheap-module-source-map",
+	// devtool: false,
 	output: {
 		filename: "bundle.js",
 		path: path.resolve(__dirname, "dist"),

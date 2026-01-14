@@ -21,7 +21,7 @@ import OrbitingBody from "../models/OrbitingBody";
 import { getCelestialBodyColor } from "../utils/CelestialHelpers";
 import { TextureFlags } from "../types/AssetParameters";
 import { CelestialBodyUniforms, CelestialShader, MoonUniforms, PlanetUniforms, StarUniforms } from "../types/Materials";
-import { getCelestialShader } from "../shaders/planetShader";
+import { getCelestialShader } from "../shaders/celestialShader";
 
 export default abstract class CelestialBodyRenderer {
 	abstract _currentBody?: CelestialBodyMesh | CelestialBodyModel | undefined;
@@ -217,7 +217,7 @@ export abstract class MeshRenderer extends CelestialBodyRenderer {
 }
 export class PlanetRenderer extends MeshRenderer {
 	private static TYPE = "Planet";
-	_currentBody?: Planet | undefined;
+	_currentBody?: Planet;
 
 	get uniforms(): PlanetUniforms {
 		if (!this._currentBody) this.raiseError(PlanetRenderer.TYPE);
@@ -292,7 +292,7 @@ export class PlanetRenderer extends MeshRenderer {
 }
 export class MoonRenderer extends MeshRenderer {
 	private static TYPE = "Moon";
-	_currentBody?: Moon | undefined;
+	_currentBody?: Moon;
 
 	get uniforms(): MoonUniforms {
 		if (!this._currentBody) this.raiseError(MoonRenderer.TYPE);
@@ -322,7 +322,7 @@ export class MoonRenderer extends MeshRenderer {
 }
 export class StarRenderer extends MeshRenderer {
 	private static TYPE = "Star";
-	_currentBody?: Star | undefined;
+	_currentBody?: Star;
 
 	get uniforms(): StarUniforms {
 		if (!this._currentBody) this.raiseError(StarRenderer.TYPE);
