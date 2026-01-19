@@ -24,6 +24,14 @@ contents = os.listdir(path)  #
 
 for item in contents:
     print(item)
+
+
+print(f"\nContents of directory'{PUBLIC_DIR}':")
+# os.listdir() returns a list of names
+contents = os.listdir(PUBLIC_DIR)  #
+
+for item in contents:
+    print(item)
 # app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="/")
 app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="public")
 from fastapi.responses import FileResponse
