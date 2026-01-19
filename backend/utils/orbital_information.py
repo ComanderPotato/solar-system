@@ -1,23 +1,28 @@
+import numpy as np
+from typing import cast
 from skyfield import elementslib
 from skyfield.framelib import ecliptic_frame
 from skyfield.data.spice import inertial_frames
-from skyfield.positionlib import Astrometric
 
-import numpy as np
 
-# from .position import get_ecliptic_position_and_velocity
 from .position import get_ecliptic_position_and_velocity
+from .types import OsculatingElements
+
+
+def load_osculating_elements(planet_at) -> OsculatingElements:
+    return cast(
+        OsculatingElements,
+        elementslib.osculating_elements_of(
+            position=planet_at, reference_frame=inertial_frames["ECLIPJ2000"]
+        ),
+    )
 
 
 def get_orbital_parameters(planet_at):
-
     position = planet_at.position.m
     position = planet_at.frame_xyz(ecliptic_frame)
-    # position = rotX90 @ planet_at.position.m
     position, velocity = get_ecliptic_position_and_velocity(planet_at=planet_at)
-    orbital_parameters = elementslib.osculating_elements_of(
-        position=planet_at, reference_frame=inertial_frames["ECLIPJ2000"]
-    )
+    orbital_parameters = load_osculating_elements(planet_at)
     orbital_parameters_dict = {
         "Position": position.tolist(),
         "DistanceFromPrimary": np.linalg.norm(position),

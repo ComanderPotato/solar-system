@@ -1,7 +1,5 @@
 from typing import TypedDict, List, Dict
-from skyfield.api import Loader
 
-# LOAD = Loader("./ephemeris")
 INITIAL_EPHEMERIS = "de432s.bsp"
 
 PLANETS_LIST = [

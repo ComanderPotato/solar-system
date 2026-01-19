@@ -1,46 +1,58 @@
+import os
 from pathlib import Path
-from typing import Annotated
 from dotenv import load_dotenv
-from .utils.time import get_sim_time_scale
-from .api.v1.deps import PhysicalDependencies, PhysicalDeps
-from .api.v1.parameters import (
-    Filter,
-    FilterBy,
-    get_authorisation,
-    retrieve_orbital_parameters,
-    retrieve_physical_parameters,
-    retrieve_physical_parameters_by,
-    retrieve_moon_physical_parameters_by,
-)
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from .utils.kernel_loader import load_kernel
 from .api.v1 import router
+from fastapi.responses import HTMLResponse, JSONResponse
+
 
 load_dotenv()
 
 app = FastAPI()
 
 app.include_router(router)
-ROOT_DIR = Path(__file__).resolve().parent
-app.mount("/", StaticFiles(directory=ROOT_DIR / "public", html=True), name="/")
+BASE_DIR = Path(__file__).resolve().parent
+PUBLIC_DIR = BASE_DIR / "public"
+# app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="/")
+app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="/public")
 
-from fastapi import HTTPException, Path
-import httpx
+
+@app.get("/app")
+async def a():
+    __import__("pprint").pprint(app.router.routes)
+    return "fart"
 
 
-async def get_api_response(url: str, parameters: dict) -> str:
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, params=parameters)
+# @app.get("/")
+# async def home():
+#     print(BASE_DIR)
+#     return Path("data/textures.json").read_text()
+# return Path(BASE_DIR / "public" / "index.html").read_text()
 
-    try:
-        return response.json()
-    except ValueError:
-        raise HTTPException(
-            status_code=502,
-            detail=f"External API returned invalid JSON. Status={response.status_code}",
-        )
 
+# @app.get("/")
+# async def home():
+#     # return BASE_DIR
+#     return Path(BASE_DIR / "public" / "index.html").read_text()
+
+
+# from fastapi import HTTPException, Path
+# import httpx
+#
+#
+# async def get_api_response(url: str, parameters: dict) -> str:
+#     async with httpx.AsyncClient() as client:
+#         response = await client.get(url, params=parameters)
+#
+#     try:
+#         return response.json()
+#     except ValueError:
+#         raise HTTPException(
+#             status_code=502,
+#             detail=f"External API returned invalid JSON. Status={response.status_code}",
+#         )
+#
 
 # @app.get("/{value}")
 # async def target(

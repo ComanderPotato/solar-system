@@ -1,16 +1,11 @@
-from datetime import datetime
 import os
-
-from ..utils.orbital_pkg import Ephemeris
+from typing import cast
+from datetime import datetime
 
 from .orbital_information import get_orbital_parameters
-
-
-# from .constants import LOAD, PLANETS_LIST, INITIAL_EPHEMERIS
-# from ..db.session import LOAD, INITIAL_EPHEMERIS
-from ..db import LOAD, INITIAL_EPHEMERIS, orbital_mapping
 from .naif_code import find_naif_code
-from typing import cast
+from .types import Ephemeris
+from ..db import LOAD, INITIAL_EPHEMERIS, orbital_mapping
 
 
 def load_ephemeris(path: str) -> Ephemeris:
@@ -41,7 +36,9 @@ def get_orbitals(primary_name: str, secondary_names: list[str], time: datetime):
     for ephemeris_file in ephemeris_files:
 
         # ephemeris = LOAD(ephemeris_file)
-        ephemeris = cast(Ephemeris, LOAD(ephemeris_file))
+        # ephemeris = cast(Ephemeris, LOAD(ephemeris_file))
+        ephemeris = load_ephemeris(ephemeris_file)
+
         # with open(ephemeris_file.__str__(), "w") as f:
         #     f.write(ephemeris.comments())
         # except:

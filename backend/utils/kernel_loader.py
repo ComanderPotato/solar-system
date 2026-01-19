@@ -1,16 +1,13 @@
 import subprocess
 import os
-from .time import CURRENT_TIME, get_stop_time, format_time
-from .constants import PLANET_NATURAL_SATELLITE_DICT
-from ..db.session import LOAD
-from tqdm import tqdm
-import os
-from pathlib import Path
-from pprint import pprint
 import math
 import time
 import ssl
 import certifi
+from tqdm import tqdm
+from pathlib import Path
+from .time import CURRENT_TIME, get_stop_time, format_time
+from .constants import PLANET_NATURAL_SATELLITE_DICT
 
 FILE_MAX_AGE = 26
 ssl_context = ssl.create_default_context(cafile=certifi.where())
