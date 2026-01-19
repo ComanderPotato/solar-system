@@ -14,8 +14,24 @@ app = FastAPI()
 app.include_router(router)
 BASE_DIR = Path(__file__).resolve().parent
 PUBLIC_DIR = BASE_DIR / "public"
+print(PUBLIC_DIR)
+print(os.getcwd())
+path = "."
+
+print(f"\nContents of directory '{path}':")
+# os.listdir() returns a list of names
+contents = os.listdir(path)  #
+
+for item in contents:
+    print(item)
 # app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="/")
-app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="/public")
+app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="public")
+from fastapi.responses import FileResponse
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    return FileResponse(PUBLIC_DIR / "index.html")
 
 
 @app.get("/app")
@@ -27,7 +43,7 @@ async def a():
 # @app.get("/")
 # async def home():
 #     print(BASE_DIR)
-#     return Path("data/textures.json").read_text()
+#     return Path("/textures.json").read_text()
 # return Path(BASE_DIR / "public" / "index.html").read_text()
 
 

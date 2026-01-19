@@ -122,7 +122,6 @@ async def retrieve_physical_parameters(
 
     filter = FilterBy[filter_by]
     filters = "&".join([filter.format(name) for name in body_names])
-    print(filters)
     full_url = build_url(physical_dependencies.base_url, filters)
     payload = await get_api_response(full_url, authorisation)
     values = PhysicalAPIResponse.model_validate(payload)
