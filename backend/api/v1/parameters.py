@@ -40,7 +40,12 @@ def retrieve_orbital_parameters(
     secondary_names: Annotated[list[str], Query()],
     time: Annotated[dict, Depends(get_sim_time_scale)],
 ):
-    return get_orbitals(primary_name, secondary_names, time["sim_time"])
+    # [secondary_name.lower() for secondary_name in secondary_names]
+    return get_orbitals(
+        primary_name.lower(),
+        [secondary_name.lower() for secondary_name in secondary_names],
+        time["sim_time"],
+    )
 
 
 async def get_authorisation():
@@ -62,8 +67,6 @@ class Filter(str, Enum):
     Id = "Id"
     EnglishName = "EnglishName"
     Name = "Name"
-
-
 
 
 @router.get(
@@ -156,9 +159,8 @@ async def retrieve_moon_physical_parameters_by(
         {body.englishName: body for body in values.bodies}
     )
 
-@router.get(
-    "/{value}"
-)
+
+@router.get("/{value}")
 async def retrieve_all_parameters(
     value: Annotated[str, Path()],
     authorisation: Annotated[dict, Depends(get_authorisation)],
