@@ -14,24 +14,24 @@ app = FastAPI()
 app.include_router(router)
 BASE_DIR = Path(__file__).resolve().parent
 PUBLIC_DIR = BASE_DIR / "public"
-print(PUBLIC_DIR)
-print(os.getcwd())
-path = "."
-
-print(f"\nContents of directory '{path}':")
-# os.listdir() returns a list of names
-contents = os.listdir(path)  #
-
-for item in contents:
-    print(item)
-
-
-print(f"\nContents of directory'{PUBLIC_DIR}':")
-# os.listdir() returns a list of names
-contents = os.listdir(PUBLIC_DIR)  #
-
-for item in contents:
-    print(item)
+# print(PUBLIC_DIR)
+# print(os.getcwd())
+# path = "."
+#
+# print(f"\nContents of directory '{path}':")
+# # os.listdir() returns a list of names
+# contents = os.listdir(path)  #
+#
+# for item in contents:
+#     print(item)
+#
+#
+# print(f"\nContents of directory'{PUBLIC_DIR}':")
+# # os.listdir() returns a list of names
+# contents = os.listdir(PUBLIC_DIR)  #
+#
+# for item in contents:
+#     print(item)
 # app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="/")
 app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="public")
 from fastapi.responses import FileResponse

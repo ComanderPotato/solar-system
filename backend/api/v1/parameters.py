@@ -3,6 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, status, HTTPException, Path
 import httpx
 import os
+
+from ...schemas.parameters import ParametersGroup
 from ...schemas.orbital import OrbitalSystem
 
 from ...utils.time import get_sim_time_scale
@@ -43,7 +45,6 @@ def retrieve_orbital_parameters(
 
 async def get_authorisation():
     token = os.environ.get("API_KEY")
-    print(token)
     if not token:
         raise RuntimeError("API_TOKEN missing")
     return {"Authorization": f"Bearer {token}"}
@@ -63,14 +64,6 @@ class Filter(str, Enum):
     Name = "Name"
 
 
-# @router.get(
-#     "/{body_name}"
-# )
-# async def retrieve_all_parameters(
-#     body_name: Annotated[str, Path()],
-#     authorisation: Annotated[dict, Depends(get_authorisation)],
-#     physical_dependencies: PhysicalDeps,
-# ):
 
 
 @router.get(
@@ -162,3 +155,25 @@ async def retrieve_moon_physical_parameters_by(
     return PhysicalResponse.model_validate(
         {body.englishName: body for body in values.bodies}
     )
+
+@router.get(
+    "/{value}"
+)
+async def retrieve_all_parameters(
+    value: Annotated[str, Path()],
+    authorisation: Annotated[dict, Depends(get_authorisation)],
+    physical_dependencies: PhysicalDeps,
+):
+    pass
+
+
+@router.get("/{value}", response_model=ParametersGroup, status_code=status.HTTP_200_OK)
+async def retrieve_parameters():
+    pass
+
+
+@router.get(
+    "/{value}/moons", response_model=ParametersGroup, status_code=status.HTTP_200_OK
+)
+async def retrieve_moon_parameters():
+    pass
